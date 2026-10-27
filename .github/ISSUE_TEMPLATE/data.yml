@@ -1,0 +1,18 @@
+name: Wrong or out-of-date figure
+description: A rate, threshold, rule or data source has changed
+labels: [data]
+body:
+  - type: input
+    id: tool
+    attributes: { label: Tool and version }
+    validations: { required: true }
+  - type: textarea
+    id: figure
+    attributes: { label: Which figure is wrong and what it should be }
+    validations: { required: true }
+  - type: input
+    id: source
+    attributes:
+      label: Official source link
+      description: For example a GOV.UK page
+    validations: { required: true }

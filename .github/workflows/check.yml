@@ -1,0 +1,17 @@
+name: check
+on: [push, pull_request]
+permissions: { contents: read }
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Safety checks (credits, disclaimer, no trackers/secrets)
+        run: bash scripts/check.sh
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      - name: Headless smoke test (each tool loads without JS errors)
+        run: |
+          npm i --no-save playwright@1.48.2
+          npx playwright install --with-deps chromium
+          node scripts/smoke.mjs

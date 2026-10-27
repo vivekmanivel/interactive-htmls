@@ -1,0 +1,11 @@
+name: New tool idea
+description: Suggest a new single-file tool
+labels: [idea]
+body:
+  - type: textarea
+    id: idea
+    attributes: { label: What should it do and who is it for? }
+    validations: { required: true }
+  - type: textarea
+    id: data
+    attributes: { label: Open data sources it could use (if any) }

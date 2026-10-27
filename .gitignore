@@ -1,0 +1,6 @@
+.DS_Store
+Thumbs.db
+*.tmp
+.env
+*.local.*
+drafts-local/
