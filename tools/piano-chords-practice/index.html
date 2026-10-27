@@ -157,7 +157,7 @@ document.addEventListener('DOMContentLoaded',function(){var s=document.getElemen
 </div>
 </section>
 <section id="about" class="ul-about"><h2>6. About, sources &amp; disclaimer</h2>
-  <p><b>Piano Chords Practice: Major, Minor &amp; 72 Inversions</b> &middot; published by <b>Usualy Labs</b> &middot; version 1.0.0.</p>
+  <p><b>Piano Chords Practice: Major, Minor &amp; 72 Inversions</b> &middot; published by <b>Usualy Labs</b> &middot; version 1.0.1.</p>
   <h3>Sources and credits</h3>
   <ul>
     <li>Chord spellings, intervals, triads and inversions follow standard Western music theory, which is common knowledge and not owned by anyone. The 12 roots &times; 2 qualities &times; 3 positions = 72 practice matrix is a widely used teaching structure.</li>
@@ -190,6 +190,7 @@ let current=null;
 document.getElementById('newQuestion').addEventListener('click',()=>{current=chords[Math.floor(Math.random()*chords.length)];document.getElementById('quizPrompt').textContent=current.chord+' — '+current.inversion;document.getElementById('quizHint').textContent='Play the chord, lowest note to highest. Then reveal the notes to check.';document.getElementById('quizAnswer').classList.add('hidden');document.getElementById('quizAnswer').textContent=''});
 document.getElementById('revealAnswer').addEventListener('click',()=>{const el=document.getElementById('quizAnswer');if(!current){el.textContent='Choose “New question” first.'}else{el.innerHTML='<strong>Chord tones:</strong> '+current.triad.map(esc).join(' – ')+'<br><strong>Play order:</strong> '+current.notes.map(esc).join(' – ')}el.classList.remove('hidden')});
 function showCheck(id,answer){const el=document.getElementById(id);el.textContent=answer;el.classList.remove('hidden')}
+render();
 </script>
 </body>
 </html>
