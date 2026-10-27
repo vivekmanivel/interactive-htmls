@@ -7,7 +7,7 @@ Free, single-file interactive tools by **Usualy Labs**. Each tool is one HTML fi
 ## Tools
 | Tool | What it does | Data sources | Version |
 |---|---|---|---|
-| [South London First-Time Buyer Guide & Mortgage Planner](tools/south-london-first-time-buyer-guide/) | Property check on a map (sold prices, schools, crime, flood, transport, EPC), mortgage planner, stamp duty and buying-cost calculator, first-time buyer checklist | HM Land Registry, ONS/postcodes.io, data.police.uk, Environment Agency, DfE/Ofsted, EPC register, planning.data.gov.uk, TfL, NaPTAN, OpenStreetMap | [1.0.0](tools/south-london-first-time-buyer-guide/CHANGELOG.md) |
+| [South London First-Time Buyer Guide & Mortgage Planner](tools/south-london-first-time-buyer-guide/) | Property check on a map (sold prices, schools, crime, flood, transport, EPC), mortgage planner, stamp duty and buying-cost calculator, first-time buyer checklist | HM Land Registry, ONS/postcodes.io, data.police.uk, Environment Agency, DfE/Ofsted, EPC register, planning.data.gov.uk, TfL, NaPTAN, OpenStreetMap | [1.0.1](tools/south-london-first-time-buyer-guide/CHANGELOG.md) |
 
 Each tool folder has its own README (what it does, data sources, privacy, limits) and CHANGELOG (version history). Releases are tagged per tool as `<tool>-vX.Y.Z`.
 

@@ -1,6 +1,10 @@
 # Changelog – South London First-Time Buyer Guide & Mortgage Planner
 Format: [Keep a Changelog](https://keepachangelog.com/), versions: [SemVer](https://semver.org/).
 
+## [1.0.1] – 2026-10-27
+### Changed
+- Page header now shows the tool name.
+
 ## [1.0.0] – 2026-10-27
 ### Added
 - First public release (from internal toolkit v2).
