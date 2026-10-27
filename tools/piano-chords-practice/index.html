@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Piano Chords Practice: Major, Minor &amp; 72 Inversions</title>
+<meta name="description" content="Learn and track all 72 major and minor triad positions with filters, a progress checklist and a self-test. Free study aid by Usualy Labs.">
+<style>
+:root{--ink:#172033;--muted:#5b6578;--paper:#f6f7fb;--card:#fff;--line:#dfe4ee;--accent:#3457d5;--accent2:#eaf0ff;--good:#18794e}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.55 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+header{background:linear-gradient(135deg,#172554,#334eaa);color:#fff;padding:32px 18px 28px}
+.wrap{max-width:1100px;margin:auto;padding:0 16px}
+h1{font-size:clamp(1.8rem,5vw,2.7rem);line-height:1.12;margin:0 0 10px}header p{max-width:760px;color:#e2e8ff;margin:0}
+main{padding:22px 0 48px}.notice{border:1px solid #f0d28a;background:#fff8e5;padding:13px 15px;border-radius:12px;margin-bottom:18px;color:#5e4814}
+nav{display:flex;flex-wrap:wrap;gap:8px;margin:18px 0}nav a{background:#fff;border:1px solid var(--line);border-radius:999px;padding:7px 12px;color:var(--ink);text-decoration:none;font-size:.9rem}
+section,.panel{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px;margin:16px 0;box-shadow:0 3px 14px #18284b08}
+h2{font-size:1.35rem;margin:0 0 10px}h3{font-size:1.05rem;margin:16px 0 6px}.muted{color:var(--muted)}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+.mini{border:1px solid var(--line);border-radius:12px;padding:14px}.formula{font-weight:800;font-size:1.2rem;color:var(--accent)}
+kbd,.note{display:inline-block;background:#f0f3fa;border:1px solid #dbe1ef;border-radius:6px;padding:2px 7px;font-weight:650}
+.controls{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:14px 0}
+label{font-weight:650;font-size:.9rem;display:block;margin-bottom:4px}select,input[type=search]{width:100%;padding:10px;border:1px solid #cbd3e2;border-radius:9px;background:white;color:var(--ink);font:inherit}
+.table-wrap{overflow:auto;border:1px solid var(--line);border-radius:10px}table{border-collapse:collapse;width:100%;min-width:660px;background:#fff}th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:middle}th{background:#f0f3fa;position:sticky;top:0;font-size:.9rem}tr:last-child td{border-bottom:0}.notes{font-weight:700;letter-spacing:.02em}.pill{display:inline-block;padding:3px 8px;border-radius:99px;background:var(--accent2);color:#263f9d;font-size:.82rem;white-space:nowrap}
+.checkcell{text-align:center}.checkcell input{width:19px;height:19px;accent-color:var(--good)}button{border:0;border-radius:10px;background:var(--accent);color:#fff;padding:11px 15px;font:inherit;font-weight:700;cursor:pointer}button.secondary{background:#edf0f8;color:#26314a;border:1px solid var(--line)}button:focus,a:focus,select:focus,input:focus{outline:3px solid #b8c7ff;outline-offset:2px}
+.progressbar{height:10px;background:#e7eaf2;border-radius:99px;overflow:hidden;margin:8px 0}.progressbar span{display:block;height:100%;background:var(--good);width:0;transition:width .2s}
+.answer{padding:12px;background:#eef8f2;border:1px solid #b8e0c7;border-radius:10px;margin-top:12px}.hidden{display:none}.keyrow{display:flex;gap:4px;align-items:flex-start;flex-wrap:wrap;margin:14px 0}.key{height:70px;width:42px;border:1px solid #9aa3b5;background:#fff;border-radius:0 0 6px 6px;display:flex;align-items:flex-end;justify-content:center;padding-bottom:6px;font-size:.75rem;color:#253047}.key.black{background:#263047;color:#fff;height:48px;width:30px;margin:0 -17px;z-index:2;border:1px solid #111a2b;border-radius:0 0 4px 4px}.small{font-size:.88rem}.foot{font-size:.85rem;color:var(--muted);text-align:center;margin-top:26px}
+@media(max-width:600px){section,.panel{padding:15px}.key{width:32px;height:62px}.key.black{width:23px;margin:0 -13px;height:42px}th,td{padding:8px}}
+@media print{header{background:#fff;color:#000;border-bottom:2px solid #222}header p{color:#222}nav,.controls,button,.checkcell,.notice{display:none!important}body{background:#fff}section,.panel{box-shadow:none;break-inside:avoid}.table-wrap{overflow:visible}table{min-width:0;font-size:9pt}th{position:static}}
+</style>
+<meta name="author" content="Usualy Labs">
+<meta name="color-scheme" content="light dark">
+<script>/* Usualy Labs theme switcher: auto | light | dark, remembered in this browser only */
+(function(){var K='usualy.theme',d=document.documentElement,m=window.matchMedia?matchMedia('(prefers-color-scheme: dark)'):null;
+function p(){try{return localStorage.getItem(K)||'auto'}catch(e){return 'auto'}}
+function a(){var v=p();d.setAttribute('data-theme',v==='auto'?(m&&m.matches?'dark':'light'):v)}
+a();if(m&&m.addEventListener)m.addEventListener('change',a);
+window.setTheme=function(v){try{localStorage.setItem(K,v)}catch(e){}a()};
+document.addEventListener('DOMContentLoaded',function(){var s=document.getElementById('themeSel');if(s){s.value=p();s.onchange=function(){setTheme(s.value)}}})})();
+</script>
+<style>
+.ul-theme{position:fixed;top:10px;right:10px;z-index:50;display:flex;gap:6px;align-items:center;font-size:.8rem;font-weight:650;color:#fff;background:#0004;border-radius:99px;padding:4px 6px 4px 12px;margin:0}
+.ul-theme select{width:auto;padding:3px 6px;border-radius:99px;font-size:.8rem}
+:root[data-theme=dark]{--ink:#e6e9f0;--muted:#9aa4b8;--paper:#0f1420;--card:#171e2c;--line:#2a3447;--accent:#7d97ff;--accent2:#1f2a4a;--good:#3fc48a}
+[data-theme=dark] nav a{background:var(--card)}
+[data-theme=dark] .notice{background:#2a2410;border-color:#6b5520;color:#f0dca0}
+[data-theme=dark] kbd,[data-theme=dark] .note{background:#222b3d;border-color:#34405a}
+[data-theme=dark] select,[data-theme=dark] input[type=search]{background:#111827;border-color:#34405a}
+[data-theme=dark] table{background:var(--card)}
+[data-theme=dark] th{background:#1d2536}
+[data-theme=dark] .pill{color:#c7d3ff}
+[data-theme=dark] button.secondary{background:#222b3d;color:var(--ink)}
+[data-theme=dark] .progressbar{background:#222b3d}
+[data-theme=dark] .answer{background:#12261c;border-color:#24563c}
+[data-theme=dark] .key{color:#253047}
+.ul-about h3{margin-top:14px}.ul-about li{margin:4px 0}
+@media print{.ul-theme{display:none}}
+</style>
+</head>
+<body>
+<label class="ul-theme">Theme <select id="themeSel" aria-label="Colour theme"><option value="auto">Auto</option><option value="light">Light</option><option value="dark">Dark</option></select></label>
+
+<header><div class="wrap">
+<h1>Piano Chords Practice</h1>
+<p>A practical guide to major and minor triads, root position, first inversion, second inversion, and a complete 72-combination practice checklist.</p>
+</div></header>
+<main class="wrap">
+<div class="notice"><strong>How to use this guide:</strong> Learn what major and minor triads and their inversions are, then work through the standard practice matrix of 12 roots &times; 2 chord qualities &times; 3 positions = 72 combinations. Tick each one off as you master it.</div>
+<nav><a href="#meaning">Key terms</a><a href="#how">How to build chords</a><a href="#table">72 combinations</a><a href="#practice">Practice routine</a><a href="#quiz">Self-test</a><a href="#about">About &amp; sources</a></nav>
+
+<section id="meaning"><h2>1. What the terms mean</h2>
+<div class="grid">
+<div class="mini"><h3>Note</h3>A single pitch, such as <span class="note">C</span>, <span class="note">F♯</span> or <span class="note">B♭</span>. The piano has 12 different pitch classes before the pattern repeats in the next octave.</div>
+<div class="mini"><h3>Root</h3>The note a chord is named after. The root of C major is C; the root of A minor is A. The root does not have to be the lowest note in an inversion.</div>
+<div class="mini"><h3>Chord / triad</h3>A chord combines notes played together. A triad contains three different note names: root, third and fifth.</div>
+<div class="mini"><h3>Major</h3>A major triad uses a major third above the root and a perfect fifth above the root. Formula: <span class="formula">1–3–5</span>. Example: C–E–G.</div>
+<div class="mini"><h3>Minor</h3>A minor triad uses a minor third above the root and a perfect fifth above the root. Formula: <span class="formula">1–♭3–5</span>. Example: C–E♭–G.</div>
+<div class="mini"><h3>Inversion</h3>The same three chord notes are rearranged so a different chord tone is the lowest note. The chord quality stays the same; the voicing changes.</div>
+</div>
+<h3>Major vs minor: what changes?</h3>
+<p>For a given root, the fifth usually stays the same. The third moves down by one semitone to change a major triad into a minor triad. For example, C major is C–E–G; C minor is C–E♭–G.</p>
+<p class="muted small">A semitone is the distance from one piano key to the immediately adjacent key, whether white or black. Two semitones make a whole tone.</p>
+</section>
+
+<section id="how"><h2>2. How to build the chords</h2>
+<div class="grid">
+<div class="mini"><h3>Major triad</h3><p class="formula">0 + 4 + 7 semitones</p>Start on the root, go up 4 semitones for the major third, then 3 more semitones for the fifth.</div>
+<div class="mini"><h3>Minor triad</h3><p class="formula">0 + 3 + 7 semitones</p>Start on the root, go up 3 semitones for the minor third, then 4 more semitones for the fifth.</div>
+</div>
+<h3>Three positions, one chord</h3>
+<div class="grid">
+<div class="mini"><h3>Root position</h3><p>Root is lowest.</p><p><strong>C major:</strong> C – E – G</p></div>
+<div class="mini"><h3>First inversion</h3><p>Third is lowest.</p><p><strong>C major:</strong> E – G – C (next octave)</p></div>
+<div class="mini"><h3>Second inversion</h3><p>Fifth is lowest.</p><p><strong>C major:</strong> G – C (next octave) – E (next octave)</p></div>
+</div>
+<p><strong>Important:</strong> Inversions do not create a new chord quality. C–E–G, E–G–C and G–C–E are all C major. Only the order and spacing change.</p>
+<h3>Quick piano-key reminder</h3>
+<p>The black keys are named with sharps (♯) or flats (♭). For example, C♯ and D♭ are the same physical key on a standard piano, though the correct written name depends on the chord’s spelling. This guide uses common chord spellings to keep the written notes musically correct.</p>
+<div class="keyrow" aria-label="One octave of piano keys">
+<div class="key">C</div><div class="key black">C♯/D♭</div><div class="key">D</div><div class="key black">D♯/E♭</div><div class="key">E</div><div class="key">F</div><div class="key black">F♯/G♭</div><div class="key">G</div><div class="key black">G♯/A♭</div><div class="key">A</div><div class="key black">A♯/B♭</div><div class="key">B</div>
+</div>
+</section>
+
+<section id="table"><h2>3. All 72 combinations</h2>
+<p>Use the filters to focus on one root, major/minor chords, or a particular inversion. Tick a row when you can play it correctly and name the notes without help. Your checklist progress is saved in this browser on this device.</p>
+<div class="controls">
+<div><label for="rootFilter">Root note</label><select id="rootFilter"><option value="">All roots</option></select></div>
+<div><label for="qualityFilter">Chord quality</label><select id="qualityFilter"><option value="">Major and minor</option><option>Major</option><option>Minor</option></select></div>
+<div><label for="invFilter">Inversion</label><select id="invFilter"><option value="">All positions</option><option>Root position</option><option>1st inversion</option><option>2nd inversion</option></select></div>
+<div><label for="search">Search</label><input id="search" type="search" placeholder="e.g. F minor or 1st inversion"></div>
+</div>
+<div class="grid" style="grid-template-columns:1fr auto;align-items:center;gap:10px">
+<div><div id="progressText" class="small muted">0 of 72 mastered</div><div class="progressbar"><span id="progressFill"></span></div></div>
+<button id="resetProgress" class="secondary" type="button">Reset ticks</button>
+</div>
+<div class="table-wrap"><table><thead><tr><th>#</th><th>Chord</th><th>Position</th><th>Play notes from lowest to highest</th><th>Chord tones (root–3rd–5th)</th><th class="checkcell">Practised</th></tr></thead><tbody id="chordRows"></tbody></table></div>
+<p class="small muted">Octave-up is written in words to make the order clear. You do not need to play the notes in the same octave; keep the order of the chord tones correct.</p>
+</section>
+
+<section id="practice"><h2>4. A simple daily practice routine</h2>
+<ol>
+<li><strong>Choose one root.</strong> Play its major triad in root position and say each note aloud.</li>
+<li><strong>Change to minor.</strong> Keep the root and fifth; lower the third by one semitone.</li>
+<li><strong>Play the inversions.</strong> For each chord, play root position, first inversion, then second inversion slowly and evenly.</li>
+<li><strong>Return to root position.</strong> Notice how the chord tones move by the smallest practical distance. This helps make chord changes smoother.</li>
+<li><strong>Test without looking.</strong> Hide the notes, play the chord, then check the table and tick the row only if you got both the notes and position right.</li>
+<li><strong>Review mixed roots.</strong> After practising one root, shuffle the order by choosing different roots and qualities rather than always playing C first.</li>
+</ol>
+<h3>Suggested 15-minute session</h3>
+<div class="grid">
+<div class="mini"><strong>3 minutes</strong><br>Review major and minor formulas.</div>
+<div class="mini"><strong>7 minutes</strong><br>Practise a few chords through all three inversions.</div>
+<div class="mini"><strong>5 minutes</strong><br>Use the self-test below, then revisit mistakes.</div>
+</div>
+</section>
+
+<section id="quiz"><h2>5. Interactive self-test</h2>
+<p>Generate a random chord-position prompt. Try to play it before revealing the answer.</p>
+<div class="mini">
+<div class="muted small">YOUR PROMPT</div>
+<h3 id="quizPrompt">Press “New question” to begin.</h3>
+<p id="quizHint">Say the root, chord quality, and inversion before you play.</p>
+<div id="quizAnswer" class="answer hidden"></div>
+<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">
+<button id="newQuestion" type="button">New question</button>
+<button id="revealAnswer" class="secondary" type="button">Reveal answer</button>
+</div>
+</div>
+<h3>Check your understanding</h3>
+<div class="mini">
+<p><strong>1.</strong> How many notes are in a triad?</p>
+<button class="secondary" onclick="showCheck('q1','A triad has three different chord tones: root, third and fifth.')">Show answer</button><div id="q1" class="answer hidden"></div>
+<p><strong>2.</strong> What changes when a major triad becomes minor?</p>
+<button class="secondary" onclick="showCheck('q2','The third is lowered by one semitone. In C major, E becomes E♭; C and G stay the same.')">Show answer</button><div id="q2" class="answer hidden"></div>
+<p><strong>3.</strong> Which chord tone is lowest in first inversion?</p>
+<button class="secondary" onclick="showCheck('q3','The third is the lowest note in first inversion.')">Show answer</button><div id="q3" class="answer hidden"></div>
+<p><strong>4.</strong> Which chord tone is lowest in second inversion?</p>
+<button class="secondary" onclick="showCheck('q4','The fifth is the lowest note in second inversion.')">Show answer</button><div id="q4" class="answer hidden"></div>
+</div>
+</section>
+<section id="about" class="ul-about"><h2>6. About, sources &amp; disclaimer</h2>
+  <p><b>Piano Chords Practice: Major, Minor &amp; 72 Inversions</b> &middot; published by <b>Usualy Labs</b> &middot; version 1.0.0.</p>
+  <h3>Sources and credits</h3>
+  <ul>
+    <li>Chord spellings, intervals, triads and inversions follow standard Western music theory, which is common knowledge and not owned by anyone. The 12 roots &times; 2 qualities &times; 3 positions = 72 practice matrix is a widely used teaching structure.</li>
+    <li>Inspired by online piano lessons on major and minor chords and their inversions, including the &ldquo;72 chords&rdquo; lessons by piano teacher <b>Jason Zachariah</b>. Usualy Labs is not affiliated with or endorsed by any teacher. All text and code here are original.</li>
+  </ul>
+  <h3>Your privacy</h3>
+  <p>Usualy Labs collects nothing and this page makes no network requests. Your ticks and theme choice are saved only in your browser on this device.</p>
+  <h3>Disclaimer</h3>
+  <p>A free study aid for general educational use, provided &ldquo;as is&rdquo; without warranty. It is not professional advice and not a substitute for a qualified music teacher. To the fullest extent permitted by law, Usualy Labs accepts no responsibility or liability arising from its use. Nothing here limits any liability that cannot be limited by law.</p>
+  <p class="small muted">Spotted a mistake? Please report it through the project's GitHub Issues page.</p>
+</section>
+
+<div class="foot">Offline-friendly study sheet • Designed for phone, tablet and desktop • Use your browser’s Print option to make a paper copy. • Usualy Labs</div>
+</main>
+<script>
+const chords = [{"id": 1, "root": "C", "quality": "Major", "chord": "C Major", "inversion": "Root position", "notes": ["C", "E", "G"], "triad": ["C", "E", "G"]}, {"id": 2, "root": "C", "quality": "Major", "chord": "C Major", "inversion": "1st inversion", "notes": ["E", "G", "C (octave up)"], "triad": ["C", "E", "G"]}, {"id": 3, "root": "C", "quality": "Major", "chord": "C Major", "inversion": "2nd inversion", "notes": ["G", "C (octave up)", "E (octave up)"], "triad": ["C", "E", "G"]}, {"id": 4, "root": "C", "quality": "Minor", "chord": "C Minor", "inversion": "Root position", "notes": ["C", "Eb", "G"], "triad": ["C", "Eb", "G"]}, {"id": 5, "root": "C", "quality": "Minor", "chord": "C Minor", "inversion": "1st inversion", "notes": ["Eb", "G", "C (octave up)"], "triad": ["C", "Eb", "G"]}, {"id": 6, "root": "C", "quality": "Minor", "chord": "C Minor", "inversion": "2nd inversion", "notes": ["G", "C (octave up)", "Eb (octave up)"], "triad": ["C", "Eb", "G"]}, {"id": 7, "root": "Db", "quality": "Major", "chord": "Db Major", "inversion": "Root position", "notes": ["Db", "F", "Ab"], "triad": ["Db", "F", "Ab"]}, {"id": 8, "root": "Db", "quality": "Major", "chord": "Db Major", "inversion": "1st inversion", "notes": ["F", "Ab", "Db (octave up)"], "triad": ["Db", "F", "Ab"]}, {"id": 9, "root": "Db", "quality": "Major", "chord": "Db Major", "inversion": "2nd inversion", "notes": ["Ab", "Db (octave up)", "F (octave up)"], "triad": ["Db", "F", "Ab"]}, {"id": 10, "root": "Db", "quality": "Minor", "chord": "Db Minor", "inversion": "Root position", "notes": ["Db", "Fb", "Ab"], "triad": ["Db", "Fb", "Ab"]}, {"id": 11, "root": "Db", "quality": "Minor", "chord": "Db Minor", "inversion": "1st inversion", "notes": ["Fb", "Ab", "Db (octave up)"], "triad": ["Db", "Fb", "Ab"]}, {"id": 12, "root": "Db", "quality": "Minor", "chord": "Db Minor", "inversion": "2nd inversion", "notes": ["Ab", "Db (octave up)", "Fb (octave up)"], "triad": ["Db", "Fb", "Ab"]}, {"id": 13, "root": "D", "quality": "Major", "chord": "D Major", "inversion": "Root position", "notes": ["D", "F#", "A"], "triad": ["D", "F#", "A"]}, {"id": 14, "root": "D", "quality": "Major", "chord": "D Major", "inversion": "1st inversion", "notes": ["F#", "A", "D (octave up)"], "triad": ["D", "F#", "A"]}, {"id": 15, "root": "D", "quality": "Major", "chord": "D Major", "inversion": "2nd inversion", "notes": ["A", "D (octave up)", "F# (octave up)"], "triad": ["D", "F#", "A"]}, {"id": 16, "root": "D", "quality": "Minor", "chord": "D Minor", "inversion": "Root position", "notes": ["D", "F", "A"], "triad": ["D", "F", "A"]}, {"id": 17, "root": "D", "quality": "Minor", "chord": "D Minor", "inversion": "1st inversion", "notes": ["F", "A", "D (octave up)"], "triad": ["D", "F", "A"]}, {"id": 18, "root": "D", "quality": "Minor", "chord": "D Minor", "inversion": "2nd inversion", "notes": ["A", "D (octave up)", "F (octave up)"], "triad": ["D", "F", "A"]}, {"id": 19, "root": "Eb", "quality": "Major", "chord": "Eb Major", "inversion": "Root position", "notes": ["Eb", "G", "Bb"], "triad": ["Eb", "G", "Bb"]}, {"id": 20, "root": "Eb", "quality": "Major", "chord": "Eb Major", "inversion": "1st inversion", "notes": ["G", "Bb", "Eb (octave up)"], "triad": ["Eb", "G", "Bb"]}, {"id": 21, "root": "Eb", "quality": "Major", "chord": "Eb Major", "inversion": "2nd inversion", "notes": ["Bb", "Eb (octave up)", "G (octave up)"], "triad": ["Eb", "G", "Bb"]}, {"id": 22, "root": "Eb", "quality": "Minor", "chord": "Eb Minor", "inversion": "Root position", "notes": ["Eb", "Gb", "Bb"], "triad": ["Eb", "Gb", "Bb"]}, {"id": 23, "root": "Eb", "quality": "Minor", "chord": "Eb Minor", "inversion": "1st inversion", "notes": ["Gb", "Bb", "Eb (octave up)"], "triad": ["Eb", "Gb", "Bb"]}, {"id": 24, "root": "Eb", "quality": "Minor", "chord": "Eb Minor", "inversion": "2nd inversion", "notes": ["Bb", "Eb (octave up)", "Gb (octave up)"], "triad": ["Eb", "Gb", "Bb"]}, {"id": 25, "root": "E", "quality": "Major", "chord": "E Major", "inversion": "Root position", "notes": ["E", "G#", "B"], "triad": ["E", "G#", "B"]}, {"id": 26, "root": "E", "quality": "Major", "chord": "E Major", "inversion": "1st inversion", "notes": ["G#", "B", "E (octave up)"], "triad": ["E", "G#", "B"]}, {"id": 27, "root": "E", "quality": "Major", "chord": "E Major", "inversion": "2nd inversion", "notes": ["B", "E (octave up)", "G# (octave up)"], "triad": ["E", "G#", "B"]}, {"id": 28, "root": "E", "quality": "Minor", "chord": "E Minor", "inversion": "Root position", "notes": ["E", "G", "B"], "triad": ["E", "G", "B"]}, {"id": 29, "root": "E", "quality": "Minor", "chord": "E Minor", "inversion": "1st inversion", "notes": ["G", "B", "E (octave up)"], "triad": ["E", "G", "B"]}, {"id": 30, "root": "E", "quality": "Minor", "chord": "E Minor", "inversion": "2nd inversion", "notes": ["B", "E (octave up)", "G (octave up)"], "triad": ["E", "G", "B"]}, {"id": 31, "root": "F", "quality": "Major", "chord": "F Major", "inversion": "Root position", "notes": ["F", "A", "C"], "triad": ["F", "A", "C"]}, {"id": 32, "root": "F", "quality": "Major", "chord": "F Major", "inversion": "1st inversion", "notes": ["A", "C", "F (octave up)"], "triad": ["F", "A", "C"]}, {"id": 33, "root": "F", "quality": "Major", "chord": "F Major", "inversion": "2nd inversion", "notes": ["C", "F (octave up)", "A (octave up)"], "triad": ["F", "A", "C"]}, {"id": 34, "root": "F", "quality": "Minor", "chord": "F Minor", "inversion": "Root position", "notes": ["F", "Ab", "C"], "triad": ["F", "Ab", "C"]}, {"id": 35, "root": "F", "quality": "Minor", "chord": "F Minor", "inversion": "1st inversion", "notes": ["Ab", "C", "F (octave up)"], "triad": ["F", "Ab", "C"]}, {"id": 36, "root": "F", "quality": "Minor", "chord": "F Minor", "inversion": "2nd inversion", "notes": ["C", "F (octave up)", "Ab (octave up)"], "triad": ["F", "Ab", "C"]}, {"id": 37, "root": "Gb", "quality": "Major", "chord": "Gb Major", "inversion": "Root position", "notes": ["Gb", "Bb", "Db"], "triad": ["Gb", "Bb", "Db"]}, {"id": 38, "root": "Gb", "quality": "Major", "chord": "Gb Major", "inversion": "1st inversion", "notes": ["Bb", "Db", "Gb (octave up)"], "triad": ["Gb", "Bb", "Db"]}, {"id": 39, "root": "Gb", "quality": "Major", "chord": "Gb Major", "inversion": "2nd inversion", "notes": ["Db", "Gb (octave up)", "Bb (octave up)"], "triad": ["Gb", "Bb", "Db"]}, {"id": 40, "root": "Gb", "quality": "Minor", "chord": "Gb Minor", "inversion": "Root position", "notes": ["Gb", "Bbb", "Db"], "triad": ["Gb", "Bbb", "Db"]}, {"id": 41, "root": "Gb", "quality": "Minor", "chord": "Gb Minor", "inversion": "1st inversion", "notes": ["Bbb", "Db", "Gb (octave up)"], "triad": ["Gb", "Bbb", "Db"]}, {"id": 42, "root": "Gb", "quality": "Minor", "chord": "Gb Minor", "inversion": "2nd inversion", "notes": ["Db", "Gb (octave up)", "Bbb (octave up)"], "triad": ["Gb", "Bbb", "Db"]}, {"id": 43, "root": "G", "quality": "Major", "chord": "G Major", "inversion": "Root position", "notes": ["G", "B", "D"], "triad": ["G", "B", "D"]}, {"id": 44, "root": "G", "quality": "Major", "chord": "G Major", "inversion": "1st inversion", "notes": ["B", "D", "G (octave up)"], "triad": ["G", "B", "D"]}, {"id": 45, "root": "G", "quality": "Major", "chord": "G Major", "inversion": "2nd inversion", "notes": ["D", "G (octave up)", "B (octave up)"], "triad": ["G", "B", "D"]}, {"id": 46, "root": "G", "quality": "Minor", "chord": "G Minor", "inversion": "Root position", "notes": ["G", "Bb", "D"], "triad": ["G", "Bb", "D"]}, {"id": 47, "root": "G", "quality": "Minor", "chord": "G Minor", "inversion": "1st inversion", "notes": ["Bb", "D", "G (octave up)"], "triad": ["G", "Bb", "D"]}, {"id": 48, "root": "G", "quality": "Minor", "chord": "G Minor", "inversion": "2nd inversion", "notes": ["D", "G (octave up)", "Bb (octave up)"], "triad": ["G", "Bb", "D"]}, {"id": 49, "root": "Ab", "quality": "Major", "chord": "Ab Major", "inversion": "Root position", "notes": ["Ab", "C", "Eb"], "triad": ["Ab", "C", "Eb"]}, {"id": 50, "root": "Ab", "quality": "Major", "chord": "Ab Major", "inversion": "1st inversion", "notes": ["C", "Eb", "Ab (octave up)"], "triad": ["Ab", "C", "Eb"]}, {"id": 51, "root": "Ab", "quality": "Major", "chord": "Ab Major", "inversion": "2nd inversion", "notes": ["Eb", "Ab (octave up)", "C (octave up)"], "triad": ["Ab", "C", "Eb"]}, {"id": 52, "root": "Ab", "quality": "Minor", "chord": "Ab Minor", "inversion": "Root position", "notes": ["Ab", "Cb", "Eb"], "triad": ["Ab", "Cb", "Eb"]}, {"id": 53, "root": "Ab", "quality": "Minor", "chord": "Ab Minor", "inversion": "1st inversion", "notes": ["Cb", "Eb", "Ab (octave up)"], "triad": ["Ab", "Cb", "Eb"]}, {"id": 54, "root": "Ab", "quality": "Minor", "chord": "Ab Minor", "inversion": "2nd inversion", "notes": ["Eb", "Ab (octave up)", "Cb (octave up)"], "triad": ["Ab", "Cb", "Eb"]}, {"id": 55, "root": "A", "quality": "Major", "chord": "A Major", "inversion": "Root position", "notes": ["A", "C#", "E"], "triad": ["A", "C#", "E"]}, {"id": 56, "root": "A", "quality": "Major", "chord": "A Major", "inversion": "1st inversion", "notes": ["C#", "E", "A (octave up)"], "triad": ["A", "C#", "E"]}, {"id": 57, "root": "A", "quality": "Major", "chord": "A Major", "inversion": "2nd inversion", "notes": ["E", "A (octave up)", "C# (octave up)"], "triad": ["A", "C#", "E"]}, {"id": 58, "root": "A", "quality": "Minor", "chord": "A Minor", "inversion": "Root position", "notes": ["A", "C", "E"], "triad": ["A", "C", "E"]}, {"id": 59, "root": "A", "quality": "Minor", "chord": "A Minor", "inversion": "1st inversion", "notes": ["C", "E", "A (octave up)"], "triad": ["A", "C", "E"]}, {"id": 60, "root": "A", "quality": "Minor", "chord": "A Minor", "inversion": "2nd inversion", "notes": ["E", "A (octave up)", "C (octave up)"], "triad": ["A", "C", "E"]}, {"id": 61, "root": "Bb", "quality": "Major", "chord": "Bb Major", "inversion": "Root position", "notes": ["Bb", "D", "F"], "triad": ["Bb", "D", "F"]}, {"id": 62, "root": "Bb", "quality": "Major", "chord": "Bb Major", "inversion": "1st inversion", "notes": ["D", "F", "Bb (octave up)"], "triad": ["Bb", "D", "F"]}, {"id": 63, "root": "Bb", "quality": "Major", "chord": "Bb Major", "inversion": "2nd inversion", "notes": ["F", "Bb (octave up)", "D (octave up)"], "triad": ["Bb", "D", "F"]}, {"id": 64, "root": "Bb", "quality": "Minor", "chord": "Bb Minor", "inversion": "Root position", "notes": ["Bb", "Db", "F"], "triad": ["Bb", "Db", "F"]}, {"id": 65, "root": "Bb", "quality": "Minor", "chord": "Bb Minor", "inversion": "1st inversion", "notes": ["Db", "F", "Bb (octave up)"], "triad": ["Bb", "Db", "F"]}, {"id": 66, "root": "Bb", "quality": "Minor", "chord": "Bb Minor", "inversion": "2nd inversion", "notes": ["F", "Bb (octave up)", "Db (octave up)"], "triad": ["Bb", "Db", "F"]}, {"id": 67, "root": "B", "quality": "Major", "chord": "B Major", "inversion": "Root position", "notes": ["B", "D#", "F#"], "triad": ["B", "D#", "F#"]}, {"id": 68, "root": "B", "quality": "Major", "chord": "B Major", "inversion": "1st inversion", "notes": ["D#", "F#", "B (octave up)"], "triad": ["B", "D#", "F#"]}, {"id": 69, "root": "B", "quality": "Major", "chord": "B Major", "inversion": "2nd inversion", "notes": ["F#", "B (octave up)", "D# (octave up)"], "triad": ["B", "D#", "F#"]}, {"id": 70, "root": "B", "quality": "Minor", "chord": "B Minor", "inversion": "Root position", "notes": ["B", "D", "F#"], "triad": ["B", "D", "F#"]}, {"id": 71, "root": "B", "quality": "Minor", "chord": "B Minor", "inversion": "1st inversion", "notes": ["D", "F#", "B (octave up)"], "triad": ["B", "D", "F#"]}, {"id": 72, "root": "B", "quality": "Minor", "chord": "B Minor", "inversion": "2nd inversion", "notes": ["F#", "B (octave up)", "D (octave up)"], "triad": ["B", "D", "F#"]}];
+const roots = [...new Set(chords.map(c=>c.root))];
+const rootFilter=document.getElementById('rootFilter');
+roots.forEach(r=>{const o=document.createElement('option');o.value=r;o.textContent=r;rootFilter.appendChild(o)});
+const keys='pianoChordPractice72';
+function getDone(){try{return JSON.parse(localStorage.getItem(keys)||'{}')}catch(e){return {}}}
+function setDone(d){try{localStorage.setItem(keys,JSON.stringify(d))}catch(e){}}
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function visibleRows(){const r=rootFilter.value,q=document.getElementById('qualityFilter').value,i=document.getElementById('invFilter').value,s=document.getElementById('search').value.toLowerCase().trim();return chords.filter(c=>(!r||c.root===r)&&(!q||c.quality===q)&&(!i||c.inversion===i)&&(!s||(c.chord+' '+c.inversion+' '+c.notes.join(' ')+' '+c.triad.join(' ')).toLowerCase().includes(s)))}
+function render(){const done=getDone(),rows=visibleRows();document.getElementById('chordRows').innerHTML=rows.map(c=>`<tr><td>${c.id}</td><td><strong>${esc(c.chord)}</strong></td><td><span class="pill">${esc(c.inversion)}</span></td><td class="notes">${c.notes.map(esc).join(' – ')}</td><td>${c.triad.map(esc).join(' – ')}</td><td class="checkcell"><input type="checkbox" aria-label="Mark ${esc(c.chord)} ${esc(c.inversion)} practised" data-id="${c.id}" ${done[c.id]?'checked':''}></td></tr>`).join('');document.getElementById('progressText').textContent=Object.values(done).filter(Boolean).length+' of 72 mastered';document.getElementById('progressFill').style.width=(Object.values(done).filter(Boolean).length/72*100)+'%';}
+['rootFilter','qualityFilter','invFilter','search'].forEach(id=>document.getElementById(id).addEventListener(id==='search'?'input':'change',render));
+document.getElementById('chordRows').addEventListener('change',e=>{if(e.target.matches('input[type=checkbox]')){const d=getDone();d[e.target.dataset.id]=e.target.checked;setDone(d);render()}});
+document.getElementById('resetProgress').addEventListener('click',()=>{if(confirm('Clear all 72 practice ticks?')){setDone({});render()}});
+let current=null;
+document.getElementById('newQuestion').addEventListener('click',()=>{current=chords[Math.floor(Math.random()*chords.length)];document.getElementById('quizPrompt').textContent=current.chord+' — '+current.inversion;document.getElementById('quizHint').textContent='Play the chord, lowest note to highest. Then reveal the notes to check.';document.getElementById('quizAnswer').classList.add('hidden');document.getElementById('quizAnswer').textContent=''});
+document.getElementById('revealAnswer').addEventListener('click',()=>{const el=document.getElementById('quizAnswer');if(!current){el.textContent='Choose “New question” first.'}else{el.innerHTML='<strong>Chord tones:</strong> '+current.triad.map(esc).join(' – ')+'<br><strong>Play order:</strong> '+current.notes.map(esc).join(' – ')}el.classList.remove('hidden')});
+function showCheck(id,answer){const el=document.getElementById(id);el.textContent=answer;el.classList.remove('hidden')}
+</script>
+</body>
+</html>

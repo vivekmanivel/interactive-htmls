@@ -1,0 +1,12 @@
+{
+  "slug": "uk-mortgage-planner",
+  "title": "UK Mortgage Planner",
+  "version": "1.0.0",
+  "status": "approved",
+  "summary": "End-to-end UK mortgage planner: take-home pay and borrowing, stamp duty and upfront costs, deposit saving, full repayment schedule with overpayments and remortgages, deal comparison, overpay-vs-invest sweet spot, mortgage-free target and monthly budget. Fully offline.",
+  "category": "Property & finance",
+  "data_sources": ["HMRC (SDLT, Income Tax, NI)", "Student Loans Company", "GOV.UK (LISA)", "Council tax 2026/27 Band D", "Bank of England Bank Rate"],
+  "external_requests": false,
+  "data_last_checked": "2026-10",
+  "licence": "MIT"
+}

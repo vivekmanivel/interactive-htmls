@@ -1,0 +1,12 @@
+{
+  "slug": "piano-chords-practice",
+  "title": "Piano Chords Practice: Major, Minor & 72 Inversions",
+  "version": "1.0.0",
+  "status": "approved",
+  "summary": "Learn how major and minor triads and inversions are built, filter and tick off all 72 combinations, follow a 15-minute routine and test yourself with random prompts.",
+  "category": "Music",
+  "data_sources": ["Standard music theory"],
+  "external_requests": false,
+  "data_last_checked": "2026-10",
+  "licence": "MIT"
+}

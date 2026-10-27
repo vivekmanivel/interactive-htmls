@@ -1,0 +1,1080 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>UK Mortgage Planner</title>
+<meta name="description" content="A full UK mortgage planner: affordability, stamp duty and purchase costs, deposit plan, repayment schedule, deal comparison, overpay-vs-invest sweet spot, early payoff targets, monthly budget, remortgage and moving.">
+<style>
+:root{
+  --bg:#0a1120;--bg2:#0d1628;--panel:#111b30;--panel2:#16233d;--ink:#f3eee4;--muted:#93a0b7;--line:#22314d;
+  --acc:#ff6a2b;--acc2:#ffa063;--blue:#5aa2ff;--good:#3fd18b;--bad:#ff6161;--warn:#ffb648;--violet:#b48cff;
+  --serif:Georgia,serif;--sans:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;--mono:ui-monospace,Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.5 var(--sans)}
+a{color:var(--acc2)}
+h1,h2,h3{font-family:var(--serif);font-weight:600;letter-spacing:-.01em}
+h2{font-size:22px;margin:0 0 4px}
+h3{font-size:16px;margin:22px 0 8px;color:var(--ink)}
+.mono,.num{font-family:var(--mono)}
+small,.hint{color:var(--muted);font-size:12.5px}
+.hint{margin:6px 0 10px}
+.app{display:grid;grid-template-columns:268px minmax(0,1fr);min-height:100vh}
+/* ---------- nav (numbered pipeline) ---------- */
+nav.side{position:sticky;top:0;height:100vh;overflow:auto;background:linear-gradient(180deg,var(--bg2),var(--bg));border-right:1px solid var(--line);padding:20px 16px}
+.brand{display:flex;gap:10px;align-items:center;margin-bottom:18px}
+.logo{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,var(--acc),#ff3d6e);display:grid;place-items:center;font-family:var(--serif);font-weight:700;font-size:20px;color:#fff}
+.brand b{font-family:var(--serif);font-size:18px;display:block;line-height:1.1}
+.brand span{font:11px var(--mono);color:var(--muted);letter-spacing:.06em}
+ol.pipe{list-style:none;margin:0;padding:0;position:relative}
+ol.pipe::before{content:"";position:absolute;left:15px;top:14px;bottom:14px;width:2px;background:linear-gradient(180deg,var(--acc),var(--violet),var(--blue));opacity:.55;border-radius:2px}
+ol.pipe li{position:relative;margin:2px 0}
+ol.pipe button{all:unset;cursor:pointer;display:grid;grid-template-columns:32px 1fr;gap:10px;align-items:center;width:100%;padding:7px 6px;border-radius:10px;box-sizing:border-box}
+ol.pipe button:hover{background:rgba(255,255,255,.04)}
+ol.pipe .n{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;background:var(--panel);border:1px solid var(--line);font:600 12px var(--mono);color:var(--muted);position:relative;z-index:1}
+ol.pipe .t{font-weight:600;font-size:13.5px;line-height:1.2}
+ol.pipe .d{display:block;font-size:11.5px;color:var(--muted);font-weight:400}
+ol.pipe button.active .n{background:var(--acc);border-color:var(--acc);color:#fff;box-shadow:0 0 0 4px rgba(255,106,43,.18)}
+ol.pipe button.active .t{color:var(--acc2)}
+.tools{margin-top:18px;border-top:1px solid var(--line);padding-top:14px;display:flex;flex-wrap:wrap;gap:6px}
+/* ---------- main ---------- */
+main{min-width:0;padding:0 26px 60px}
+.kpis{position:sticky;top:0;z-index:20;background:rgba(10,17,32,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);margin:0 -26px 18px;padding:10px 26px;display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px}
+.kpi .l{font:11px var(--mono);color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.kpi .v{font:600 17px var(--mono);white-space:nowrap}
+.kpi .s{font-size:11.5px;color:var(--muted)}
+.tab{display:none}.tab.active{display:block;animation:fade .25s ease}
+@keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+.tabhead{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+.eyebrow{font:11.5px var(--mono);color:var(--acc2);letter-spacing:.12em;text-transform:uppercase}
+.grid2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.3fr);gap:16px;align-items:start}
+@media (max-width:1150px){.grid2{grid-template-columns:1fr}}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px 18px;min-width:0}
+.panel+.panel{margin-top:16px}
+fieldset{border:1px solid var(--line);border-radius:12px;padding:10px 12px 12px;margin:0 0 12px}
+legend{font:600 11.5px var(--mono);color:var(--acc2);text-transform:uppercase;letter-spacing:.08em;padding:0 6px}
+.fg{display:grid;grid-template-columns:repeat(auto-fill,minmax(165px,1fr));gap:10px}
+label{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--muted);font-weight:500}
+label>small{font-size:11px;line-height:1.3}
+input,select,textarea{font:13px var(--mono);color:var(--ink);background:var(--bg2);border:1px solid var(--line);border-radius:8px;padding:7px 9px;width:100%;min-width:0}
+select{font-family:var(--sans)}
+input:focus,select:focus{outline:2px solid var(--acc);outline-offset:-1px}
+label.chk{flex-direction:row;align-items:center;gap:8px;color:var(--ink);font-size:13px}
+label.chk input{width:auto;accent-color:var(--acc)}
+.btn{font:600 12.5px var(--sans);border:1px solid var(--line);background:var(--panel2);color:var(--ink);padding:7px 12px;border-radius:8px;cursor:pointer;text-decoration:none;display:inline-block}
+.btn:hover{border-color:var(--acc)}
+.btn.pri{background:var(--acc);border-color:var(--acc);color:#fff}
+.btn.sm{padding:4px 9px;font-size:12px}
+.btn.del{color:var(--bad);padding:3px 8px}
+.filebtn{position:relative;overflow:hidden}.filebtn input{position:absolute;inset:0;opacity:0;cursor:pointer}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;margin:10px 0}
+.stat{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:10px 12px}
+.stat .l{font-size:11.5px;color:var(--muted);font-weight:600}
+.stat .v{font:600 19px var(--mono);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.stat .s{font-size:11.5px;color:var(--muted)}
+.stat.good .v{color:var(--good)}.stat.bad .v{color:var(--bad)}.stat.warn .v{color:var(--warn)}.stat.acc .v{color:var(--acc2)}
+.stat.hero{background:linear-gradient(135deg,rgba(255,106,43,.16),rgba(90,162,255,.08));border-color:rgba(255,106,43,.45)}
+.note{border-left:3px solid var(--blue);background:rgba(90,162,255,.08);padding:8px 12px;border-radius:8px;margin:8px 0;font-size:13px}
+.warnbox{border-left:3px solid var(--warn);background:rgba(255,182,72,.08);padding:8px 12px;border-radius:8px;margin:8px 0;font-size:13px}
+.badbox{border-left:3px solid var(--bad);background:rgba(255,97,97,.08);padding:8px 12px;border-radius:8px;margin:8px 0;font-size:13px}
+.okbox{border-left:3px solid var(--good);background:rgba(63,209,139,.08);padding:8px 12px;border-radius:8px;margin:8px 0;font-size:13px}
+.reco{border:1px solid rgba(255,106,43,.5);background:linear-gradient(135deg,rgba(255,106,43,.14),rgba(180,140,255,.06));border-radius:14px;padding:14px 16px;margin:10px 0}
+.reco .big{font:600 26px var(--mono);color:var(--acc2)}
+.reco p{margin:6px 0}
+table{border-collapse:collapse;width:100%}
+.tbl th,.tbl td{padding:6px 8px;border-bottom:1px solid var(--line);font-size:12.5px;text-align:right;white-space:nowrap}
+.tbl th{color:var(--muted);font-weight:600;position:sticky;top:0;background:var(--panel);z-index:1}
+.tbl td:first-child,.tbl th:first-child,.tbl td.l,.tbl th.l{text-align:left}
+.tbl td{font-family:var(--mono)}
+.tbl td.l{font-family:var(--sans)}
+.tbl tr.tot td{font-weight:700;border-top:2px solid var(--line)}
+.tbl tr.hl td{background:rgba(255,106,43,.1)}
+.tbl tr.yr{cursor:pointer}.tbl tr.yr:hover td{background:rgba(255,255,255,.03)}
+.tbl tr.mo td{color:var(--muted);background:var(--bg2)}
+.tbl tr.ev td{background:rgba(90,162,255,.07)}
+.tbl input,.tbl select{padding:4px 6px;font-size:12px}
+.wrap{overflow:auto;max-height:70vh;border:1px solid var(--line);border-radius:10px}
+.wrap.short{max-height:none}
+.chart svg{width:100%;height:auto;display:block}
+.chart text{fill:var(--muted);font:11px var(--mono)}
+.chart .gl{stroke:var(--line)}
+.chart .hit{fill:transparent;cursor:crosshair}
+.tip{position:fixed;pointer-events:none;background:#030712;border:1px solid var(--line);color:var(--ink);padding:7px 10px;border-radius:8px;font:12px var(--mono);z-index:999;display:none;white-space:pre;box-shadow:0 8px 24px rgba(0,0,0,.4)}
+.toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:var(--acc);color:#fff;padding:9px 16px;border-radius:10px;z-index:999;font-weight:600}
+.toast.hidden{display:none}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.between{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.hbar{display:grid;grid-template-columns:200px 1fr 90px;gap:8px;align-items:center;font-size:12.5px;margin:3px 0}
+.hbar .t{height:10px;background:var(--bg2);border-radius:6px;overflow:hidden}
+.hbar .t i{display:block;height:100%}
+.hbar .v{text-align:right;font-family:var(--mono)}
+.pill{display:inline-block;padding:1px 8px;border-radius:99px;background:var(--panel2);border:1px solid var(--line);font:11px var(--mono);color:var(--muted)}
+.pill.g{color:var(--good);border-color:rgba(63,209,139,.4)}.pill.b{color:var(--bad);border-color:rgba(255,97,97,.4)}.pill.w{color:var(--warn);border-color:rgba(255,182,72,.4)}
+details.more{border:1px dashed var(--line);border-radius:10px;padding:6px 12px;margin:10px 0}
+details.more summary{cursor:pointer;font-weight:600;color:var(--muted)}
+/* home */
+.hero{position:relative;overflow:hidden;border-radius:18px;padding:34px 30px;border:1px solid var(--line);background:radial-gradient(900px 300px at 0% 0%,rgba(255,106,43,.22),transparent 60%),radial-gradient(700px 300px at 100% 100%,rgba(90,162,255,.18),transparent 60%),var(--panel)}
+.hero h1{font-size:clamp(28px,4.2vw,46px);line-height:1.05;margin:8px 0 12px;max-width:820px}
+.hero h1 em{font-style:italic;color:var(--acc2)}
+.hero p{color:#cdd5e3;max-width:760px;font-size:15px}
+.steps{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px;margin-top:16px}
+.step{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px;cursor:pointer;transition:border-color .15s,transform .15s}
+.step:hover{border-color:var(--acc);transform:translateY(-2px)}
+.step .n{font:600 12px var(--mono);color:var(--acc2)}
+.step b{display:block;font-family:var(--serif);font-size:17px;margin:4px 0}
+.step p{margin:0;color:var(--muted);font-size:13px}
+.cols3{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px}
+.cols3 ul{padding-left:18px;margin:6px 0}.cols3 li{margin:3px 0;font-size:13px}
+@media (max-width:900px){
+  .app{grid-template-columns:1fr}
+  nav.side{position:static;height:auto;padding:12px}
+  ol.pipe{display:flex;overflow-x:auto;gap:4px}
+  ol.pipe::before{display:none}
+  ol.pipe button{grid-template-columns:28px auto;white-space:nowrap}
+  ol.pipe .d{display:none}
+  main{padding:0 14px 50px}
+  .kpis{margin:0 -14px 14px;padding:8px 14px;position:static}
+  .hbar{grid-template-columns:120px 1fr 70px}
+}
+@media print{nav.side,.kpis,.tools,.btn{display:none!important}.app{display:block}.tab{display:block!important;page-break-after:always}}
+</style>
+<meta name="author" content="Usualy Labs">
+<meta name="color-scheme" content="light dark">
+<script>/* Usualy Labs theme switcher: auto | light | dark, remembered in this browser only */
+(function(){var K='usualy.theme',d=document.documentElement,m=window.matchMedia?matchMedia('(prefers-color-scheme: dark)'):null;
+function p(){try{return localStorage.getItem(K)||'auto'}catch(e){return 'auto'}}
+function a(){var v=p();d.setAttribute('data-theme',v==='auto'?(m&&m.matches?'dark':'light'):v)}
+a();if(m&&m.addEventListener)m.addEventListener('change',a);
+window.setTheme=function(v){try{localStorage.setItem(K,v)}catch(e){}a()};
+document.addEventListener('DOMContentLoaded',function(){var s=document.getElementById('themeSel');if(s){s.value=p();s.onchange=function(){setTheme(s.value)}}})})();
+</script>
+<style>
+.ul-theme{display:flex;gap:8px;align-items:center;margin-top:10px;font-size:12.5px;color:var(--muted)}
+.ul-theme select{background:var(--panel);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:4px 8px;font:inherit}
+:root[data-theme=light]{--bg:#f7f5f0;--bg2:#efece4;--panel:#ffffff;--panel2:#f3f1ec;--ink:#1b2333;--muted:#5d6678;--line:#dcd7cc;--acc:#d9531a;--acc2:#b8460f;--blue:#2f6fd6;--good:#1d8f5a;--bad:#cc3333;--warn:#a86d12;--violet:#7650d0}
+[data-theme=light] .kpis{background:rgba(247,245,240,.94)}
+[data-theme=light] ol.pipe button:hover{background:rgba(0,0,0,.04)}
+.ul-about{margin:28px 0 8px;padding:18px 20px;border:1px solid var(--line);border-radius:14px;background:var(--panel);font-size:13px;line-height:1.6}
+.ul-about h2{font-size:18px}.ul-about h3{font-size:14px;margin:14px 0 4px}.ul-about ul{margin:4px 0;padding-left:20px}
+@media print{.ul-theme{display:none}}
+</style>
+</head>
+<body>
+<div class="app">
+  <nav class="side">
+    <div class="brand"><div class="logo">£</div><div><b>Mortgage Planner</b><span>UK · ENGLAND · USUALY LABS</span></div></div>
+    <ol class="pipe" id="pipe"></ol>
+    <div class="tools">
+      <button class="btn sm" id="tShare" title="Copy a link that holds all your inputs">Copy share link</button>
+      <button class="btn sm" id="tExport">Export</button>
+      <label class="btn sm filebtn">Import<input type="file" id="tImport" accept=".json"></label>
+      <button class="btn sm" id="tPrint">Print</button>
+      <button class="btn sm del" id="tReset">Reset</button>
+    </div>
+    <p class="hint" style="margin-top:12px">Inputs save in this browser only. Nothing is sent anywhere.</p>
+    <label class="ul-theme">Theme <select id="themeSel" aria-label="Colour theme"><option value="auto">Auto</option><option value="light">Light</option><option value="dark">Dark</option></select></label>
+
+  </nav>
+  <main>
+    <header class="kpis" id="kpis"></header>
+    <div id="tabs"></div>
+<footer class="ul-about" id="about">
+  <h2>About, data sources &amp; disclaimer</h2>
+  <p><b>UK Mortgage Planner</b> &middot; published by <b>Usualy Labs</b> &middot; version 1.0.0 &middot; figures last checked October 2026.</p>
+  <h3>Not advice</h3>
+  <p>This planner gives illustrations for general information and personal research only. It is <b>not</b> financial, mortgage, investment, tax or legal advice, and Usualy Labs is not authorised or regulated by the Financial Conduct Authority. It does not recommend any lender or product. Real lending decisions depend on each lender's own criteria. Investment returns are not guaranteed and can fall as well as rise. Tax rates, thresholds and reliefs change. Check figures with the official sources and speak to a qualified, FCA-authorised mortgage adviser or financial adviser before you decide anything.</p>
+  <p>Provided &ldquo;as is&rdquo; without warranty of any kind. To the fullest extent permitted by law, Usualy Labs and contributors accept no responsibility or liability for any loss or decision arising from its use. Nothing here limits any liability that cannot be limited by law.</p>
+  <h3>Your privacy</h3>
+  <p>Usualy Labs collects nothing. The planner makes no network requests: no accounts, analytics, cookies, trackers or web fonts. Your inputs are saved only in <b>your browser's local storage</b> on this device. &ldquo;Copy share link&rdquo; puts your inputs into the link itself; it is only shared if you send it to someone, so treat it like a private document. Export and Import create and read a file on your own device.</p>
+  <h3>Data sources and credits</h3>
+  <p>Figures built into the planner come from these publishers. All credit for the underlying information belongs to them; inclusion does not imply their endorsement.</p>
+  <ul>
+    <li><b>HM Revenue &amp; Customs / GOV.UK</b> &ndash; Stamp Duty Land Tax rates and first-time buyer relief (England &amp; NI, from 1 April 2025), Income Tax and National Insurance rates and thresholds.</li>
+    <li><b>Student Loans Company / GOV.UK</b> &ndash; student loan repayment plan thresholds and rates.</li>
+    <li><b>GOV.UK</b> &ndash; Lifetime ISA rules and limits.</li>
+    <li><b>Local councils / MHCLG council tax statistics</b> &ndash; 2026/27 Band D council tax by London borough, including GLA precept.</li>
+    <li><b>Bank of England</b> &ndash; Bank Rate, used as the starting base rate (an editable assumption).</li>
+    <li>Mortgage rates, LTV bands, fees, lender income multiples, energy costs, running costs and investment returns are <b>illustrative assumptions</b> by Usualy Labs, not live market data. Replace them with your own quotes.</li>
+  </ul>
+  <p>Contains public sector information licensed under the Open Government Licence v3.0. No third-party code libraries are used.</p>
+  <p>Spotted a mistake or out-of-date figure? Please report it through the project's GitHub Issues page.</p>
+</footer>
+
+  </main>
+</div>
+<div class="tip" id="tip"></div>
+<div class="toast hidden" id="toast"></div>
+
+<script>
+'use strict';
+/* =========================================================================
+   Mortgage Planner · single-file app
+   Engine (amortise, sdlt, tax, affordability, sweet spot) → state S → tabs
+   ========================================================================= */
+const $ = (s, e = document) => e.querySelector(s), $$ = (s, e = document) => [...e.querySelectorAll(s)];
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const fin = n => typeof n === 'number' && isFinite(n);
+const gbp = n => fin(n) ? (n < 0 ? '−£' : '£') + Math.abs(Math.round(n)).toLocaleString('en-GB') : '–';
+const gbp2 = n => fin(n) ? (n < 0 ? '−£' : '£') + Math.abs(n).toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '–';
+const pct = (n, d = 1) => fin(n) ? n.toFixed(d) + '%' : '–';
+const kfmt = v => { const a = Math.abs(v), s = v < 0 ? '−' : ''; return a >= 1e6 ? s + '£' + (a / 1e6).toFixed(2) + 'm' : a >= 1e3 ? s + '£' + Math.round(a / 1e3) + 'k' : s + '£' + Math.round(a); };
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+const sum = (arr, f) => arr.reduce((a, x) => a + (+(f ? (typeof f === 'function' ? f(x) : x[f]) : x) || 0), 0);
+const N = v => { const x = parseFloat(v); return isFinite(x) ? x : 0; };
+const yrsMo = m => `${Math.floor(m / 12)} yr ${Math.round(m % 12)} mo`;
+const todayYM = () => new Date().toISOString().slice(0, 7);
+const monthsAdd = (ym, k) => { const [y, m] = ym.split('-').map(Number); return new Date(Date.UTC(y, m - 1 + k, 1)).toISOString().slice(0, 7); };
+const ymLabel = ym => { const [y, m] = ym.split('-').map(Number); return new Date(Date.UTC(y, m - 1, 1)).toLocaleDateString('en-GB', { month: 'short', year: 'numeric', timeZone: 'UTC' }); };
+const debounce = (fn, ms) => { let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), ms); }; };
+function toast(m) { const t = $('#toast'); t.textContent = m; t.classList.remove('hidden'); clearTimeout(toast.t); toast.t = setTimeout(() => t.classList.add('hidden'), 2600); }
+const tipEl = () => $('#tip');
+function showTip(e, txt) { const t = tipEl(); t.textContent = txt; t.style.display = 'block'; t.style.left = Math.min(e.clientX + 14, innerWidth - 260) + 'px'; t.style.top = (e.clientY + 14) + 'px'; }
+function hideTip() { tipEl().style.display = 'none'; }
+
+/* ---------------- finance primitives ---------------- */
+function pmt(P, r, n) { if (n <= 0) return P; if (Math.abs(r) < 1e-12) return P / n; return P * r / (1 - Math.pow(1 + r, -n)); }
+function nper(P, r, A) { if (P <= 0) return 0; if (Math.abs(r) < 1e-12) return P / A; if (A <= P * r) return Infinity; return -Math.log(1 - P * r / A) / Math.log(1 + r); }
+function pvA(r, n, A) { if (A <= 0) return 0; if (Math.abs(r) < 1e-12) return A * n; return A * (1 - Math.pow(1 + r, -n)) / r; }
+function rng(seed) { return () => { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+function gauss(rand) { let u = 0, v = 0; while (u === 0) u = rand(); while (v === 0) v = rand(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v); }
+
+/* ---------------- reference data ---------------- */
+// 2026/27 Band D incl. GLA / county / police precepts (published tables). Override per council in the Budget tab.
+const BAND_D = { 'Barking and Dagenham': 2040, 'Barnet': 2130, 'Bexley': 2366, 'Brent': 2190, 'Bromley': 2140, 'Camden': 2140, 'Croydon': 2600, 'Ealing': 2190, 'Enfield': 2210, 'Greenwich': 2108, 'Hackney': 1960, 'Hammersmith and Fulham': 1519, 'Haringey': 2230, 'Harrow': 2400, 'Havering': 2380, 'Hillingdon': 2080, 'Hounslow': 2185, 'Islington': 1990, 'Kensington and Chelsea': 1643, 'Kingston upon Thames': 2609, 'Lambeth': 2047, 'Lewisham': 2237, 'Merton': 2147, 'Newham': 1880, 'Redbridge': 2280, 'Richmond upon Thames': 2486, 'Southwark': 1967, 'Sutton': 2379, 'Tower Hamlets': 1837, 'Waltham Forest': 2330, 'Wandsworth': 1028, 'Westminster': 1047, 'Elmbridge': 2558, 'Epsom and Ewell': 2531, 'Reigate and Banstead': 2567, 'Tandridge': 2595, 'Sevenoaks': 2522, 'Dartford': 2375, 'Spelthorne': 2526, 'Runnymede': 2493, 'Mole Valley': 2520, 'Other (enter Band D)': 0 };
+const BAND_RATIO = { A: 6 / 9, B: 7 / 9, C: 8 / 9, D: 1, E: 11 / 9, F: 13 / 9, G: 15 / 9, H: 18 / 9 };
+const CREDIT = {
+  excellent: { label: 'Excellent: clean file, low card use', add: 0, maxLTV: 95, note: 'Access to the full market and the best rates.' },
+  good: { label: 'Good: no missed payments in 6 yrs', add: 0, maxLTV: 95, note: 'Mainstream lenders; the rate you are quoted should hold.' },
+  fair: { label: 'Fair: late payments / high card use', add: 0.5, maxLTV: 90, note: 'Fewer lenders at high LTV. Expect a slightly higher rate and a lower income multiple.' },
+  poor: { label: 'Poor: defaults, CCJs, IVA or DMP', add: 2, maxLTV: 85, note: 'Usually specialist (adverse credit) lenders: larger deposit, lower multiple and higher rates. A broker is close to essential.' }
+};
+const EMP = { employed: 'Employed (permanent, past probation)', probation: 'Employed, still on probation', contractor: 'Contractor (day rate)', selfemp: 'Self-employed, 2+ years of accounts', selfnew: 'Self-employed, under 2 years', retired: 'Retired / pension income', none: 'Not working' };
+const SL = { none: ['None', 0, 0], p1: ['Plan 1', 26065, .09], p2: ['Plan 2', 28470, .09], p4: ['Plan 4 (Scotland)', 32745, .09], p5: ['Plan 5', 25000, .09], pg: ['Postgraduate', 21000, .06] };
+
+/* ---------------- default state ---------------- */
+const DEF = () => ({
+  v: 1,
+  buyer: 'ftb', nonRes: false, applicants: '2', age1: 30, age2: 30,
+  inc1: 55000, bonus1: 0, emp1: 'employed', pens1: 5, sl1: 'none',
+  inc2: 35000, bonus2: 0, emp2: 'employed', pens2: 5, sl2: 'none',
+  bonusPct: 50, credit: 'good', dependants: 0, multOverride: '', stressAdd: 3, maxAge: 70,
+  debts: [{ name: 'Car finance', bal: 9000, rate: 8.9, pay: 280 }, { name: 'Credit card', bal: 1500, rate: 22.9, pay: 75 }],
+  price: 450000, deposit: 50000, loanOverride: '', term: 30, start: '', repType: 'repay', ioPart: 100000,
+  product: 'fixed', rate: 4.35, fix: 5, trackMargin: 0.6, discount: 1.5, svr: 7.24, svrFollowsBase: true, base: 3.75, baseLong: 3.25, baseGlide: 3,
+  afterDeal: 'remortgage', reFix: 5, remortFee: 999, hpi: 3,
+  fee: 999, feeAdd: false, cashback: 0, offset: 0, offsetAdd: 0,
+  over: 0, overFrom: '', annualOver: 0, annualMonth: 12, overMode: 'term', ercSched: '5,4,3,2,1', allow: 10, capAllow: false,
+  lumps: [], rateCh: [],
+  bands: [{ ltv: 60, rate: 3.85 }, { ltv: 75, rate: 3.95 }, { ltv: 80, rate: 4.05 }, { ltv: 85, rate: 4.2 }, { ltv: 90, rate: 4.45 }, { ltv: 95, rate: 4.85 }],
+  savings: 60000, lisa: 0, lisaOn: false, gift: 0, monthlySave: 1000, saveRate: 4, rent: 1600, rentInc: 4,
+  up: { legal: 1800, searches: 400, survey: 750, broker: 0, valuation: 0, tt: 60, removals: 900, furnish: 2000, repairs: 0 },
+  borough: 'Croydon', ctBand: 'D', bandD: '', epc: 'D', sqm: 85, kwh: 0.12, standing: 350, maintPct: 1,
+  own: { water: 45, broadband: 35, insure: 45, life: 30, tv: 15, travel: 150, other: 0 },
+  tenure: 'F', lYears: 125, lGround: 0, lService: 0, lDouble: 'no',
+  spend: [{ n: 'Groceries & household', v: 450 }, { n: 'Car, fuel, transport', v: 180 }, { n: 'Childcare', v: 0 }, { n: 'Phone & subscriptions', v: 70 }, { n: 'Eating out & leisure', v: 200 }, { n: 'Clothing & personal', v: 80 }, { n: 'Holidays (set-aside)', v: 150 }, { n: 'Gifts & other', v: 80 }, { n: 'Health & fitness', v: 40 }],
+  emergencyMonths: 6, surplusShare: 50,
+  budgetYear: 12000, invReturn: 10, invFee: 0.3, wrapper: 'isa', gaDrag: 1, riskPrem: 2, vol: 15, horizon: '', overHow: 'monthly',
+  targetYears: 15, payoffHow: 'monthly',
+  compareYears: 5,
+  products: [
+    { name: '2-yr fixed', type: 'fixed', rate: 4.15, years: 2, fee: 999, feeAdd: false, cashback: 0 },
+    { name: '5-yr fixed', type: 'fixed', rate: 4.35, years: 5, fee: 999, feeAdd: false, cashback: 0 },
+    { name: 'Tracker (base + margin)', type: 'tracker', rate: 0.6, years: 25, fee: 0, feeAdd: false, cashback: 0 },
+    { name: '5-yr fixed, no fee', type: 'fixed', rate: 4.6, years: 5, fee: 0, feeAdd: false, cashback: 500 }],
+  rm: { bal: 280000, rate: 5.5, monthsLeft: 6, termLeft: 24, ercPct: 2, value: 480000, newRate: 4.2, newYears: 5, newFee: 999, legal: 0, raise: 0 },
+  mv: { value: 420000, mortgage: 250000, erc: 0, agentPct: 1.2, legal: 1500, epc: 90, other: 500 }
+});
+const STORE = 'mortgage-planner.v1';
+let S = DEF();
+function deepMerge(base, add) { for (const k in add) { if (add[k] && typeof add[k] === 'object' && !Array.isArray(add[k]) && base[k] && typeof base[k] === 'object' && !Array.isArray(base[k])) deepMerge(base[k], add[k]); else if (add[k] !== undefined) base[k] = add[k]; } return base; }
+function load() {
+  try { const h = location.hash; if (h.startsWith('#s=')) { S = deepMerge(DEF(), JSON.parse(decodeURIComponent(escape(atob(h.slice(3)))))); history.replaceState(null, '', location.pathname); setTimeout(() => toast('Loaded plan from link'), 300); return; } } catch (e) { console.warn(e); }
+  try { const s = localStorage.getItem(STORE); if (s) S = deepMerge(DEF(), JSON.parse(s)); } catch (e) {}
+}
+const save = debounce(() => { try { localStorage.setItem(STORE, JSON.stringify(S)); } catch (e) {} }, 300);
+const getP = (o, p) => p.split('.').reduce((a, k) => a == null ? a : a[k], o);
+const setP = (o, p, v) => { const ks = p.split('.'); let a = o; ks.slice(0, -1).forEach(k => a = a[k] = a[k] || {}); a[ks[ks.length - 1]] = v; };
+
+/* =========================================================================
+   ENGINE
+   ========================================================================= */
+const startYM = () => S.start || monthsAdd(todayYM(), 3);
+const baseLoan = () => (S.loanOverride !== '' && N(S.loanOverride) > 0) ? N(S.loanOverride) : Math.max(0, N(S.price) - N(S.deposit));
+const loanAmt = () => baseLoan() + (S.feeAdd ? N(S.fee) : 0);
+const ltvNow = () => N(S.price) ? loanAmt() / N(S.price) * 100 : NaN;
+const creditAdj = () => (CREDIT[S.credit] || CREDIT.good).add;
+function bandRate(l, bands = S.bands) { const b = [...bands].filter(x => fin(N(x.ltv))).sort((a, c) => a.ltv - c.ltv).find(x => l <= N(x.ltv) + 1e-9); return b ? N(b.rate) : null; }
+function bandOf(l, bands = S.bands) { const b = [...bands].sort((a, c) => a.ltv - c.ltv).find(x => l <= N(x.ltv) + 1e-9); return b ? N(b.ltv) : null; }
+
+function mortOpts(x = {}) {
+  return {
+    loan: loanAmt(), price: N(S.price), term: N(S.term) || 25, start: startYM(), repType: S.repType, ioPart: N(S.ioPart),
+    product: S.product, rate: N(S.rate), trackMargin: N(S.trackMargin), discount: N(S.discount), fix: S.product === 'svr' ? 0 : N(S.fix),
+    svr: N(S.svr), svrFollowsBase: !!S.svrFollowsBase, base: N(S.base), baseLong: N(S.baseLong), baseGlide: N(S.baseGlide),
+    afterDeal: S.afterDeal, reFix: N(S.reFix) || 5, remortFee: N(S.remortFee), hpi: N(S.hpi), creditAdj: creditAdj(), bands: S.bands,
+    offset: N(S.offset), offsetAdd: N(S.offsetAdd),
+    over: N(S.over), overFrom: S.overFrom, annualOver: N(S.annualOver), annualMonth: N(S.annualMonth) || 12, lumps: S.lumps, rateCh: S.rateCh,
+    ercSched: S.ercSched, allow: N(S.allow), capAllow: !!S.capAllow, overMode: S.overMode, ...x
+  };
+}
+
+/* Month-by-month amortisation. Handles repayment / interest-only / part-and-part, fixed / tracker / discount / SVR,
+   reversion or automatic remortgage at the LTV-band rate, manual new deals, offset savings, regular / annual / lump
+   overpayments, penalty-free allowances and early repayment charges. */
+function amortise(o) {
+  const n = Math.max(1, Math.round(o.term * 12));
+  const erc = String(o.ercSched ?? '').split(/[^0-9.]+/).filter(Boolean).map(Number);
+  const ercPct = k => !erc.length ? 0 : erc.length === 1 ? erc[0] : (erc[k] ?? 0);
+  const lumps = (o.lumps || []).filter(l => l && l.ym && N(l.amt) > 0);
+  const rcs = (o.rateCh || []).filter(c => c && c.ym && c.rate !== '' && fin(+c.rate));
+  const loan = Math.max(0, N(o.loan));
+  let bI = o.repType === 'io' ? loan : o.repType === 'part' ? Math.min(loan, Math.max(0, N(o.ioPart))) : 0, bR = loan - bI;
+  let phase = o.fix > 0 ? 'deal' : 'svr', dealStart = 0, dealN = Math.round(o.fix * 12), phaseRate = null;
+  const baseAt = i => o.base + (o.baseLong - o.base) * (o.baseGlide > 0 ? Math.min(1, i / (o.baseGlide * 12)) : 1);
+  const svrAt = i => o.svr + (o.svrFollowsBase ? baseAt(i) - o.base : 0);
+  const propV = i => o.price * Math.pow(1 + (o.hpi || 0) / 100, i / 12);
+  const rows = [], warn = [];
+  let cumI = 0, totPaid = 0, totErc = 0, fees = 0, payR = 0, prevRate = null, recalc = true, forcePay = false, dyKey = '', yrOver = 0, yrStart = loan;
+  for (let i = 0; i < n && bR + bI > 0.005; i++) {
+    const ym = monthsAdd(o.start, i), evt = [];
+    const rc = rcs.find(c => c.ym === ym);
+    if (rc) { phase = 'manual'; phaseRate = +rc.rate; dealStart = i; dealN = Math.round(N(rc.ercYears) * 12); fees += N(rc.fee); evt.push(`new deal ${(+rc.rate).toFixed(2)}%`); }
+    else if (phase !== 'svr' && dealN > 0 && i === dealStart + dealN) {
+      if (o.afterDeal === 'remortgage') {
+        const l = (bR + bI) / propV(i) * 100, br = bandRate(l, o.bands);
+        phaseRate = (br ?? o.svr) + (o.creditAdj || 0); phase = 'redeal'; dealStart = i; dealN = Math.max(12, Math.round(o.reFix * 12)); fees += o.remortFee || 0;
+        evt.push(`remortgage at ${l.toFixed(0)}% LTV → ${phaseRate.toFixed(2)}%`);
+      } else { phase = 'svr'; evt.push('deal ends → reversion rate'); }
+    }
+    let rate = phase === 'deal' ? (o.product === 'tracker' ? baseAt(i) + o.trackMargin : o.product === 'discount' ? Math.max(0, svrAt(i) - o.discount) : o.rate)
+      : (phase === 'redeal' || phase === 'manual') ? phaseRate : svrAt(i);
+    rate = Math.round(rate * 1e4) / 1e4;
+    const inErc = phase !== 'svr' && i < dealStart + dealN;
+    if (inErc) { const key = dealStart + ':' + Math.floor((i - dealStart) / 12); if (key !== dyKey) { dyKey = key; yrOver = 0; yrStart = bR + bI; } } else dyKey = '';
+    if (o.overMode === 'pay' && i > 0 && i % 12 === 0) recalc = true;
+    if (recalc || rate !== prevRate) {
+      if (bR > 0) {
+        let remN = n - i;
+        if (prevRate !== null && o.overMode === 'term' && !forcePay) { const rem = nper(bR, prevRate / 1200, payR); remN = fin(rem) ? clamp(Math.ceil(rem - 1e-6), 1, n - i) : n - i; }
+        payR = pmt(bR, rate / 1200, remN);
+      }
+      recalc = false; forcePay = false;
+    }
+    prevRate = rate;
+    const r = rate / 1200, open = bR + bI;
+    const off = Math.max(0, (o.offset || 0) + (o.offsetAdd || 0) * i);
+    const effI = Math.max(0, bI - off), effR = Math.max(0, bR - Math.max(0, off - bI));
+    const intR = effR * r, intI = effI * r, interest = intR + intI;
+    const schedR = bR > 0 ? Math.min(payR, bR + intR) : 0;
+    bR = Math.max(0, bR + intR - schedR);
+    const sched = schedR + intI;
+    let extra = 0, lump = 0, ercM = 0;
+    const ep = inErc ? ercPct(Math.floor((i - dealStart) / 12)) : 0, allowance = yrStart * (o.allow || 0) / 100;
+    const apply = amt => {
+      amt = Math.min(amt, bR + bI);
+      if (inErc && o.capAllow) amt = Math.min(amt, Math.max(0, allowance - yrOver));
+      if (amt <= 0.004) return 0;
+      if (inErc) { const before = yrOver; yrOver += amt; const exc = Math.max(0, yrOver - allowance) - Math.max(0, before - allowance); if (exc > 0.5 && ep > 0) ercM += exc * ep / 100; }
+      const a1 = Math.min(amt, bI); bI -= a1; bR = Math.max(0, bR - (amt - a1)); return amt;
+    };
+    if (o.over > 0 && (!o.overFrom || ym >= o.overFrom)) extra += apply(o.over);
+    if (o.annualOver > 0 && (i % 12) === ((o.annualMonth || 12) - 1)) extra += apply(o.annualOver);
+    for (const l of lumps) if (l.ym === ym) { const a = apply(N(l.amt)); if (a > 0) { lump += a; evt.push(`lump ${gbp(a)}`); if (l.mode === 'pay') { recalc = true; forcePay = true; } } }
+    if (ercM > 0) { totErc += ercM; warn.push(`${ymLabel(ym)}: overpayments in this deal year pass the ${o.allow}% allowance (${gbp(allowance)}). Estimated early repayment charge ${gbp(ercM)} at ${ep}%.`); }
+    if (i === n - 1 && bR + bI > 0.5) evt.push(`${gbp(bR + bI)} still owed at term end`);
+    cumI += interest; totPaid += sched + extra + lump;
+    rows.push({ i, ym, rate, phase, open, pay: sched, interest, principal: sched - interest, extra, lump, close: bR + bI, erc: ercM, cumI, ltv: (bR + bI) / propV(i) * 100, value: propV(i), evt: evt.join(', ') });
+  }
+  return { rows, totalInterest: cumI, totalPaid: totPaid, totErc, fees, months: rows.length, end: rows.length ? rows[rows.length - 1].ym : o.start, endBal: bR + bI, paidOff: bR + bI <= 0.005, warn: [...new Set(warn)] };
+}
+
+/* ---------------- tax & affordability ---------------- */
+function netPay(gross, pensPct, sl, selfEmp) {
+  const pens = gross * pensPct / 100, t = Math.max(0, gross - pens);
+  const pa = t > 100000 ? Math.max(0, 12570 - (t - 100000) / 2) : 12570, ti = Math.max(0, t - pa);
+  const hw = Math.max(0, 125140 - pa - 37700);
+  const basic = Math.min(ti, 37700), higher = Math.min(Math.max(0, ti - 37700), hw), add = Math.max(0, ti - 37700 - hw);
+  const tax = .2 * basic + .4 * higher + .45 * add;
+  const ni = (selfEmp ? .06 : .08) * Math.max(0, Math.min(t, 50270) - 12570) + .02 * Math.max(0, t - 50270);
+  const s = SL[sl] || SL.none, slv = s[1] ? s[2] * Math.max(0, t - s[1]) : 0;
+  return { gross, pens, tax, ni, sl: slv, net: gross - pens - tax - ni - slv };
+}
+function incomeCalc() {
+  const ap = S.applicants === '2' ? [1, 2] : [1];
+  const per = ap.map(k => { const g = N(S['inc' + k]), b = N(S['bonus' + k]), emp = S['emp' + k]; return { k, g, b, emp, np: netPay(g + b, N(S['pens' + k]), S['sl' + k], /^self/.test(emp)), lender: emp === 'none' ? 0 : g + b * N(S.bonusPct) / 100 }; });
+  return { per, gross: sum(per, p => p.g + p.b), net: sum(per, p => p.np.net), lender: sum(per, 'lender') };
+}
+const bandDFor = () => (S.bandD !== '' && N(S.bandD) > 0) ? N(S.bandD) : (BAND_D[S.borough] || 0);
+function ownCosts() {
+  const ct = bandDFor() * BAND_RATIO[S.ctBand] / 12;
+  const kwhm2 = { A: 50, B: 90, C: 150, D: 220, E: 290, F: 360, G: 430 }[S.epc] || 220;
+  const energy = (kwhm2 * N(S.sqm) * N(S.kwh) + N(S.standing)) / 12;
+  const maint = N(S.price) * N(S.maintPct) / 100 / 12, lease = S.tenure === 'L' ? (N(S.lGround) + N(S.lService)) / 12 : 0, o = S.own;
+  const items = [['Council tax', ct], ['Gas & electricity (estimate)', energy], ['Water & sewerage', N(o.water)], ['Broadband', N(o.broadband)], ['Buildings & contents insurance', N(o.insure)], ['Life / income protection', N(o.life)], ['TV licence', N(o.tv)], ['Commuting', N(o.travel)], ['Maintenance fund', maint], ['Service charge + ground rent', lease], ['Other home costs', N(o.other)]];
+  return { items, total: sum(items, x => x[1]), ct, energy };
+}
+const spendTotal = () => sum(S.spend, 'v');
+const debtPay = () => sum(S.debts, 'pay');
+function autoMult(inc, credit, l) { if (credit === 'poor') return 3.5; if (credit === 'fair') return 4.0; if (inc >= 100000 && l <= 85) return 5.5; if (inc >= 75000 && l <= 90) return 5.0; return 4.5; }
+function afford() {
+  const I = incomeCalc(), oc = ownCosts(), sp = spendTotal(), dp = debtPay(), l = N(S.price) ? baseLoan() / N(S.price) * 100 : 0;
+  const auto = autoMult(I.lender, S.credit, l), mult = (S.multOverride !== '' && N(S.multOverride) > 0) ? N(S.multOverride) : auto;
+  const multCap = Math.max(0, (I.lender - dp * 12) * mult);
+  const netM = I.net / 12, avail = netM - sp - oc.total - dp;
+  const stress = N(S.rate) + N(S.stressAdd), n = Math.round(N(S.term) * 12);
+  const affCap = avail > 0 ? pvA(stress / 1200, n, avail) : 0;
+  const cr = CREDIT[S.credit] || CREDIT.good, ltvPrice = N(S.deposit) / (1 - cr.maxLTV / 100);
+  const maxLoan = Math.min(multCap, affCap), maxPrice = Math.min(maxLoan + N(S.deposit), ltvPrice);
+  const binding = maxLoan + N(S.deposit) <= ltvPrice ? (multCap <= affCap ? 'income multiple' : 'monthly affordability') : 'deposit / maximum LTV';
+  return { I, oc, sp, dp, l, auto, mult, multCap, netM, avail, stress, affCap, ltvPrice, maxLoan, maxPrice, binding, cr };
+}
+
+/* ---------------- stamp duty (England & NI, rates from 1 April 2025) ---------------- */
+function sdlt(price, buyer, nonRes) {
+  if (buyer === 'remortgage') return { tax: 0, parts: [], relief: false, lost: false };
+  const std = [[125000, 0], [250000, .02], [925000, .05], [1500000, .10], [Infinity, .12]];
+  let bands = std, relief = false;
+  if (buyer === 'ftb' && price <= 500000) { bands = [[300000, 0], [500000, .05]]; relief = true; }
+  else if (buyer === 'add' && price >= 40000) bands = std.map(([t, r]) => [t, r + .05]);
+  if (nonRes) bands = bands.map(([t, r]) => [t, r + .02]);
+  let prev = 0, tax = 0; const parts = [];
+  for (const [t, r] of bands) { if (price <= prev) break; const sl = Math.min(price, t) - prev; parts.push({ from: prev, to: Math.min(price, t), rate: r, tax: sl * r }); tax += sl * r; prev = t; }
+  return { tax: Math.floor(tax), parts, relief, lost: buyer === 'ftb' && price > 500000 };
+}
+const lrFee = p => p <= 80000 ? 45 : p <= 100000 ? 95 : p <= 200000 ? 230 : p <= 500000 ? 330 : p <= 1000000 ? 655 : 1105;
+const UP = [['legal', 'Conveyancing / solicitor (inc. VAT)'], ['searches', 'Searches (local, drainage, environmental)'], ['survey', 'Survey (RICS Level 2 or 3)'], ['broker', 'Mortgage broker fee'], ['valuation', 'Lender valuation fee'], ['tt', 'Bank transfer & ID check fees'], ['removals', 'Removals / van'], ['furnish', 'Furniture & white goods'], ['repairs', 'Immediate repairs / decorating']];
+const upSum = () => sum(UP, ([k]) => N(S.up[k]));
+function cashCosts(price) { const s = sdlt(price, S.buyer, S.nonRes).tax; return { sdlt: s, lr: lrFee(price), mfee: S.feeAdd ? 0 : N(S.fee), other: upSum(), total: s + lrFee(price) + (S.feeAdd ? 0 : N(S.fee)) + upSum() }; }
+const cashAvail = () => N(S.savings) + N(S.lisa) + N(S.gift);
+const lisaOK = price => S.lisaOn && S.buyer === 'ftb' && price <= 450000;
+
+/* ---------------- cached main plan ---------------- */
+let C = null;
+function main() { if (C) return C; const o = mortOpts(); const plan = amortise(o); const base = amortise({ ...o, over: 0, annualOver: 0, lumps: [], offset: 0, offsetAdd: 0 }); C = { o, plan, base }; return C; }
+
+/* =========================================================================
+   UI FRAMEWORK: fields, lists, show/hide, charts
+   ========================================================================= */
+function fld(k, label, o = {}) {
+  const t = o.type || 'num', v = getP(S, k), sh = o.show ? ` data-show="${o.show}"` : '', h = o.hint ? `<small>${o.hint}</small>` : '';
+  if (t === 'chk') return `<label class="chk"${sh}><input type="checkbox" data-k="${k}" ${v ? 'checked' : ''}> <span>${label}</span></label>`;
+  if (t === 'sel') return `<label${sh}><span>${label}</span><select data-k="${k}">${o.opts.map(([val, l]) => `<option value="${esc(val)}" ${String(v) === String(val) ? 'selected' : ''}>${esc(l)}</option>`).join('')}</select>${h}</label>`;
+  const it = t === 'num' ? 'type="number" inputmode="decimal"' : t === 'month' ? 'type="month"' : 'type="text"';
+  return `<label${sh}><span>${label}</span><input ${it} data-k="${k}" value="${esc(v ?? '')}"${o.step ? ` step="${o.step}"` : ''}${o.min != null ? ` min="${o.min}"` : ''}${o.ph ? ` placeholder="${esc(o.ph)}"` : ''}>${h}</label>`;
+}
+const fs = (title, inner, show) => `<fieldset${show ? ` data-show="${show}"` : ''}><legend>${title}</legend><div class="fg">${inner}</div></fieldset>`;
+const stat = (l, v, s = '', c = '') => `<div class="stat ${c}"><div class="l">${l}</div><div class="v" title="${esc(String(v).replace(/<[^>]+>/g, ''))}">${v}</div><div class="s">${s}</div></div>`;
+function applyShow() {
+  $$('[data-show]').forEach(el => {
+    const ok = el.dataset.show.split('&').every(cond => { const m = cond.match(/^([\w.]+)(!?=)(.*)$/); if (!m) return true; const v = String(getP(S, m[1])), vals = m[3].split('|'); return m[2] === '=' ? vals.includes(v) : !vals.includes(v); });
+    el.style.display = ok ? '' : 'none';
+  });
+}
+function syncInputs() { $$('[data-k]').forEach(el => { if (el === document.activeElement) return; const v = getP(S, el.dataset.k); if (el.type === 'checkbox') el.checked = !!v; else if (String(el.value) !== String(v ?? '')) el.value = v ?? ''; }); }
+
+const LISTS = {
+  debts: { cols: [['name', 'Debt', 'text'], ['bal', 'Balance £', 'num'], ['rate', 'Rate %', 'num'], ['pay', 'Monthly £', 'num']], add: () => ({ name: 'Loan', bal: 5000, rate: 9.9, pay: 150 }) },
+  lumps: { cols: [['ym', 'Month', 'month'], ['amt', 'Amount £', 'num'], ['mode', 'Effect', 'sel', [['term', 'Finish sooner'], ['pay', 'Lower payment']]]], add: () => ({ ym: monthsAdd(startYM(), 12 * (S.lumps.length + 1)), amt: 10000, mode: 'term' }) },
+  rateCh: { cols: [['ym', 'From month', 'month'], ['rate', 'Rate %', 'num'], ['ercYears', 'ERC yrs', 'num'], ['fee', 'Fee £', 'num']], add: () => ({ ym: monthsAdd(startYM(), Math.round(N(S.fix) * 12) || 60), rate: N(S.rate), ercYears: 5, fee: 999 }) },
+  bands: { cols: [['ltv', 'Max LTV %', 'num'], ['rate', 'Typical rate %', 'num']], add: () => ({ ltv: 70, rate: 4 }) },
+  spend: { cols: [['n', 'Category', 'text'], ['v', '£ / month', 'num']], add: () => ({ n: 'New item', v: 0 }) },
+  products: { cols: [['name', 'Deal', 'text'], ['type', 'Type', 'sel', [['fixed', 'Fixed'], ['tracker', 'Tracker'], ['discount', 'Discount'], ['svr', 'SVR / variable']]], ['rate', 'Rate / margin / discount %', 'num'], ['years', 'Deal yrs', 'num'], ['fee', 'Fee £', 'num'], ['feeAdd', 'Fee added', 'chk'], ['cashback', 'Cashback £', 'num']], add: () => ({ name: 'New deal', type: 'fixed', rate: 4.5, years: 5, fee: 999, feeAdd: false, cashback: 0 }), max: 6 }
+};
+function listHTML(name) {
+  const L = LISTS[name], arr = S[name] || [];
+  return `<div class="wrap short"><table class="tbl"><thead><tr>${L.cols.map(c => `<th class="l">${c[1]}</th>`).join('')}<th></th></tr></thead><tbody>${arr.map((r, i) => `<tr>${L.cols.map(([f, , t, opts]) => `<td class="l">${t === 'sel' ? `<select data-l="${name}" data-i="${i}" data-f="${f}">${opts.map(([v, l]) => `<option value="${v}" ${r[f] === v ? 'selected' : ''}>${l}</option>`).join('')}</select>` : t === 'chk' ? `<input type="checkbox" data-l="${name}" data-i="${i}" data-f="${f}" ${r[f] ? 'checked' : ''}>` : `<input ${t === 'num' ? 'type="number" step="any"' : t === 'month' ? 'type="month"' : 'type="text"'} data-l="${name}" data-i="${i}" data-f="${f}" value="${esc(r[f] ?? '')}">`}</td>`).join('')}<td><button class="btn del" data-del="${name}:${i}">✕</button></td></tr>`).join('') || `<tr><td class="l hint" colspan="${L.cols.length + 1}">Nothing added yet.</td></tr>`}</tbody></table></div>
+  ${!L.max || arr.length < L.max ? `<button class="btn sm" data-add="${name}" style="margin-top:6px">+ Add</button>` : ''}`;
+}
+function renderLists(name) { $$(`[data-list${name ? `="${name}"` : ''}]`).forEach(el => el.innerHTML = listHTML(el.dataset.list)); }
+
+function lineChart(el, o) {
+  if (!el) return;
+  const W = 780, H = o.h || 260, pl = 64, pr = 18, pt = 30, pb = 30, xs = o.xs, n = xs.length;
+  const vals = o.series.flatMap(s => s.ys).filter(fin);
+  if (!vals.length) { el.innerHTML = ''; return; }
+  let mn = Math.min(o.yMin ?? 0, ...vals), mx = Math.max(...vals); if (mx - mn < 1e-9) mx = mn + 1;
+  const pad = (mx - mn) * .06; mx += pad; if (mn < 0) mn -= pad;
+  const X = i => pl + (W - pl - pr) * (n > 1 ? i / (n - 1) : .5), Y = v => pt + (H - pt - pb) * (1 - (v - mn) / (mx - mn));
+  const yf = o.yFmt || kfmt; let g = '';
+  for (let k = 0; k <= 4; k++) { const v = mn + (mx - mn) * k / 4; g += `<line class="gl" x1="${pl}" x2="${W - pr}" y1="${Y(v)}" y2="${Y(v)}"/><text x="${pl - 8}" y="${Y(v) + 4}" text-anchor="end">${yf(v)}</text>`; }
+  if (mn < 0) g += `<line x1="${pl}" x2="${W - pr}" y1="${Y(0)}" y2="${Y(0)}" stroke="var(--muted)"/>`;
+  const st = Math.max(1, Math.ceil(n / 8)); for (let i = 0; i < n; i += st) g += `<text x="${X(i)}" y="${H - 9}" text-anchor="middle">${esc(xs[i])}</text>`;
+  (o.markers || []).forEach(m => { if (m.i == null || m.i < 0 || m.i >= n) return; g += `<line x1="${X(m.i)}" x2="${X(m.i)}" y1="${pt}" y2="${H - pb}" stroke="${m.color || 'var(--warn)'}" stroke-dasharray="4 4"/><text x="${X(m.i) + 5}" y="${pt + 12 + (m.dy || 0)}" style="fill:${m.color || 'var(--warn)'}">${esc(m.label)}</text>`; });
+  o.series.forEach(s => {
+    let d = '', pen = false; s.ys.forEach((v, i) => { if (!fin(v)) { pen = false; return; } d += (pen ? 'L' : 'M') + X(i).toFixed(1) + ',' + Y(v).toFixed(1); pen = true; });
+    if (s.area && d) { const f = s.ys.findIndex(fin), l = s.ys.length - 1 - [...s.ys].reverse().findIndex(fin); g += `<path d="${d}L${X(l)},${Y(Math.max(mn, 0))}L${X(f)},${Y(Math.max(mn, 0))}Z" fill="${s.color}" opacity=".12"/>`; }
+    g += `<path d="${d}" fill="none" stroke="${s.color}" stroke-width="${s.w || 2.4}" ${s.dash ? `stroke-dasharray="${s.dash}"` : ''} stroke-linejoin="round" stroke-linecap="round"/>`;
+  });
+  let lx = pl; g += `<g transform="translate(0,${pt - 16})">` + o.series.map(s => { const t = `<rect x="${lx}" y="0" width="14" height="4" rx="2" fill="${s.color}"/><text x="${lx + 19}" y="6">${esc(s.name)}</text>`; lx += 30 + s.name.length * 6.6; return t; }).join('') + '</g>';
+  el.innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(o.label || 'chart')}">${g}<line class="cur" x1="0" x2="0" y1="${pt}" y2="${H - pb}" stroke="var(--ink)" stroke-opacity=".35" style="opacity:0"/><rect class="hit" x="${pl}" y="${pt}" width="${W - pl - pr}" height="${H - pt - pb}"/></svg>`;
+  const svg = el.querySelector('svg'), hit = svg.querySelector('.hit'), cur = svg.querySelector('.cur');
+  hit.addEventListener('mousemove', e => { const r = hit.getBoundingClientRect(), i = clamp(Math.round((e.clientX - r.left) / r.width * (n - 1)), 0, n - 1); cur.setAttribute('x1', X(i)); cur.setAttribute('x2', X(i)); cur.style.opacity = 1; showTip(e, (o.tipTitle ? o.tipTitle(i) : xs[i]) + '\n' + o.series.map(s => `${s.name}: ${fin(s.ys[i]) ? (o.tipFmt || gbp)(s.ys[i]) : '–'}`).join('\n')); });
+  hit.addEventListener('mouseleave', () => { hideTip(); cur.style.opacity = 0; });
+}
+function barChart(el, o) {
+  if (!el) return;
+  const W = 780, H = o.h || 250, pl = 64, pr = 18, pt = 30, pb = 30, n = o.cats.length;
+  const tot = o.cats.map((_, i) => o.stacks.reduce((a, s) => a + Math.max(0, s.vals[i] || 0), 0)), mx = Math.max(...tot, 1) * 1.06;
+  const bw = (W - pl - pr) / Math.max(1, n), Y = v => pt + (H - pt - pb) * (1 - v / mx), Hh = v => (H - pt - pb) * v / mx, yf = o.yFmt || kfmt;
+  let g = '';
+  for (let k = 0; k <= 4; k++) { const v = mx * k / 4; g += `<line class="gl" x1="${pl}" x2="${W - pr}" y1="${Y(v)}" y2="${Y(v)}"/><text x="${pl - 8}" y="${Y(v) + 4}" text-anchor="end">${yf(v)}</text>`; }
+  o.cats.forEach((c, i) => {
+    let base = H - pb; const x0 = pl + i * bw + bw * .14, w = bw * .72;
+    g += `<g class="bg" data-i="${i}">` + o.stacks.map(s => { const v = Math.max(0, s.vals[i] || 0); if (!v) return ''; const h = Hh(v); base -= h; return `<rect x="${x0}" y="${base}" width="${w}" height="${h}" rx="2" fill="${s.color}"/>`; }).join('') + `<rect x="${pl + i * bw}" y="${pt}" width="${bw}" height="${H - pt - pb}" fill="transparent"/></g>`;
+    if (n <= 14 || i % Math.ceil(n / 12) === 0) g += `<text x="${x0 + w / 2}" y="${H - 9}" text-anchor="middle">${esc(c)}</text>`;
+  });
+  let lx = pl; g += `<g transform="translate(0,${pt - 18})">` + o.stacks.map(s => { const t = `<rect x="${lx}" y="0" width="10" height="10" rx="2" fill="${s.color}"/><text x="${lx + 14}" y="9">${esc(s.name)}</text>`; lx += 26 + s.name.length * 6.6; return t; }).join('') + '</g>';
+  el.innerHTML = `<svg viewBox="0 0 ${W} ${H}">${g}</svg>`;
+  $$('.bg', el).forEach(b => { b.addEventListener('mousemove', e => { const i = +b.dataset.i; showTip(e, (o.tipTitle ? o.tipTitle(i) : o.cats[i]) + '\n' + o.stacks.map(s => `${s.name}: ${gbp(s.vals[i] || 0)}`).join('\n')); }); b.addEventListener('mouseleave', hideTip); });
+}
+const hbars = (items, color = 'var(--acc)') => { const mx = Math.max(...items.map(x => Math.abs(x[1])), 1); return items.map(([l, v, c]) => `<div class="hbar"><span>${esc(l)}</span><div class="t"><i style="width:${Math.abs(v) / mx * 100}%;background:${c || color}"></i></div><span class="v">${gbp(v)}</span></div>`).join(''); };
+
+/* =========================================================================
+   TABS
+   ========================================================================= */
+const TABS = [
+  ['home', 'Start here', 'Index & how to use'],
+  ['profile', 'You & affordability', 'Income, credit, debts'],
+  ['costs', 'Deposit & buying costs', 'Stamp duty, fees, savings plan'],
+  ['mortgage', 'Mortgage plan', 'Schedule, rates, overpayments'],
+  ['products', 'Compare deals', 'Fixed vs variable, IO vs repayment'],
+  ['invest', 'Overpay or invest', 'Sweet-spot finder'],
+  ['payoff', 'Mortgage-free target', 'Clear it in X years'],
+  ['budget', 'Monthly budget', 'Cost of owning & spending'],
+  ['switch', 'Remortgage & moving', 'Switching, porting, equity']
+];
+let CUR = 'home';
+function go(t) { CUR = t; $$('#pipe button').forEach(b => b.classList.toggle('active', b.dataset.t === t)); $$('.tab').forEach(s => s.classList.toggle('active', s.id === 't-' + t)); try { localStorage.setItem(STORE + '.tab', t); } catch (e) {} render(); scrollTo({ top: 0 }); }
+
+function buildTabs() {
+  $('#pipe').innerHTML = TABS.map(([k, t, d], i) => `<li><button data-t="${k}"><span class="n">${String(i).padStart(2, '0')}</span><span class="t">${t}<span class="d">${d}</span></span></button></li>`).join('');
+  const head = (i, title, sub) => `<div class="tabhead"><div><div class="eyebrow">Step ${String(i).padStart(2, '0')}</div><h2>${title}</h2><div class="hint" style="margin:0">${sub}</div></div></div>`;
+  const yesno = [['term', 'Shorten the term (keep payment)'], ['pay', 'Lower the payment (keep end date)']];
+  $('#tabs').innerHTML = `
+<section class="tab" id="t-home">
+  <div class="hero">
+    <div class="eyebrow">UK mortgage planner · England stamp duty · runs in your browser</div>
+    <h1>Plan the whole mortgage, <em>not just the monthly payment.</em></h1>
+    <p>From what a lender might offer you, to the cash you need on completion day, to whether your spare £500 a month should go into the mortgage or the stock market. Every number updates as you type, and every tab feeds the others.</p>
+    <div class="row" style="margin-top:14px"><button class="btn pri" data-go="profile">Start with your profile →</button><button class="btn" data-go="mortgage">Jump to the mortgage plan</button><button class="btn" data-go="invest">Find the overpayment sweet spot</button></div>
+  </div>
+  <div id="homeSum" class="cards" style="margin-top:16px"></div>
+  <h3>The pipeline</h3><p class="hint">Work top to bottom the first time. After that, jump to whatever you're deciding. Shared inputs (price, deposit, rate, term) are the same everywhere, so a change in one tab updates all of them.</p>
+  <div class="steps">${TABS.slice(1).map(([k, t], i) => `<div class="step" data-go="${k}"><div class="n">${String(i + 1).padStart(2, '0')}</div><b>${t}</b><p>${{
+    profile: 'Take-home pay after tax, NI, pension and student loan. A lender-style view of how much you could borrow, which limit binds, and how your debts fit in.',
+    costs: 'Stamp duty for first-time buyers, movers and additional homes. Every upfront cost, cash needed vs cash you have, and how long to save each deposit size.',
+    mortgage: 'Repayment, interest-only or part-and-part. Fixed, tracker, discount or SVR. Remortgage automatically at the LTV-band rate. Overpayments, lump sums, ERCs, offset. Full schedule.',
+    products: 'Put up to six deals side by side over the same horizon. True cost after fees and cashback, plus base-rate shocks for trackers, and repayment vs interest-only.',
+    invest: 'Set an expected investment return (10%, 12%, anything). The model finds the yearly overpayment that maximises your net worth, after risk, and the return investing must beat.',
+    payoff: 'Want to be mortgage-free in 15 years? See the monthly or yearly overpayment needed, the ERC risk, and how "invest then clear" compares.',
+    budget: 'Council tax by borough, energy from EPC, every running cost, your spending and debt payments. The surplus feeds the overpay planner.',
+    switch: 'Remortgage savings and break-even, switching now vs waiting out the ERC, and the equity you would have if you sold and moved.'
+  }[k]}</p></div>`).join('')}</div>
+  <div class="cols3" style="margin-top:18px">
+    <div class="panel"><h3 style="margin-top:0">How to use it</h3><ul>
+      <li>Fill in the white boxes. Everything recalculates instantly; nothing needs a "calculate" button.</li>
+      <li>The bar along the top always shows the headline plan: price, loan and LTV, monthly payment, mortgage-free date, interest and cash position.</li>
+      <li>Hover over any chart to read exact values. Click a year in the schedule to expand its months.</li>
+      <li>Rates in the LTV-band table (Mortgage tab) drive remortgage projections and the deposit plan. Update them from a broker or comparison site every few months.</li>
+      <li>All interest rates are annual percentages. Money is in pounds.</li></ul></div>
+    <div class="panel"><h3 style="margin-top:0">Saving & sharing</h3><ul>
+      <li>Your inputs save automatically in this browser (local storage). They never leave your device.</li>
+      <li><b>Copy share link</b> puts every input into the URL. Send it to a partner or broker and they open the same plan.</li>
+      <li><b>Export</b> downloads a JSON backup; <b>Import</b> restores it. Use this to move between devices.</li>
+      <li><b>Print</b> gives a paper version of every tab.</li></ul></div>
+    <div class="panel"><h3 style="margin-top:0">Assumptions & limits</h3><ul>
+      <li>Stamp duty uses England and Northern Ireland rates in force since 1 April 2025. Scotland (LBTT) and Wales (LTT) are not modelled.</li>
+      <li>Income tax uses rest-of-UK bands (personal allowance £12,570, frozen thresholds). Student loan thresholds are 2025/26; check them.</li>
+      <li>Lender limits are typical market rules of thumb, not any lender's actual criteria.</li>
+      <li>Investment returns are assumptions, not forecasts. Past returns don't guarantee future ones.</li>
+      <li>This is a planning tool, not financial or mortgage advice. Speak to a qualified adviser before you commit.</li></ul></div>
+  </div>
+</section>
+
+<section class="tab" id="t-profile">
+  ${head(1, 'You & affordability', 'Who is buying, what you earn, what you owe, and a lender-style estimate of how much you could borrow.')}
+  <div class="grid2"><div>
+    ${fs('Buying situation', fld('buyer', 'You are', { type: 'sel', opts: [['ftb', 'First-time buyer'], ['mover', 'Moving home'], ['remortgage', 'Remortgaging (staying put)'], ['add', 'Buying an additional property']] }) + fld('applicants', 'Applicants', { type: 'sel', opts: [['1', 'One'], ['2', 'Two (joint)']] }) + fld('age1', 'Age, applicant 1') + fld('age2', 'Age, applicant 2', { show: 'applicants=2' }) + fld('dependants', 'Dependent children') + fld('nonRes', 'Non-UK resident buyer (+2% SDLT)', { type: 'chk' }))}
+    ${fs('Applicant 1 income', fld('inc1', 'Basic salary / profit £/yr', { step: 1000 }) + fld('bonus1', 'Bonus / overtime £/yr', { step: 500 }) + fld('emp1', 'Employment', { type: 'sel', opts: Object.entries(EMP) }) + fld('pens1', 'Pension (salary sacrifice) %', { step: .5 }) + fld('sl1', 'Student loan', { type: 'sel', opts: Object.entries(SL).map(([k, v]) => [k, v[0]]) }))}
+    ${fs('Applicant 2 income', fld('inc2', 'Basic salary / profit £/yr', { step: 1000 }) + fld('bonus2', 'Bonus / overtime £/yr', { step: 500 }) + fld('emp2', 'Employment', { type: 'sel', opts: Object.entries(EMP) }) + fld('pens2', 'Pension (salary sacrifice) %', { step: .5 }) + fld('sl2', 'Student loan', { type: 'sel', opts: Object.entries(SL).map(([k, v]) => [k, v[0]]) }), 'applicants=2')}
+    ${fs('Credit & lender assumptions', fld('credit', 'Credit history', { type: 'sel', opts: Object.entries(CREDIT).map(([k, v]) => [k, v.label]) }) + fld('bonusPct', '% of bonus lenders count', { step: 10, hint: 'Often 50% (100% if guaranteed)' }) + fld('multOverride', 'Income multiple override', { ph: 'auto', step: .1 }) + fld('stressAdd', 'Stress test: rate + %', { step: .25 }) + fld('maxAge', 'Lender max age at term end', { hint: 'Commonly 70–75' }))}
+    <fieldset><legend>Other liabilities (loans, cards, car finance)</legend><div data-list="debts"></div><p class="hint">Monthly payments reduce what lenders will offer. Your living costs come from the Monthly budget tab.</p></fieldset>
+  </div><div id="pfOut"></div></div>
+</section>
+
+<section class="tab" id="t-costs">
+  ${head(2, 'Deposit & buying costs', 'Stamp duty, every fee you will pay before you get the keys, and a savings plan for each deposit size.')}
+  <div class="grid2"><div>
+    ${fs('The purchase', fld('price', 'Property price £', { step: 5000 }) + fld('deposit', 'Deposit £', { step: 1000 }) + fld('buyer', 'Buyer status', { type: 'sel', opts: [['ftb', 'First-time buyer'], ['mover', 'Moving home'], ['remortgage', 'Remortgage (no SDLT)'], ['add', 'Additional property (+5%)']] }) + fld('nonRes', 'Non-UK resident (+2%)', { type: 'chk' }))}
+    ${fs('Other purchase costs (£)', UP.map(([k, l]) => fld('up.' + k, l, { step: 50 })).join(''))}
+    ${fs('Your cash', fld('savings', 'Savings & investments £', { step: 1000 }) + fld('lisa', 'Lifetime ISA balance £', { step: 500 }) + fld('gift', 'Gifted deposit £', { step: 1000 }) + fld('lisaOn', 'Keep paying into a LISA (25% bonus)', { type: 'chk' }))}
+    ${fs('Deposit savings plan', fld('monthlySave', 'You save £/month', { step: 50 }) + fld('saveRate', 'Savings interest % a year', { step: .1 }) + fld('rent', 'Rent £/month while saving', { step: 50 }) + fld('rentInc', 'Rent rises % a year', { step: .5 }) + fld('hpi', 'House prices rise % a year', { step: .5 }))}
+    ${fs('Tenure & lease', fld('tenure', 'Tenure', { type: 'sel', opts: [['F', 'Freehold'], ['L', 'Leasehold']] }) + fld('lYears', 'Years left on lease', { show: 'tenure=L' }) + fld('lGround', 'Ground rent £/yr', { show: 'tenure=L' }) + fld('lService', 'Service charge £/yr', { show: 'tenure=L' }) + fld('lDouble', 'Ground rent reviews', { type: 'sel', opts: [['no', 'Fixed / peppercorn'], ['yes', 'Doubles periodically'], ['rpi', 'RPI-linked']], show: 'tenure=L' }))}
+  </div><div id="coOut"></div></div>
+</section>
+
+<section class="tab" id="t-mortgage">
+  ${head(3, 'Mortgage plan', 'The loan itself: structure, rate type, what happens when the deal ends, overpayments and the full repayment schedule.')}
+  <div class="grid2"><div>
+    ${fs('Loan', fld('price', 'Property price £', { step: 5000 }) + fld('deposit', 'Deposit £', { step: 1000 }) + fld('loanOverride', 'Loan amount £', { ph: 'auto = price − deposit', step: 1000 }) + fld('term', 'Term (years)', { min: 1 }) + fld('start', 'First payment', { type: 'month' }) + fld('repType', 'Repayment type', { type: 'sel', opts: [['repay', 'Capital & interest (repayment)'], ['io', 'Interest only'], ['part', 'Part & part']] }) + fld('ioPart', 'Interest-only part £', { show: 'repType=part', step: 5000 }))}
+    ${fs('Rate', fld('product', 'Rate type', { type: 'sel', opts: [['fixed', 'Fixed rate'], ['tracker', 'Tracker (base + margin)'], ['discount', 'Discount off SVR'], ['svr', 'Standard variable rate only']] }) + fld('rate', 'Fixed rate %', { step: .01, show: 'product=fixed', hint: 'The rate you were offered' }) + fld('trackMargin', 'Margin over base %', { step: .01, show: 'product=tracker' }) + fld('discount', 'Discount off SVR %', { step: .05, show: 'product=discount' }) + fld('fix', 'Deal length (years)', { show: 'product!=svr' }) + fld('svr', 'Lender SVR / reversion %', { step: .01 }) + fld('base', 'Bank Rate now %', { step: .05 }) + fld('baseLong', 'Bank Rate in future %', { step: .05, hint: 'Your view; drives trackers and SVR' }) + fld('baseGlide', 'Years to get there', { step: .5 }) + fld('svrFollowsBase', 'SVR moves with Bank Rate', { type: 'chk' }))}
+    ${fs('When the deal ends', fld('afterDeal', 'Then', { type: 'sel', opts: [['remortgage', 'Remortgage at the LTV-band rate'], ['svr', 'Stay on the SVR']] }) + fld('reFix', 'Each new deal (years)', { show: 'afterDeal=remortgage' }) + fld('remortFee', 'Fee per remortgage £', { show: 'afterDeal=remortgage' }) + fld('hpi', 'House prices rise % a year', { step: .5, show: 'afterDeal=remortgage', hint: 'Rising value lowers your LTV' }))}
+    ${fs('Fees & incentives', fld('fee', 'Product / arrangement fee £') + fld('feeAdd', 'Add the fee to the loan', { type: 'chk' }) + fld('cashback', 'Cashback £'))}
+    ${fs('Overpayments & flexibility', fld('over', 'Regular extra £/month', { step: 25 }) + fld('overFrom', 'Regular extra from', { type: 'month' }) + fld('annualOver', 'Yearly lump £', { step: 500 }) + fld('annualMonth', 'Paid in month n of each year', { min: 1 }) + fld('overMode', 'Overpayments should', { type: 'sel', opts: yesno }) + fld('offset', 'Offset savings £', { step: 1000, hint: 'Offset mortgage: no interest on this slice' }) + fld('offsetAdd', 'Offset grows £/month', { step: 50 }))}
+    ${fs('Early repayment charges', fld('ercSched', 'ERC % by deal year', { type: 'text', hint: 'e.g. 5,4,3,2,1' }) + fld('allow', 'Penalty-free allowance % of balance a year') + fld('capAllow', 'Never overpay beyond the allowance', { type: 'chk' }))}
+    <fieldset><legend>One-off lump sums</legend><div data-list="lumps"></div></fieldset>
+    <fieldset><legend>New deals you already know about</legend><div data-list="rateCh"></div><p class="hint">A known remortgage or product transfer from a given month. It replaces the automatic logic from then on.</p></fieldset>
+    <fieldset><legend>LTV bands → typical rates (shared assumption)</legend><div data-list="bands"></div><p class="hint">Typical best-buy rates for each loan-to-value band. Used for future remortgages, the deposit plan and LTV tips. Credit-history adjustment: +${creditAdj().toFixed(2)}%.</p></fieldset>
+  </div><div>
+    <div id="mOut"></div>
+    <div class="panel"><h3 style="margin-top:0">Balance over time</h3><div class="chart" id="chBal"></div>
+      <h3>Interest vs capital each year</h3><div class="chart" id="chYear"></div>
+      <h3>Rate path & LTV</h3><div class="chart" id="chRate"></div>
+      <div class="between"><h3>Repayment schedule</h3><div class="row"><select id="schedView" style="width:auto"><option value="year">By year (click to expand)</option><option value="month">Every month</option></select><button class="btn sm" id="schedCsv">Export CSV</button></div></div>
+      <div class="wrap"><table class="tbl" id="schedTable"></table></div></div>
+  </div></div>
+</section>
+
+<section class="tab" id="t-products">
+  ${head(4, 'Compare deals', 'Fixed vs variable, short vs long fix, fee vs no fee, and repayment vs interest-only, all on the same loan and horizon.')}
+  <div class="panel">${fs('Compare over', fld('compareYears', 'Horizon (years)', { hint: 'Usually the longest fix you are considering' }))}
+  <div data-list="products"></div><p class="hint">Rate column: the fixed rate, the tracker margin over Bank Rate, or the discount off the SVR. Trackers use the Bank Rate path from the Mortgage tab. After each deal ends, the "When the deal ends" setting applies.</p>
+  <div id="prOut"></div></div>
+  <div class="panel"><h3 style="margin-top:0">Repayment vs interest-only vs part & part</h3><div id="ioOut"></div></div>
+  <div class="panel guide"><h3 style="margin-top:0">Fixed or variable?</h3><div class="cols3">
+    <div><b>Fixed</b><ul><li>Payment certain for the deal; easy to budget.</li><li>You don't benefit if rates fall, and ERCs usually apply.</li><li>Longer fixes cost a little more, but protect you from a shock at remortgage.</li></ul></div>
+    <div><b>Tracker</b><ul><li>Moves with Bank Rate plus a margin, so payments can rise or fall.</li><li>Often no or low ERCs: good if you plan big overpayments or might move.</li><li>Check the collar (minimum rate) and run the shock scenarios above.</li></ul></div>
+    <div><b>Discount / SVR</b><ul><li>Discounts track the lender's own SVR, which they set themselves.</li><li>SVR is what you drift onto when a deal ends: usually the most expensive option.</li><li>Book your next deal 3–6 months before the current one ends.</li></ul></div></div></div>
+</section>
+
+<section class="tab" id="t-invest">
+  ${head(5, 'Overpay or invest', 'Every pound you overpay earns your mortgage rate, guaranteed and tax-free. Every pound invested earns an uncertain return. This finds the split that leaves you richest.')}
+  <div class="grid2"><div>
+    ${fs('Money available', fld('budgetYear', 'Spare money £ a year', { step: 500, hint: 'Split between overpaying and investing' }) + fld('overHow', 'Overpay as', { type: 'sel', opts: [['monthly', 'Monthly amounts'], ['annual', 'One yearly lump']] }) + fld('horizon', 'Compare over (years)', { ph: 'term' }) + `<label><span>&nbsp;</span><button class="btn" id="useSurplus">Use my budget surplus</button></label>`)}
+    ${fs('Investment assumptions', fld('invReturn', 'Expected return % a year', { step: .5 }) + `<label><span>Presets</span><div class="row"><button class="btn sm" data-ret="5">5%</button><button class="btn sm" data-ret="7">7%</button><button class="btn sm" data-ret="10">10%</button><button class="btn sm" data-ret="12">12%</button></div></label>` + fld('invFee', 'Fund & platform fees %', { step: .05 }) + fld('wrapper', 'Held in', { type: 'sel', opts: [['isa', 'ISA / pension (no tax)'], ['gia', 'General account (taxed)']] }) + fld('gaDrag', 'Tax drag % a year', { step: .25, show: 'wrapper=gia' }) + fld('riskPrem', 'Risk premium you require %', { step: .5, hint: 'How much more investing must earn to be worth the risk' }) + fld('vol', 'Volatility (std dev) %', { step: 1, hint: '≈15–18% for global equities' }))}
+    <div class="note">The model keeps your total monthly outgoings identical in every scenario. Whatever isn't overpaid is invested. Once the mortgage is gone, the old payment is invested too. Lower balances also mean lower LTV bands at each remortgage, which is where a real sweet spot appears.</div>
+    <div id="ladder"></div>
+  </div><div id="ivOut"></div></div>
+</section>
+
+<section class="tab" id="t-payoff">
+  ${head(6, 'Mortgage-free target', 'Pick the year you want to be mortgage-free. See exactly what it takes, what it costs in penalties, and what you give up.')}
+  <div class="grid2"><div>
+    ${fs('Target', fld('targetYears', 'Mortgage-free in (years)', { min: 1 }) + fld('payoffHow', 'Overpay as', { type: 'sel', opts: [['monthly', 'Monthly amount'], ['annual', 'Yearly lump']] }))}
+    <div class="note">Uses the plan from the Mortgage tab (rate type, remortgages, ERC schedule and allowance), but ignores the overpayments set there so the answer stands alone.</div>
+  </div><div id="poOut"></div></div>
+</section>
+
+<section class="tab" id="t-budget">
+  ${head(7, 'Monthly budget', 'The real monthly cost of owning, your spending, debt payments, and the surplus left for overpaying or investing.')}
+  <div class="grid2"><div>
+    ${fs('Council tax', fld('borough', 'Council', { type: 'sel', opts: Object.keys(BAND_D).map(k => [k, k]) }) + fld('ctBand', 'Band', { type: 'sel', opts: Object.keys(BAND_RATIO).map(b => [b, b]) }) + fld('bandD', 'Band D override £/yr', { ph: 'from table' }))}
+    ${fs('Energy', fld('epc', 'EPC rating', { type: 'sel', opts: 'ABCDEFG'.split('').map(b => [b, b]) }) + fld('sqm', 'Floor area m²') + fld('kwh', 'Blended price £/kWh', { step: .01 }) + fld('standing', 'Standing charges £/yr'))}
+    ${fs('Other running costs (£/month)', fld('own.water', 'Water & sewerage') + fld('own.broadband', 'Broadband') + fld('own.insure', 'Buildings & contents insurance') + fld('own.life', 'Life / income protection') + fld('own.tv', 'TV licence') + fld('own.travel', 'Commuting') + fld('own.other', 'Other home costs') + fld('maintPct', 'Maintenance % of value a year', { step: .25 }))}
+    <fieldset><legend>Monthly spending</legend><div data-list="spend"></div></fieldset>
+    ${fs('Safety net', fld('emergencyMonths', 'Emergency fund (months of costs)') + fld('surplusShare', '% of surplus for overpay / invest', { step: 5 }))}
+  </div><div id="buOut"></div></div>
+</section>
+
+<section class="tab" id="t-switch">
+  ${head(8, 'Remortgage & moving', 'Is switching worth it? Should you wait out the early repayment charge? How much equity would you take to your next home?')}
+  <div class="grid2"><div>
+    ${fs('Your current mortgage', fld('rm.bal', 'Outstanding balance £', { step: 1000 }) + fld('rm.rate', 'Current rate %', { step: .01 }) + fld('rm.termLeft', 'Years left on term') + fld('rm.monthsLeft', 'Months until the deal ends') + fld('rm.ercPct', 'ERC if you leave now %', { step: .5 }) + fld('rm.value', 'Property value now £', { step: 5000 }))}
+    ${fs('The new deal', fld('rm.newRate', 'New rate %', { step: .01 }) + fld('rm.newYears', 'Deal length (years)') + fld('rm.newFee', 'Product fee £') + fld('rm.legal', 'Legal / valuation £', { hint: 'Often free on remortgage' }) + fld('rm.raise', 'Extra borrowing £', { step: 1000, hint: 'Capital raise, e.g. for works' }))}
+    ${fs('If you sell and move', fld('mv.value', 'Sale price £', { step: 5000 }) + fld('mv.mortgage', 'Mortgage to repay £', { step: 1000 }) + fld('mv.erc', 'ERC on redemption %', { step: .5, hint: '0 if you port the mortgage' }) + fld('mv.agentPct', 'Estate agent % (+VAT)', { step: .1 }) + fld('mv.legal', 'Sale conveyancing £') + fld('mv.epc', 'EPC £') + fld('mv.other', 'Other selling costs £'))}
+  </div><div id="swOut"></div></div>
+</section>`;
+  renderLists();
+}
+
+/* ---------------- header KPIs ---------------- */
+function renderKPIs() {
+  const { plan } = main(), l = ltvNow(), cc = cashCosts(N(S.price)), need = N(S.deposit) + cc.total, have = cashAvail();
+  const p0 = plan.rows[0]?.pay || 0;
+  $('#kpis').innerHTML = [
+    ['Price', gbp(N(S.price)), S.buyer === 'ftb' ? 'first-time buyer' : S.buyer === 'mover' ? 'home mover' : S.buyer === 'add' ? 'additional home' : 'remortgage'],
+    ['Loan · LTV', gbp(loanAmt()), pct(l) + ' LTV'],
+    ['Monthly payment', gbp2(p0), (S.product === 'fixed' ? N(S.rate).toFixed(2) + '% fixed' : S.product) + (S.over > 0 ? ` +${gbp(N(S.over))}` : '')],
+    ['Mortgage-free', plan.paidOff ? ymLabel(plan.end) : 'not by term end', plan.paidOff ? yrsMo(plan.months) : gbp(plan.endBal) + ' left'],
+    ['Total interest', gbp(plan.totalInterest), 'over the life of the plan'],
+    ['Cash needed', gbp(need), have >= need ? `<span style="color:var(--good)">${gbp(have - need)} spare</span>` : `<span style="color:var(--bad)">${gbp(need - have)} short</span>`]
+  ].map(([l, v, s]) => `<div class="kpi"><div class="l">${l}</div><div class="v">${v}</div><div class="s">${s}</div></div>`).join('');
+}
+
+/* ---------------- 0 Home ---------------- */
+function rHome() {
+  const { plan } = main(), a = afford(), iv = investModel();
+  $('#homeSum').innerHTML = [
+    stat('Lender-style maximum', gbp(a.maxPrice), `price · limited by ${a.binding}`, a.maxPrice >= N(S.price) ? 'good' : 'bad'),
+    stat('Stamp duty', gbp(sdlt(N(S.price), S.buyer, S.nonRes).tax), S.buyer === 'ftb' ? (N(S.price) <= 500000 ? 'first-time buyer relief applies' : 'relief lost above £500k') : ''),
+    stat('Monthly payment', gbp2(plan.rows[0]?.pay), `then ${gbp2(plan.rows[Math.round(N(S.fix) * 12)]?.pay)} after the deal`),
+    stat('Overpay sweet spot', gbp(iv.sweet.X) + '/yr', `at ${N(S.invReturn)}% expected return, ${N(S.riskPrem)}% risk premium`, 'acc'),
+    stat('Budget surplus', gbp(budgetCalc().surplus) + '/mo', 'after mortgage, bills, spending, debts', budgetCalc().surplus >= 0 ? 'good' : 'bad')
+  ].join('');
+}
+
+/* ---------------- 1 Profile ---------------- */
+function rProfile() {
+  const a = afford(), I = a.I, loan = baseLoan(), { plan } = main(), p0 = plan.rows[0]?.pay || 0;
+  const ages = [N(S.age1)].concat(S.applicants === '2' ? [N(S.age2)] : []), oldest = Math.max(...ages), endAge = oldest + N(S.term);
+  const empNotes = I.per.map(p => ({ probation: `Applicant ${p.k}: some lenders lend during probation, especially if you stayed in the same industry. Others wait until it ends.`, contractor: `Applicant ${p.k}: contractor lenders usually annualise the day rate (rate × 5 × 46–48 weeks). Enter that annualised figure as salary.`, selfemp: `Applicant ${p.k}: lenders average the last 2 years of SA302s / tax year overviews, or use the latest year if lower. Enter that figure.`, selfnew: `Applicant ${p.k}: under 2 years self-employed, most mainstream lenders will decline. A few accept 1 year of accounts; use a broker.`, retired: `Applicant ${p.k}: pension income counts; some lenders offer later-life or retirement interest-only mortgages.`, none: `Applicant ${p.k}: no income counted.` }[p.emp])).filter(Boolean);
+  const dti = I.gross ? debtPay() / (I.gross / 12) * 100 : 0, pti = a.netM ? p0 / a.netM * 100 : 0;
+  const debts = [...S.debts].filter(d => N(d.bal) > 0).sort((x, y) => N(y.rate) - N(x.rate));
+  const dRows = debts.map(d => { const m = nper(N(d.bal), N(d.rate) / 1200, N(d.pay)); return { ...d, m, int: fin(m) ? N(d.pay) * m - N(d.bal) : Infinity }; });
+  $('#pfOut').innerHTML = `<div class="panel"><h3 style="margin-top:0">Take-home pay</h3>
+    <div class="wrap short"><table class="tbl"><thead><tr><th>Per year</th>${I.per.map(p => `<th>Applicant ${p.k}</th>`).join('')}<th>Total</th></tr></thead><tbody>
+    ${[['Gross pay', 'gross'], ['Pension (sacrifice)', 'pens'], ['Income tax', 'tax'], ['National Insurance', 'ni'], ['Student loan', 'sl'], ['Take-home', 'net']].map(([l, k]) => `<tr class="${k === 'net' ? 'tot' : ''}"><td>${l}</td>${I.per.map(p => `<td>${gbp(k === 'gross' ? p.np.gross : (k === 'net' ? 1 : -1) * p.np[k])}</td>`).join('')}<td>${gbp(k === 'gross' ? sum(I.per, p => p.np.gross) : (k === 'net' ? 1 : -1) * sum(I.per, p => p.np[k]))}</td></tr>`).join('')}
+    <tr><td>Take-home per month</td>${I.per.map(p => `<td>${gbp(p.np.net / 12)}</td>`).join('')}<td><b>${gbp(a.netM)}</b></td></tr></tbody></table></div>
+    <p class="hint">Rest-of-UK income tax bands, employee NI at 8% / 2% (self-employed Class 4 at 6% / 2%). Scottish rates differ.</p></div>
+  <div class="panel"><h3 style="margin-top:0">How much could you borrow?</h3>
+    <div class="cards">${stat('Maximum loan', gbp(a.maxLoan), `limited by ${a.binding}`, 'hero')}${stat('Maximum price', gbp(a.maxPrice), `with your ${gbp(N(S.deposit))} deposit`, a.maxPrice >= N(S.price) ? 'good' : 'bad')}${stat('Income multiple', a.mult.toFixed(2) + '×', S.multOverride !== '' ? 'your override' : 'auto: ' + (a.mult > 4.5 ? 'higher-earner multiple' : a.mult < 4.5 ? 'reduced for credit' : 'standard'))}${stat('Income lenders use', gbp(I.lender), `basic + ${N(S.bonusPct)}% of bonus`)}</div>
+    <div class="wrap short"><table class="tbl"><thead><tr><th>Limit</th><th>Loan</th><th>How it's worked out</th></tr></thead><tbody>
+      <tr class="${a.binding === 'income multiple' ? 'hl' : ''}"><td>Income multiple</td><td>${gbp(a.multCap)}</td><td class="l">(${gbp(I.lender)} − debts ${gbp(debtPay() * 12)}/yr) × ${a.mult.toFixed(2)}</td></tr>
+      <tr class="${a.binding === 'monthly affordability' ? 'hl' : ''}"><td>Monthly affordability</td><td>${gbp(a.affCap)}</td><td class="l">${gbp(a.avail)}/mo left after spending, bills and debts, at a ${a.stress.toFixed(2)}% stress rate</td></tr>
+      <tr class="${a.binding === 'deposit / maximum LTV' ? 'hl' : ''}"><td>Deposit / max LTV</td><td>${gbp(a.ltvPrice - N(S.deposit))}</td><td class="l">${a.cr.maxLTV}% max LTV for your credit profile → price up to ${gbp(a.ltvPrice)}</td></tr></tbody></table></div>
+    ${loan > a.maxLoan ? `<div class="badbox">Your planned loan of ${gbp(loan)} is ${gbp(loan - a.maxLoan)} above this estimate. Options: a bigger deposit, a longer term, clearing a debt, a joint application, or a cheaper property.</div>` : `<div class="okbox">Your planned loan of ${gbp(loan)} sits ${gbp(a.maxLoan - loan)} inside this estimate.</div>`}
+    <div class="cards">${stat('Payment vs take-home', pct(pti), 'aim under ~30–35%', pti > 40 ? 'bad' : pti > 33 ? 'warn' : 'good')}${stat('Debt payments vs gross', pct(dti), 'lenders get wary above ~15–20%', dti > 20 ? 'bad' : dti > 12 ? 'warn' : 'good')}${stat('Age at term end', endAge, `lender max ${N(S.maxAge)}`, endAge > N(S.maxAge) ? 'bad' : 'good')}${stat('Left each month', gbp(a.avail - p0), 'after mortgage and everything else', a.avail - p0 < 0 ? 'bad' : 'good')}</div>
+    ${endAge > N(S.maxAge) ? `<div class="warnbox">The term runs to age ${endAge}. Most lenders cap this at ${N(S.maxAge)}, which means a term of ${Math.max(0, N(S.maxAge) - oldest)} years at most, unless a later-life lender agrees.</div>` : ''}
+    <div class="note"><b>Credit:</b> ${esc(a.cr.note)}${a.cr.add ? ` The model adds ${a.cr.add}% to future band rates.` : ''}</div>
+    ${empNotes.map(t => `<div class="warnbox">${esc(t)}</div>`).join('')}
+    <p class="hint">Real lenders use their own affordability models with ONS spending data, dependants and stress rates. Treat this as a ballpark, and get an agreement in principle (ideally a soft search) for the real figure.</p></div>
+  <div class="panel"><h3 style="margin-top:0">Other liabilities & your mortgage</h3>
+    ${dRows.length ? `<div class="wrap short"><table class="tbl"><thead><tr><th>Debt (highest rate first)</th><th>Balance</th><th>Rate</th><th>Monthly</th><th>Cleared in</th><th>Interest left</th><th>vs mortgage</th></tr></thead><tbody>${dRows.map(d => `<tr><td>${esc(d.name)}</td><td>${gbp(N(d.bal))}</td><td>${pct(N(d.rate), 1)}</td><td>${gbp(N(d.pay))}</td><td>${fin(d.m) ? yrsMo(d.m) : '<span style="color:var(--bad)">never</span>'}</td><td>${fin(d.int) ? gbp(d.int) : '–'}</td><td>${N(d.rate) > N(S.rate) ? '<span class="pill b">clear first</span>' : '<span class="pill g">cheaper</span>'}</td></tr>`).join('')}</tbody></table></div>
+    <div class="note">Pay off debts in rate order (the "avalanche"): anything charging more than your ${N(S.rate).toFixed(2)}% mortgage rate is a better home for spare cash than overpaying the mortgage. Clearing a debt before you apply also frees up ${gbp(debtPay())}/month of affordability. ${dRows[0] && fin(dRows[0].m) ? `When ${esc(dRows[0].name)} is cleared in ${yrsMo(dRows[0].m)}, redirect its ${gbp(N(dRows[0].pay))} to the next debt, then to the mortgage or investments.` : ''}</div>` : '<p class="hint">No other debts entered.</p>'}</div>`;
+}
+
+/* ---------------- 2 Costs & deposit ---------------- */
+function depositPlan() {
+  const out = [], price0 = N(S.price), r = N(S.saveRate) / 1200, g = N(S.hpi) / 100;
+  for (const p of [5, 10, 15, 20, 25, 30, 40]) {
+    if (100 - p > (CREDIT[S.credit] || CREDIT.good).maxLTV) continue;
+    let pot = cashAvail(), m = 0, rentPaid = 0, price = price0, need = 0, bonus = 0;
+    for (; m <= 360; m++) {
+      price = price0 * Math.pow(1 + g, m / 12); need = price * p / 100 + cashCosts(price).total;
+      if (pot >= need) break;
+      const b = lisaOK(price) ? Math.min(N(S.monthlySave), 4000 / 12) * .25 : 0;
+      pot = pot * (1 + r) + N(S.monthlySave) + b; bonus += b; rentPaid += N(S.rent) * Math.pow(1 + N(S.rentInc) / 100, m / 12);
+    }
+    const loan = price * (1 - p / 100), br = (bandRate(100 - p) ?? N(S.svr)) + creditAdj(), n = Math.round(N(S.term) * 12), pay = pmt(loan, br / 1200, n);
+    const totInt = pay * n - loan, win = Math.max(0, 120 - m);
+    let i10 = 0, b = loan; for (let k = 0; k < win; k++) { const it = b * br / 1200; i10 += it; b -= pay - it; }
+    out.push({ p, m, reached: m <= 360, price, need, loan, rate: br, pay, totInt, rentPaid, bonus, cost10: rentPaid + i10 + (price - price0) });
+  }
+  const ok = out.filter(x => x.reached), best = ok.length ? ok.reduce((a, b) => b.cost10 < a.cost10 ? b : a) : null;
+  return { rows: out, best };
+}
+function rCosts() {
+  const price = N(S.price), s = sdlt(price, S.buyer, S.nonRes), cc = cashCosts(price), need = N(S.deposit) + cc.total, have = cashAvail();
+  const items = [['Deposit', N(S.deposit)], ['Stamp Duty Land Tax', s.tax], ['Mortgage fee (paid upfront)', cc.mfee], ['HM Land Registry fee', cc.lr], ...UP.map(([k, l]) => [l, N(S.up[k])])].filter(x => x[1] > 0);
+  const lisaWarn = N(S.lisa) > 0 && (S.buyer !== 'ftb' || price > 450000);
+  const dp = depositPlan();
+  const yr = N(S.lYears), g = N(S.lGround), sc = N(S.lService), lease = [];
+  if (S.tenure === 'L') {
+    if (yr < 70) lease.push(['bad', `${yr} years left: many lenders won't lend under about 70 years, and extending is expensive. Treat with great caution.`]);
+    else if (yr < 80) lease.push(['bad', `${yr} years left: under 80, "marriage value" can make a lease extension much dearer. The Leasehold and Freehold Reform Act 2024 abolishes it once that part is in force, so check with your solicitor.`]);
+    else if (yr < 90) lease.push(['warn', `${yr} years left: think about extending before it drops below 80. Lenders often want 70–85 years left at the end of the mortgage term.`]);
+    else lease.push(['ok', `${yr} years left: comfortable for most lenders.`]);
+    if (g > 0 && (g > 1000 || g > price * .001)) lease.push(['warn', `Ground rent of ${gbp(g)} is over 0.1% of the price or over £1,000 (the London threshold). Some lenders refuse these.`]);
+    if (S.lDouble === 'yes') lease.push(['bad', 'A doubling ground rent is a red flag for lenders and buyers. Ask for a deed of variation before exchange.']);
+    if (S.lDouble === 'rpi') lease.push(['warn', 'RPI-linked ground rent rises every year. Check the cap and how often it is reviewed.']);
+    lease.push(['ok', `Running cost ${gbp((g + sc) / 12)} a month. Ask for 3 years of service charge accounts, planned major works, the sinking fund and any cladding / EWS1 issues.`]);
+  }
+  // next stamp-duty threshold tip
+  let sdTip = '';
+  if (S.buyer === 'ftb' && price > 500000 && price <= 540000) sdTip = `<div class="warnbox">You're ${gbp(price - 500000)} over the £500,000 first-time buyer limit, and it costs ${gbp(s.tax - sdlt(500000, 'ftb').tax)} in extra duty. Negotiating to £500,000 would be worth far more than the price cut alone.</div>`;
+  $('#coOut').innerHTML = `<div class="panel"><h3 style="margin-top:0">Stamp Duty Land Tax</h3>
+    <div class="cards">${stat('Stamp duty', gbp(s.tax), price ? pct(s.tax / price * 100, 2) + ' effective rate' : '', s.tax ? '' : 'good')}${S.buyer === 'ftb' ? stat('First-time buyer relief', s.relief ? 'Applies' : 'Lost', s.relief ? 'saves ' + gbp(sdlt(price, 'mover', S.nonRes).tax - s.tax) : 'price over £500,000', s.relief ? 'good' : 'warn') : ''}${S.buyer === 'add' ? stat('Surcharge', '+5%', 'higher rates for additional dwellings') : ''}</div>
+    ${s.parts.length ? `<div class="wrap short"><table class="tbl"><thead><tr><th>Slice</th><th>Rate</th><th>Tax</th></tr></thead><tbody>${s.parts.map(p => `<tr><td>${gbp(p.from)} – ${gbp(p.to)}</td><td>${(p.rate * 100).toFixed(0)}%</td><td>${gbp(p.tax)}</td></tr>`).join('')}</tbody></table></div>` : '<p class="hint">No stamp duty on a remortgage.</p>'}
+    ${sdTip}<p class="hint">England & NI, rates since 1 April 2025: 0% to £125k, 2% to £250k, 5% to £925k, 10% to £1.5m, 12% above. First-time buyers: 0% to £300k, 5% to £500k, no relief above £500k. Movers replacing a main home within 3 years may reclaim the surcharge. Check GOV.UK before exchange.</p></div>
+  <div class="panel"><h3 style="margin-top:0">Cash needed on completion</h3>
+    <div class="cards">${stat('Total cash needed', gbp(need), `deposit + ${gbp(cc.total)} costs`, 'hero')}${stat('Cash you have', gbp(have), 'savings + LISA + gift')}${stat(have >= need ? 'Spare after buying' : 'Shortfall', gbp(Math.abs(have - need)), have >= need ? 'keep some as an emergency fund' : 'see the savings plan below', have >= need ? 'good' : 'bad')}</div>
+    ${hbars(items.map(([l, v], i) => [l, v, i === 0 ? 'var(--blue)' : i === 1 ? 'var(--acc)' : 'var(--violet)']))}
+    ${lisaWarn ? `<div class="warnbox">A Lifetime ISA can only be used penalty-free by a first-time buyer on a home costing £450,000 or less. At ${gbp(price)} withdrawing it costs a 25% charge, which wipes out the bonus and some of your own money. The LISA rules have been under government review, so check the current position.</div>` : ''}</div>
+  <div class="panel"><h3 style="margin-top:0">Deposit plan: how long to save each deposit size</h3>
+    <p class="hint">Starts from ${gbp(have)} today, adds ${gbp(N(S.monthlySave))}/month at ${N(S.saveRate)}%${S.lisaOn ? ' plus the LISA bonus where it applies' : ''}. The target includes stamp duty and fees, and the price rises ${N(S.hpi)}% a year while you wait. Rates come from the LTV-band table.</p>
+    <div class="wrap short"><table class="tbl"><thead><tr><th>Deposit</th><th>Ready in</th><th>Price then</th><th>Cash target</th><th>Rate</th><th>Monthly</th><th>Lifetime interest</th><th>Rent while waiting</th><th>10-yr cost*</th></tr></thead><tbody>
+    ${dp.rows.map(x => `<tr class="${dp.best && x.p === dp.best.p ? 'hl' : ''}"><td>${x.p}%${dp.best && x.p === dp.best.p ? ' ★' : ''}</td><td>${x.reached ? (x.m ? yrsMo(x.m) : 'now') : '30+ yrs'}</td><td>${gbp(x.price)}</td><td>${gbp(x.need)}</td><td>${x.rate.toFixed(2)}%</td><td>${gbp(x.pay)}</td><td>${gbp(x.totInt)}</td><td>${gbp(x.rentPaid)}</td><td>${x.reached ? gbp(x.cost10) : '–'}</td></tr>`).join('')}</tbody></table></div>
+    <p class="hint">*Indicative 10-year cost of each path = rent paid while saving + mortgage interest until year 10 + the rise in price while you wait. ★ = lowest. It ignores equity built and rent-vs-own differences beyond that, so treat it as a guide.</p>
+    <div class="chart" id="chDep"></div></div>
+  ${S.tenure === 'L' ? `<div class="panel"><h3 style="margin-top:0">Leasehold check</h3>${lease.map(([c, t]) => `<div class="${c === 'ok' ? 'okbox' : c === 'bad' ? 'badbox' : 'warnbox'}">${esc(t)}</div>`).join('')}</div>` : ''}`;
+  // deposit growth chart
+  const months = Math.min(240, Math.max(24, ...dp.rows.filter(x => x.reached).map(x => x.m + 6)));
+  const xs = [], pot = [], tgt5 = [], tgt10 = [], tgtCur = [];
+  let p = cashAvail();
+  for (let m = 0; m <= months; m++) {
+    const pr = N(S.price) * Math.pow(1 + N(S.hpi) / 100, m / 12);
+    xs.push(ymLabel(monthsAdd(todayYM(), m))); pot.push(p);
+    tgt5.push(pr * .05 + cashCosts(pr).total); tgt10.push(pr * .10 + cashCosts(pr).total); tgtCur.push(pr * (N(S.deposit) / N(S.price) || 0) + cashCosts(pr).total);
+    p = p * (1 + N(S.saveRate) / 1200) + N(S.monthlySave) + (lisaOK(pr) ? Math.min(N(S.monthlySave), 4000 / 12) * .25 : 0);
+  }
+  lineChart($('#chDep'), { xs, label: 'Savings vs deposit targets', series: [{ name: 'Your savings', color: 'var(--good)', ys: pot, area: true }, { name: '5% + costs', color: 'var(--muted)', ys: tgt5, dash: '5 4' }, { name: '10% + costs', color: 'var(--blue)', ys: tgt10, dash: '5 4' }, { name: `Your ${(N(S.deposit) / N(S.price) * 100 || 0).toFixed(0)}% + costs`, color: 'var(--acc)', ys: tgtCur }] });
+}
+
+/* ---------------- 3 Mortgage ---------------- */
+function yearAgg(rows) {
+  const ys = [];
+  rows.forEach(r => { const k = Math.floor(r.i / 12); const y = ys[k] = ys[k] || { k, from: r.ym, to: r.ym, open: r.open, interest: 0, principal: 0, extra: 0, lump: 0, pay: 0, close: 0, erc: 0, rates: new Set(), rows: [] }; y.to = r.ym; y.interest += r.interest; y.principal += r.principal; y.extra += r.extra; y.lump += r.lump; y.pay += r.pay; y.close = r.close; y.erc += r.erc; y.cumI = r.cumI; y.rates.add(r.rate.toFixed(2)); y.rows.push(r); });
+  return ys;
+}
+function rMortgage() {
+  const { o, plan: P, base: B } = main(), loan = o.loan, price = N(S.price), l = ltvNow(), fixN = Math.round(o.fix * 12);
+  if (!(loan > 0)) { $('#mOut').innerHTML = '<div class="panel"><p class="hint">Enter a price and deposit (or a loan amount).</p></div>'; return; }
+  const p1 = P.rows[0]?.pay || 0, pAfter = P.rows[fixN]?.pay, savedI = B.totalInterest - P.totalInterest, savedM = B.months - P.months;
+  const feesUp = (S.feeAdd ? 0 : N(S.fee)) - N(S.cashback), y1 = P.rows.slice(0, 12);
+  const w = [...P.warn];
+  if (S.repType === 'io') w.unshift(`Interest only: the full ${gbp(loan)} is still owed at the end of the term unless you overpay. Lenders will want a credible repayment plan (investments, pension lump sum, sale).`);
+  if (S.repType === 'part') w.unshift(`Part & part: ${gbp(Math.min(loan, N(S.ioPart)))} is interest only and must be repaid at the end. Overpayments go to that part first.`);
+  if (l > 95) w.unshift('The loan is over 95% of the price. Very few products go higher, and those are niche.');
+  if (N(S.term) > 35) w.push('Terms over 35 years are rare and add a lot of interest.');
+  if (S.product !== 'fixed' && S.product !== 'svr') w.push('Variable rate: payments follow your Bank Rate assumption. Check the shock scenarios on Compare deals.');
+  // LTV band tip
+  const curBand = bandOf(l), sorted = [...S.bands].sort((a, b) => a.ltv - b.ltv), lower = sorted.filter(b => b.ltv < (curBand ?? 999)).pop();
+  let tip = '';
+  if (lower && price) {
+    const needDep = loan - lower.ltv / 100 * price, rNow = bandRate(l), rLow = N(lower.rate), n = Math.round(N(S.term) * 12);
+    if (needDep > 0 && rNow != null) { const save = pmt(loan, rNow / 1200, n) - pmt(lower.ltv / 100 * price, rLow / 1200, n); tip = `<div class="note">You're in the <b>${curBand}% LTV</b> band. Another <b>${gbp(needDep)}</b> of deposit takes you to ${lower.ltv}% LTV, where typical rates are ${rLow.toFixed(2)}% vs ${rNow.toFixed(2)}%. That saves about <b>${gbp(save)}/month</b> (${gbp(save * 12 * N(S.fix || 5))} over a ${N(S.fix) || 5}-year deal) on top of the smaller loan.</div>`; }
+  }
+  const remorts = P.rows.filter(r => /remortgage/.test(r.evt));
+  $('#mOut').innerHTML = `<div class="panel"><div class="cards">
+    ${stat('Loan', gbp(loan), `LTV ${pct(l)}${curBand ? ' · ≤' + curBand + '% band' : ''}`)}
+    ${stat('Monthly payment', gbp2(p1), o.fix ? `for ${o.fix} yrs at ${P.rows[0].rate.toFixed(2)}%` : `at ${P.rows[0].rate.toFixed(2)}%`, 'hero')}
+    ${pAfter != null && o.fix ? stat('After the deal', gbp2(pAfter), `at ${P.rows[fixN].rate.toFixed(2)}% (${P.rows[fixN].phase === 'redeal' ? 'remortgaged' : 'SVR'})`, pAfter > p1 * 1.1 ? 'warn' : '') : ''}
+    ${N(S.over) > 0 ? stat('With regular extra', gbp2(p1 + N(S.over)), `+${gbp(N(S.over))}/month`) : ''}
+    ${stat('Total interest', gbp(P.totalInterest), `${(P.totalInterest / loan * 100).toFixed(0)}% of the loan`, 'bad')}
+    ${stat('Total cost', gbp(P.totalPaid + feesUp + P.totErc + P.fees + P.endBal), 'payments + fees + ERCs')}
+    ${stat('Mortgage-free', P.paidOff ? ymLabel(P.end) : 'Not by term end', P.paidOff ? yrsMo(P.months) : gbp(P.endBal) + ' still owed', P.paidOff ? 'good' : 'bad')}
+    ${savedM > 0 || savedI > 1 ? stat('Overpayments & offset save', gbp(savedI), savedM > 0 ? `${yrsMo(savedM)} sooner` : 'lower payments', 'good') : ''}
+    ${P.totErc ? stat('Est. early repayment charges', gbp(P.totErc), '', 'warn') : ''}
+    ${stat('Year 1', gbp(sum(y1, 'interest')) + ' interest', `${gbp(sum(y1, r => r.principal + r.extra + r.lump))} capital repaid`)}
+    ${remorts.length ? stat('Remortgages', remorts.length, `fees ${gbp(P.fees)}`) : ''}
+  </div>${tip}
+  ${w.slice(0, 8).map(x => `<div class="warnbox">${esc(x)}</div>`).join('')}${w.length > 8 ? `<p class="hint">…and ${w.length - 8} more allowance warnings. Tick "Never overpay beyond the allowance" to stay within it.</p>` : ''}</div>`;
+  const xs = P.rows.length >= B.rows.length ? P.rows.map(r => ymLabel(r.ym)) : B.rows.map(r => ymLabel(r.ym));
+  lineChart($('#chBal'), { xs, label: 'Balance', series: [{ name: 'Your plan', color: 'var(--acc)', ys: xs.map((_, i) => P.rows[i] ? P.rows[i].open : 0), area: true }, { name: 'No overpayments', color: 'var(--muted)', dash: '5 4', ys: xs.map((_, i) => B.rows[i] ? B.rows[i].open : (i < B.rows.length ? 0 : B.endBal)) }], markers: o.fix ? [{ i: fixN, label: 'deal ends' }] : [] });
+  const ys = yearAgg(P.rows);
+  barChart($('#chYear'), { cats: ys.map(y => String(y.k + 1)), stacks: [{ name: 'Interest', color: 'var(--bad)', vals: ys.map(y => y.interest) }, { name: 'Capital', color: 'var(--blue)', vals: ys.map(y => y.principal) }, { name: 'Overpayments', color: 'var(--good)', vals: ys.map(y => y.extra + y.lump) }], tipTitle: i => `Year ${i + 1} (${ymLabel(ys[i].from)} – ${ymLabel(ys[i].to)})` });
+  lineChart($('#chRate'), { xs: P.rows.map(r => ymLabel(r.ym)), h: 210, label: 'Rate and LTV', yFmt: v => v.toFixed(1) + '%', tipFmt: v => v.toFixed(2) + '%', series: [{ name: 'Interest rate', color: 'var(--acc)', ys: P.rows.map(r => r.rate) }, { name: 'LTV ÷ 10', color: 'var(--violet)', dash: '4 4', ys: P.rows.map(r => r.ltv / 10) }] });
+  renderSched();
+}
+function renderSched() {
+  const { plan: S2 } = main(), view = $('#schedView').value, t = $('#schedTable');
+  const head = `<thead><tr><th>${view === 'year' ? 'Year' : 'Month'}</th><th>Opening</th><th>Rate</th><th>Payments</th><th>Interest</th><th>Capital</th><th>Overpaid</th><th>Lumps</th><th>ERC</th><th>Closing</th><th>LTV</th><th>Interest to date</th></tr></thead>`;
+  const mrow = (r, cls = '') => `<tr class="${cls}${r.evt ? ' ev' : ''}" title="${esc(r.evt)}"><td>${ymLabel(r.ym)}${r.evt ? ' •' : ''}</td><td>${gbp(r.open)}</td><td>${r.rate.toFixed(2)}%</td><td>${gbp2(r.pay)}</td><td>${gbp2(r.interest)}</td><td>${gbp2(r.principal)}</td><td>${r.extra ? gbp(r.extra) : ''}</td><td>${r.lump ? gbp(r.lump) : ''}</td><td>${r.erc ? gbp(r.erc) : ''}</td><td>${gbp(r.close)}</td><td>${pct(r.ltv, 0)}</td><td>${gbp(r.cumI)}</td></tr>`;
+  const tot = `<tr class="tot"><td>Whole plan</td><td></td><td></td><td>${gbp(sum(S2.rows, 'pay'))}</td><td>${gbp(S2.totalInterest)}</td><td>${gbp(sum(S2.rows, 'principal'))}</td><td>${gbp(sum(S2.rows, 'extra'))}</td><td>${gbp(sum(S2.rows, 'lump'))}</td><td>${gbp(S2.totErc)}</td><td>${gbp(S2.endBal)}</td><td></td><td></td></tr>`;
+  if (view === 'month') { t.innerHTML = head + '<tbody>' + S2.rows.map(r => mrow(r)).join('') + tot + '</tbody>'; return; }
+  const ys = yearAgg(S2.rows);
+  t.innerHTML = head + '<tbody>' + ys.map(y => `<tr class="yr" data-y="${y.k}"><td>▸ Year ${y.k + 1} <small>${ymLabel(y.from)}</small></td><td>${gbp(y.open)}</td><td>${[...y.rates].join(' / ')}%</td><td>${gbp(y.pay)}</td><td>${gbp(y.interest)}</td><td>${gbp(y.principal)}</td><td>${y.extra ? gbp(y.extra) : ''}</td><td>${y.lump ? gbp(y.lump) : ''}</td><td>${y.erc ? gbp(y.erc) : ''}</td><td>${gbp(y.close)}</td><td>${pct(y.rows[y.rows.length - 1].ltv, 0)}</td><td>${gbp(y.cumI)}</td></tr>`).join('') + tot + '</tbody>';
+  $$('tr.yr[data-y]', t).forEach(tr => tr.onclick = () => {
+    const k = +tr.dataset.y, open = tr.classList.toggle('open'), c = tr.firstElementChild;
+    c.innerHTML = c.innerHTML.replace(open ? '▸' : '▾', open ? '▾' : '▸');
+    if (open) tr.insertAdjacentHTML('afterend', ys[k].rows.map(r => mrow(r, 'mo y' + k)).join('')); else $$('tr.y' + k, t).forEach(x => x.remove());
+  });
+}
+function schedCsv() {
+  const { plan } = main(), L = [['Month', 'Opening', 'Rate %', 'Payment', 'Interest', 'Capital', 'Overpaid', 'Lump', 'ERC', 'Closing', 'LTV %', 'Cumulative interest', 'Events'].join(',')];
+  plan.rows.forEach(r => L.push([r.ym, r.open.toFixed(2), r.rate, r.pay.toFixed(2), r.interest.toFixed(2), r.principal.toFixed(2), r.extra.toFixed(2), r.lump.toFixed(2), r.erc.toFixed(2), r.close.toFixed(2), r.ltv.toFixed(1), r.cumI.toFixed(2), '"' + r.evt + '"'].join(',')));
+  download('mortgage-schedule.csv', L.join('\n'), 'text/csv');
+}
+
+/* ---------------- 4 Products ---------------- */
+function rProducts() {
+  const Hm = Math.max(12, Math.round(N(S.compareYears) * 12)), loanB = baseLoan();
+  const runs = S.products.map(p => {
+    const o = mortOpts({ loan: loanB + (p.feeAdd ? N(p.fee) : 0), product: p.type, rate: N(p.rate), trackMargin: N(p.rate), discount: N(p.rate), fix: p.type === 'svr' ? 0 : N(p.years), over: 0, annualOver: 0, lumps: [], rateCh: [], offset: 0, offsetAdd: 0 });
+    const cost = o2 => { const r = amortise(o2), rows = r.rows.slice(0, Hm), bal = rows.length ? rows[rows.length - 1].close : 0, remFees = sum(rows.filter(x => /remortgage/.test(x.evt)), () => o2.remortFee); return { r, pay0: rows[0]?.pay || 0, payMax: Math.max(...rows.map(x => x.pay)), bal, cost: sum(rows, 'pay') + (p.feeAdd ? 0 : N(p.fee)) - N(p.cashback) + remFees - (loanB - bal) }; };
+    const b = cost(o), shocks = (p.type === 'tracker' || p.type === 'discount' || p.type === 'svr' || N(p.years) * 12 < Hm) ? [1, 2].map(d => cost({ ...o, base: o.base, baseLong: o.baseLong + d, svr: o.svr, bands: o.bands.map(x => ({ ...x, rate: N(x.rate) + d })) })) : null;
+    return { p, ...b, shocks };
+  });
+  const best = runs.reduce((a, b) => b.cost < a.cost ? b : a, runs[0]);
+  $('#prOut').innerHTML = runs.length ? `<div class="wrap short" style="margin-top:12px"><table class="tbl"><thead><tr><th>Deal</th><th>First payment</th><th>Highest payment</th><th>Balance after ${N(S.compareYears)} yrs</th><th>True cost over ${N(S.compareYears)} yrs</th><th>If rates +1%</th><th>If rates +2%</th></tr></thead><tbody>
+  ${runs.map(x => `<tr class="${x === best ? 'hl' : ''}"><td>${esc(x.p.name)}${x === best ? ' ★' : ''}</td><td>${gbp2(x.pay0)}</td><td>${gbp2(x.payMax)}</td><td>${gbp(x.bal)}</td><td><b>${gbp(x.cost)}</b></td><td>${x.shocks ? gbp(x.shocks[0].cost) : '<span class="pill g">fixed</span>'}</td><td>${x.shocks ? gbp(x.shocks[1].cost) : '<span class="pill g">fixed</span>'}</td></tr>`).join('')}</tbody></table></div>
+  <p class="hint">True cost = payments + upfront fees − cashback + remortgage fees − capital repaid. That's the interest and fees you actually lose, so lower is better. Rate shocks raise future Bank Rate (and the LTV-band rates used at remortgage) by 1% and 2%. A fix that ends before the horizon is exposed to the shock at remortgage.</p>
+  <div class="chart" id="chPr"></div>` : '';
+  barChart($('#chPr'), { cats: runs.map(x => x.p.name.slice(0, 18)), h: 220, stacks: [{ name: `True cost over ${N(S.compareYears)} yrs`, color: 'var(--acc)', vals: runs.map(x => x.cost) }] });
+  // repayment structures
+  const st = [['repay', 'Repayment'], ['io', 'Interest only'], ['part', 'Part & part (50/50)']].map(([k, l]) => { const r = amortise(mortOpts({ repType: k, ioPart: loanAmt() / 2, over: 0, annualOver: 0, lumps: [] })); return { l, r, p0: r.rows[0]?.pay || 0 }; });
+  $('#ioOut').innerHTML = `<div class="wrap short"><table class="tbl"><thead><tr><th>Structure</th><th>First payment</th><th>Total interest</th><th>Owed at term end</th><th>Total cost incl. balance</th></tr></thead><tbody>${st.map(x => `<tr><td>${x.l}</td><td>${gbp2(x.p0)}</td><td>${gbp(x.r.totalInterest)}</td><td>${gbp(x.r.endBal)}</td><td>${gbp(x.r.totalPaid + x.r.endBal)}</td></tr>`).join('')}</tbody></table></div>
+  <div class="note">Interest only cuts the monthly payment by ${gbp(st[0].p0 - st[1].p0)} but you pay ${gbp(st[1].r.totalInterest - st[0].r.totalInterest)} more interest and still owe the whole loan at the end. It can work if you invest the difference at a return above your mortgage rate and lenders accept your repayment vehicle. Most residential lenders want a 25%+ deposit and a high income for it.</div>`;
+}
+
+/* ---------------- 5 Overpay vs invest ---------------- */
+let IVC = null, IVkey = '';
+function investModel() {
+  const key = JSON.stringify([S, 'iv']); if (IVkey === key && IVC) return IVC;
+  const o = mortOpts({ over: 0, annualOver: 0, lumps: [], offset: 0, offsetAdd: 0 }), base = amortise(o);
+  const B = Math.max(0, N(S.budgetYear)), H = Math.max(12, Math.round((N(S.horizon) || N(S.term)) * 12));
+  const rNet = N(S.invReturn) - N(S.invFee) - (S.wrapper === 'gia' ? N(S.gaDrag) : 0), rRisk = rNet - N(S.riskPrem);
+  const allowY = loanAmt() * N(S.allow) / 100;
+  let Xs = []; for (let k = 0; k <= 40; k++) Xs.push(Math.round(B * k / 40));
+  if (allowY > 0 && allowY < B) Xs.push(Math.round(allowY));
+  Xs = [...new Set(Xs)].sort((a, b) => a - b);
+  const scen = Xs.map(X => {
+    const r = amortise({ ...o, over: S.overHow === 'monthly' ? X / 12 : 0, annualOver: S.overHow === 'annual' ? X : 0, annualMonth: 12 });
+    const c = new Float64Array(H);
+    for (let t = 0; t < H; t++) { const b = base.rows[t], s = r.rows[t]; c[t] = (b ? b.pay : 0) + B / 12 - (s ? s.pay + s.extra + s.lump + s.erc : 0); }
+    const remF = sum(r.rows.filter(x => x.i < H && /remortgage/.test(x.evt)), () => o.remortFee) - sum(base.rows.filter(x => x.i < H && /remortgage/.test(x.evt)), () => o.remortFee);
+    const bal = H <= r.rows.length ? r.rows[H - 1].close : r.endBal;
+    return { X, r, c, bal, remF, free: r.paidOff ? r.end : null };
+  });
+  const nw = (sc, rate) => { const g = Math.pow(1 + rate / 100, 1 / 12) - 1; let pot = 0; for (let t = 0; t < H; t++) pot = pot * (1 + g) + sc.c[t]; return pot - sc.bal - sc.remF; };
+  scen.forEach(sc => { sc.nwExp = nw(sc, rNet); sc.nwRisk = nw(sc, rRisk); });
+  const argmax = k => scen.reduce((a, b) => b[k] > a[k] + 1 ? b : a, scen[0]);
+  const sweet = argmax('nwRisk'), bestExp = argmax('nwExp'), zero = scen[0], full = scen[scen.length - 1];
+  const breakeven = (A, Bs) => { const f = r => nw(A, r) - nw(Bs, r); let lo = -10, hi = 40, flo = f(lo), fhi = f(hi); if (flo * fhi > 0) return null; for (let k = 0; k < 60; k++) { const m = (lo + hi) / 2, fm = f(m); if (flo * fm <= 0) { hi = m; } else { lo = m; flo = fm; } } return (lo + hi) / 2; };
+  const cmpX = sweet.X > 0 ? sweet : full;
+  const be = cmpX.X > 0 ? breakeven(cmpX, zero) : null;
+  // Monte Carlo: invest-all vs overpay (cmpX)
+  let mc = null;
+  if (cmpX.X > 0 && N(S.vol) >= 0) {
+    const rand = rng(42), P = 600, diffs = []; let wins = 0;
+    const yrs = Math.ceil(H / 12);
+    for (let p = 0; p < P; p++) {
+      let pa = 0, pb = 0;
+      for (let y = 0; y < yrs; y++) {
+        const R = Math.max(-.95, (rNet + N(S.vol) * gauss(rand)) / 100), g = Math.pow(1 + R, 1 / 12) - 1;
+        for (let m = 0; m < 12; m++) { const t = y * 12 + m; if (t >= H) break; pa = pa * (1 + g) + zero.c[t]; pb = pb * (1 + g) + cmpX.c[t]; }
+      }
+      const d = (pa - zero.bal - zero.remF) - (pb - cmpX.bal - cmpX.remF); diffs.push(d); if (d > 0) wins++;
+    }
+    diffs.sort((a, b) => a - b);
+    mc = { p: wins / P, p10: diffs[Math.floor(P * .1)], p50: diffs[Math.floor(P * .5)], p90: diffs[Math.floor(P * .9)] };
+  }
+  IVC = { o, base, B, H, rNet, rRisk, allowY, scen, sweet, bestExp, zero, full, cmpX, be, mc }; IVkey = key; return IVC;
+}
+function rInvest() {
+  const M = investModel(), { sweet, bestExp, zero, cmpX, be, mc, B, H, rNet, rRisk } = M;
+  const rate0 = main().plan.rows[0]?.rate ?? N(S.rate);
+  const gainVs0 = sweet.nwRisk - zero.nwRisk;
+  const perMonth = sweet.X / 12;
+  const within = sweet.X <= M.allowY + 1;
+  let headline;
+  if (B <= 0) headline = '<p>Enter how much spare money you have each year.</p>';
+  else if (sweet.X === 0) headline = `<div class="big">Invest all ${gbp(B)} a year</div><p>At a ${rNet.toFixed(1)}% net expected return (${rRisk.toFixed(1)}% after your ${N(S.riskPrem)}% risk premium), investing beats overpaying at every level. Overpaying everything only wins if investments return less than <b>${be != null ? be.toFixed(2) + '%' : '–'}</b> a year.</p>`;
+  else if (sweet.X >= B - 1) headline = `<div class="big">Overpay all ${gbp(B)} a year</div><p>Your risk-adjusted return of ${rRisk.toFixed(1)}% doesn't clear the guaranteed return from overpaying, which works out at about <b>${be != null ? be.toFixed(2) + '%' : '–'}</b> once lower LTV bands at remortgage are counted. Investing only wins if you expect more than that after fees, tax and your risk premium.</p>`;
+  else headline = `<div class="big">Overpay ${gbp(sweet.X)} a year · invest ${gbp(B - sweet.X)}</div><p>That's about ${gbp(perMonth)}/month into the mortgage${within ? ', inside the penalty-free allowance' : ''}. The first ${gbp(sweet.X)} a year earns an effective <b>${be != null ? be.toFixed(2) + '%' : '–'}</b> guaranteed (it pulls your LTV into cheaper bands at remortgage). Beyond that, extra overpayments earn less than your ${rRisk.toFixed(1)}% risk-adjusted investment return.</p>`;
+  $('#ivOut').innerHTML = `<div class="panel"><div class="reco"><div class="eyebrow">Sweet spot · over ${yrsMo(H)}</div>${headline}</div>
+    <div class="cards">${stat('Net worth at horizon', gbp(sweet.nwRisk), 'at the sweet spot (risk-adjusted)', 'hero')}${stat('vs investing everything', (gainVs0 >= 0 ? '+' : '') + gbp(gainVs0), 'risk-adjusted', gainVs0 >= 0 ? 'good' : 'bad')}${stat('Best at expected return', gbp(bestExp.X) + '/yr', `if you need no risk premium (${rNet.toFixed(1)}%)`)}${stat('Mortgage-free', sweet.free ? ymLabel(sweet.free) : 'by term end', sweet.X ? 'with the sweet-spot overpayment' : 'no overpayment')}${stat('Mortgage rate now', rate0.toFixed(2) + '%', 'the guaranteed return on overpaying')}${stat('Penalty-free allowance', gbp(M.allowY) + '/yr', `${N(S.allow)}% of the starting balance`)}</div>
+    <h3>Net worth at horizon for each yearly overpayment</h3><div class="chart" id="chIv"></div>
+    <p class="hint">Net worth = investment pot − mortgage left − extra remortgage fees, with the same total monthly outgoings in every scenario. The flat parts and kinks come from LTV-band steps at each remortgage and the ERC allowance.</p>
+    ${mc ? `<h3>How sure is this? (600 simulated markets)</h3><div class="cards">${stat('Chance investing all beats overpaying ' + gbp(cmpX.X) + '/yr', pct(mc.p * 100, 0), `expected ${rNet.toFixed(1)}%, volatility ${N(S.vol)}%`, mc.p > .6 ? 'good' : mc.p < .4 ? 'bad' : 'warn')}${stat('Bad markets (10th pct)', (mc.p10 >= 0 ? '+' : '') + gbp(mc.p10), 'investing minus overpaying', mc.p10 >= 0 ? 'good' : 'bad')}${stat('Typical (median)', (mc.p50 >= 0 ? '+' : '') + gbp(mc.p50), '', mc.p50 >= 0 ? 'good' : 'bad')}${stat('Good markets (90th pct)', (mc.p90 >= 0 ? '+' : '') + gbp(mc.p90), '', mc.p90 >= 0 ? 'good' : 'bad')}</div><p class="hint">Annual returns drawn from a normal distribution with your expected return and volatility (fixed seed, so results are repeatable). Real markets have fatter tails and long flat spells.</p>` : ''}
+    <div class="wrap short"><table class="tbl"><thead><tr><th>Overpay / yr</th><th>Invest / yr</th><th>Mortgage-free</th><th>Interest paid</th><th>Net worth (expected)</th><th>Net worth (risk-adjusted)</th></tr></thead><tbody>
+    ${M.scen.filter((s, i) => i % 4 === 0 || s === sweet || s === bestExp || Math.abs(s.X - M.allowY) < 1).map(s => `<tr class="${s === sweet ? 'hl' : ''}"><td>${gbp(s.X)}${s === sweet ? ' ★' : ''}${Math.abs(s.X - M.allowY) < 1 ? ' <span class="pill">allowance</span>' : ''}</td><td>${gbp(B - s.X)}</td><td>${s.free ? ymLabel(s.free) : '–'}</td><td>${gbp(s.r.totalInterest)}</td><td>${gbp(s.nwExp)}</td><td>${gbp(s.nwRisk)}</td></tr>`).join('')}</tbody></table></div></div>`;
+  const xi = M.scen.map(s => kfmt(s.X));
+  lineChart($('#chIv'), { xs: xi, label: 'Net worth by overpayment', tipTitle: i => `Overpay ${gbp(M.scen[i].X)}/yr`, series: [{ name: `Expected ${rNet.toFixed(1)}%`, color: 'var(--blue)', ys: M.scen.map(s => s.nwExp) }, { name: `Risk-adjusted ${rRisk.toFixed(1)}%`, color: 'var(--acc)', ys: M.scen.map(s => s.nwRisk) }], yMin: Math.min(...M.scen.map(s => Math.min(s.nwExp, s.nwRisk))), markers: [{ i: M.scen.indexOf(sweet), label: 'sweet spot', color: 'var(--acc)' }, { i: M.scen.findIndex(s => Math.abs(s.X - M.allowY) < 1), label: 'allowance', color: 'var(--violet)', dy: 14 }] });
+  // priority ladder
+  const bud = budgetCalc(), ef = bud.essential * N(S.emergencyMonths), spare = cashAvail() - N(S.deposit) - cashCosts(N(S.price)).total;
+  const hi = [...S.debts].filter(d => N(d.bal) > 0 && N(d.rate) > rate0).sort((a, b) => N(b.rate) - N(a.rate));
+  $('#ladder').innerHTML = `<div class="panel" style="margin-top:12px"><h3 style="margin-top:0">Where spare money should go first</h3>
+    <div class="${spare >= ef ? 'okbox' : 'warnbox'}"><b>1. Emergency fund:</b> ${N(S.emergencyMonths)} months of essentials ≈ ${gbp(ef)}. ${spare >= ef ? 'Covered by cash left after buying.' : `Cash left after buying is ${gbp(Math.max(0, spare))}; build this before overpaying. Money in the mortgage is hard to get back.`}</div>
+    <div class="${hi.length ? 'warnbox' : 'okbox'}"><b>2. Debts above ${rate0.toFixed(2)}%:</b> ${hi.length ? hi.map(d => `${esc(d.name)} at ${N(d.rate)}%`).join(', ') + '. Clear these first: a guaranteed return higher than overpaying.' : 'none. Good.'}</div>
+    <div class="note"><b>3. Free money:</b> pension contributions up to the full employer match, plus tax relief (20–45%), usually beat both options.</div>
+    <div class="note"><b>4. Then the split above:</b> overpay up to the sweet spot, invest the rest in an ISA.</div></div>`;
+}
+
+/* ---------------- 6 Payoff target ---------------- */
+function rPayoff() {
+  const o = mortOpts({ over: 0, annualOver: 0, lumps: [], offset: 0, offsetAdd: 0 }), base = amortise(o), T = Math.round(N(S.targetYears) * 12);
+  const run = (x, cap) => amortise({ ...o, over: S.payoffHow === 'monthly' ? x : 0, annualOver: S.payoffHow === 'annual' ? x : 0, annualMonth: 12, capAllow: cap ?? o.capAllow });
+  const ok = r => r.paidOff && r.months <= T;
+  let out = '';
+  if (!(T > 0)) { $('#poOut').innerHTML = '<div class="panel"><p class="hint">Set a target.</p></div>'; return; }
+  if (base.paidOff && base.months <= T) { out = `<div class="okbox">Your plan already finishes in ${yrsMo(base.months)}, within ${N(S.targetYears)} years. No overpayment needed.</div>`; $('#poOut').innerHTML = `<div class="panel">${out}</div>`; return; }
+  let lo = 0, hi = loanAmt() * (S.payoffHow === 'annual' ? 1 : .2);
+  if (!ok(run(hi, false))) hi = loanAmt() * 2;
+  for (let k = 0; k < 50; k++) { const m = (lo + hi) / 2; if (ok(run(m, false))) hi = m; else lo = m; }
+  const need = Math.ceil(hi), R = run(need, false), unit = S.payoffHow === 'monthly' ? '/month' : '/year';
+  const fast = amortise({ ...o, over: loanAmt(), capAllow: true }), shorter = pmt(loanAmt(), (base.rows[0]?.rate || N(S.rate)) / 1200, T);
+  const rNet = N(S.invReturn) - N(S.invFee) - (S.wrapper === 'gia' ? N(S.gaDrag) : 0), g = Math.pow(1 + rNet / 100, 1 / 12) - 1, mPay = S.payoffHow === 'monthly' ? need : need / 12;
+  let pot = 0, clearAt = null; for (let t = 0; t < base.rows.length; t++) { pot = pot * (1 + g) + mPay; if (pot >= base.rows[t].close) { clearAt = t + 1; break; } }
+  const xs = base.rows.map(r => ymLabel(r.ym));
+  $('#poOut').innerHTML = `<div class="panel"><div class="reco"><div class="eyebrow">To be mortgage-free in ${N(S.targetYears)} years</div><div class="big">${gbp(need)}${unit} extra</div><p>On top of the ${gbp2(base.rows[0]?.pay)} contractual payment. You finish in <b>${ymLabel(R.end)}</b> instead of ${base.paidOff ? ymLabel(base.end) : 'never (balance left)'}, saving <b>${gbp(base.totalInterest - R.totalInterest)}</b> of interest${R.totErc ? `, but paying an estimated <b>${gbp(R.totErc)}</b> in early repayment charges` : ''}.</p></div>
+    <div class="cards">${stat('Total extra paid', gbp(sum(R.rows, r => r.extra + r.lump)), 'over the plan')}${stat('Interest saved', gbp(base.totalInterest - R.totalInterest), '', 'good')}${stat('ERCs triggered', gbp(R.totErc), R.totErc ? 'overpaying beyond the allowance' : 'none', R.totErc ? 'warn' : 'good')}${stat('Fastest within allowance', fast.paidOff ? yrsMo(fast.months) : 'n/a', `max penalty-free overpaying each deal year`)}${stat(`Or take a ${N(S.targetYears)}-yr term`, gbp2(shorter) + '/mo', 'contractual: less flexible, harder affordability test')}</div>
+    ${R.totErc ? `<div class="warnbox">This target needs more than the ${N(S.allow)}% penalty-free allowance in some deal years. Options: time the big payments for when each deal ends, pick a tracker or a deal with no ERCs, or tick "Never overpay beyond the allowance" (the fastest possible within it is shown above).</div>` : ''}
+    <h3>Invest-then-clear alternative</h3><p class="hint">Instead of overpaying, invest the same ${gbp(mPay)}/month at ${rNet.toFixed(1)}% net, and clear the mortgage in one go when the pot reaches the balance.</p>
+    <div class="${clearAt && clearAt < R.months ? 'okbox' : 'note'}">${clearAt ? `Expected to clear the mortgage in <b>${yrsMo(clearAt)}</b> (${ymLabel(base.rows[clearAt - 1].ym)}), ${clearAt < R.months ? `${yrsMo(R.months - clearAt)} sooner than overpaying` : `${yrsMo(clearAt - R.months)} later than overpaying`}. It keeps the money accessible but depends on markets: a crash near the target date can push it back years. Check the ERC position at the time you'd redeem.` : 'The invested pot never catches the balance at this return.'}</div>
+    <div class="chart" id="chPo"></div></div>`;
+  let p2 = 0; const potY = base.rows.map((r, t) => { p2 = p2 * (1 + g) + mPay; return clearAt && t >= clearAt ? null : p2; });
+  lineChart($('#chPo'), { xs, label: 'Payoff paths', series: [{ name: 'No overpayment', color: 'var(--muted)', dash: '5 4', ys: base.rows.map(r => r.close) }, { name: 'Overpay to target', color: 'var(--acc)', ys: base.rows.map((r, t) => R.rows[t] ? R.rows[t].close : 0) }, { name: 'Invested pot', color: 'var(--good)', ys: potY }], markers: [{ i: T - 1, label: 'target' }] });
+}
+
+/* ---------------- 7 Budget ---------------- */
+function budgetCalc() {
+  const I = incomeCalc(), netM = I.net / 12, oc = ownCosts(), { plan } = main(), mort = (plan.rows[0]?.pay || 0), sp = spendTotal(), dp = debtPay();
+  const essential = mort + oc.total + sp + dp, surplus = netM - essential;
+  return { netM, oc, mort, sp, dp, essential, surplus, over: N(S.over) };
+}
+function rBudget() {
+  const b = budgetCalc(), share = Math.max(0, b.surplus) * N(S.surplusShare) / 100;
+  const lines = [['Mortgage payment', b.mort, 'var(--acc)'], ...b.oc.items.filter(x => x[1] > 0).map(([l, v]) => [l, v, 'var(--violet)']), ...S.spend.filter(x => N(x.v) > 0).map(x => [x.n, N(x.v), 'var(--blue)']), ...S.debts.filter(d => N(d.pay) > 0).map(d => [d.name + ' (debt)', N(d.pay), 'var(--bad)'])];
+  $('#buOut').innerHTML = `<div class="panel"><div class="cards">${stat('Take-home', gbp(b.netM), 'per month, all applicants')}${stat('Mortgage', gbp(b.mort), 'first payment')}${stat('Cost of owning', gbp(b.oc.total), 'bills, tax, upkeep')}${stat('Spending', gbp(b.sp), '')}${stat('Debt payments', gbp(b.dp), '')}${stat('Surplus', gbp(b.surplus), 'per month', b.surplus >= 0 ? 'good' : 'bad')}</div>
+    ${b.surplus < 0 ? `<div class="badbox">You'd be ${gbp(-b.surplus)} a month short. Cut spending, clear a debt, lower the price or lengthen the term, and re-check the Affordability tab.</div>` : `<div class="okbox">${N(S.surplusShare)}% of the surplus is ${gbp(share)}/month (${gbp(share * 12)}/yr) for overpaying or investing. <button class="btn sm" id="sendSurplus">Send to Overpay or invest →</button></div>`}
+    <h3>Where the money goes</h3>${hbars(lines.map(([l, v, c]) => [l, v, c]))}
+    <div class="cards">${stat('Council tax', gbp(b.oc.ct * 12) + '/yr', `${esc(S.borough)}, Band ${S.ctBand}: ${gbp(bandDFor())} Band D`)}${stat('Energy estimate', gbp(b.oc.energy * 12) + '/yr', `EPC ${S.epc}, ${N(S.sqm)} m²`)}${stat('Emergency fund target', gbp(b.essential * N(S.emergencyMonths)), `${N(S.emergencyMonths)} months of outgoings`)}</div>
+    <p class="hint">Council tax bands come from 1991 values (A ≤ £40k … H > £320k); check the actual band on the VOA website. Energy is a rough guide from EPC band and floor area. Band D figures are 2026/27 totals including GLA/county precepts; override them if your council differs.</p></div>`;
+  const sb = $('#sendSurplus'); if (sb) sb.onclick = () => { S.budgetYear = Math.round(share * 12 / 100) * 100; changed(); go('invest'); };
+}
+
+/* ---------------- 8 Remortgage & moving ---------------- */
+function rSwitch() {
+  const r = S.rm, n = Math.max(1, Math.round(N(r.termLeft) * 12)), cur = pmt(N(r.bal), N(r.rate) / 1200, n), nb = N(r.bal) + N(r.raise), np = pmt(nb, N(r.newRate) / 1200, n);
+  const erc = N(r.bal) * N(r.ercPct) / 100, cost = erc + N(r.newFee) + N(r.legal), H = Math.round(N(r.newYears) * 12);
+  const sim = (P, rate, pay, m) => { let b = P, i = 0; for (let k = 0; k < m; k++) { const it = b * rate / 1200; i += it; b = b + it - pay; } return { b, i }; };
+  const like = pmt(N(r.bal), N(r.newRate) / 1200, n); // ignore raise for the saving calc
+  const a = sim(N(r.bal), N(r.rate), cur, H), c = sim(N(r.bal), N(r.newRate), like, H);
+  const save = a.i - c.i - cost, monthly = cur - like;
+  let be = null; { let ca = 0, cb = 0, ba = N(r.bal), bb = N(r.bal); for (let k = 0; k < H * 2; k++) { const ia = ba * N(r.rate) / 1200, ib = bb * N(r.newRate) / 1200; ca += ia; cb += ib; ba += ia - cur; bb += ib - like; if (ca - cb >= cost) { be = k + 1; break; } } }
+  const wait = Math.max(0, N(r.monthsLeft)), waitCost = sim(N(r.bal), N(r.rate), cur, wait).i - sim(N(r.bal), N(r.newRate), like, wait).i;
+  const l = nb / N(r.value) * 100, br = bandRate(l);
+  const mv = S.mv, agent = N(mv.value) * N(mv.agentPct) / 100 * 1.2, mErc = N(mv.mortgage) * N(mv.erc) / 100, sell = agent + N(mv.legal) + N(mv.epc) + N(mv.other), equity = N(mv.value) - N(mv.mortgage) - mErc - sell;
+  $('#swOut').innerHTML = `<div class="panel"><h3 style="margin-top:0">Remortgage</h3>
+    <div class="cards">${stat('Current payment', gbp2(cur), `${N(r.rate)}% over ${N(r.termLeft)} yrs`)}${stat('New payment', gbp2(np), `${N(r.newRate)}%${N(r.raise) ? ` incl. ${gbp(N(r.raise))} extra borrowing` : ''}`, 'hero')}${stat('Monthly saving', gbp(monthly), 'same balance and term', monthly > 0 ? 'good' : 'bad')}${stat('Cost to switch', gbp(cost), `ERC ${gbp(erc)} + fees`)}${stat('Break-even', be ? yrsMo(be) : 'not within deal', 'interest saved vs switching costs', be && be <= H ? 'good' : 'bad')}${stat(`Net saving over ${N(r.newYears)} yrs`, gbp(save), '', save > 0 ? 'good' : 'bad')}</div>
+    ${erc > 0 && wait > 0 ? `<div class="${waitCost < erc ? 'warnbox' : 'okbox'}"><b>Switch now or wait?</b> Waiting ${wait} months for the deal to end costs about ${gbp(waitCost)} in extra interest, against an ERC of ${gbp(erc)} for leaving now. ${waitCost < erc ? `Waiting is better by ${gbp(erc - waitCost)}. Most lenders let you secure a new rate up to 6 months ahead.` : `Switching now is better by ${gbp(waitCost - erc)}.`}</div>` : ''}
+    <div class="note">New LTV ${pct(l)}${br != null ? `: typical rates in that band around ${br.toFixed(2)}% (from your LTV-band table)` : ''}. A <b>product transfer</b> with your current lender usually needs no legal work or new affordability check. A full <b>remortgage</b> to a new lender may get a better rate, often with free legals and valuation.</div></div>
+  <div class="panel"><h3 style="margin-top:0">If you sell and move</h3>
+    <div class="cards">${stat('Equity released', gbp(equity), 'cash towards the next deposit', equity > 0 ? 'hero' : 'bad')}${stat('Selling costs', gbp(sell), `agent ${gbp(agent)} incl. VAT`)}${stat('ERC on redemption', gbp(mErc), N(mv.erc) ? 'avoid by porting' : 'none')}</div>
+    <div class="row"><button class="btn pri" id="useEquity">Use ${gbp(equity)} as my deposit (home mover)</button></div>
+    <p class="hint">Porting moves your current rate to the new home, avoiding the ERC. Any extra borrowing is usually on a separate product at today's rates, and the lender re-checks affordability. Movers pay standard stamp duty, and if you buy before selling you pay the 5% surcharge, which you can reclaim if you sell the old home within 3 years.</p></div>`;
+  $('#useEquity').onclick = () => { S.deposit = Math.max(0, Math.round(equity)); S.buyer = 'mover'; S.price = Math.max(N(S.price), S.deposit); changed(); toast('Deposit and buyer status updated'); };
+}
+
+/* =========================================================================
+   wiring
+   ========================================================================= */
+const RENDER = { home: rHome, profile: rProfile, costs: rCosts, mortgage: rMortgage, products: rProducts, invest: rInvest, payoff: rPayoff, budget: rBudget, switch: rSwitch };
+function render() { C = null; try { renderKPIs(); RENDER[CUR](); } catch (e) { console.error(e); } }
+const renderSoon = debounce(render, 180);
+function changed(now = true) { save(); C = null; applyShow(); syncInputs(); now ? render() : renderSoon(); }
+function download(name, text, type) { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([text], { type })); a.download = name; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 2000); }
+
+function wire() {
+  document.addEventListener('input', e => {
+    const el = e.target;
+    if (el.dataset.k) { setP(S, el.dataset.k, el.type === 'checkbox' ? el.checked : el.type === 'number' ? (el.value === '' ? '' : parseFloat(el.value)) : el.value); save(); C = null; applyShow(); renderSoon(); $$(`[data-k="${el.dataset.k}"]`).forEach(o => { if (o !== el && o.type !== 'checkbox') o.value = el.value; }); }
+    else if (el.dataset.l) { const row = S[el.dataset.l][+el.dataset.i]; row[el.dataset.f] = el.type === 'checkbox' ? el.checked : el.type === 'number' ? (el.value === '' ? '' : parseFloat(el.value)) : el.value; save(); C = null; renderSoon(); }
+  });
+  document.addEventListener('change', e => { const el = e.target; if (el.dataset.k || el.dataset.l) { if (el.dataset.k) setP(S, el.dataset.k, el.type === 'checkbox' ? el.checked : el.type === 'number' ? (el.value === '' ? '' : parseFloat(el.value)) : el.value); changed(); } });
+  document.addEventListener('click', e => {
+    const t = e.target.closest('[data-go],[data-t],[data-add],[data-del],[data-ret]'); if (!t) return;
+    if (t.dataset.go) go(t.dataset.go);
+    else if (t.dataset.t) go(t.dataset.t);
+    else if (t.dataset.add) { const L = LISTS[t.dataset.add]; S[t.dataset.add].push(L.add()); renderLists(t.dataset.add); changed(); }
+    else if (t.dataset.del) { const [n, i] = t.dataset.del.split(':'); S[n].splice(+i, 1); renderLists(n); changed(); }
+    else if (t.dataset.ret) { S.invReturn = +t.dataset.ret; changed(); }
+  });
+  $('#schedView').onchange = renderSched; $('#schedCsv').onclick = schedCsv;
+  $('#useSurplus').onclick = () => { const b = budgetCalc(); S.budgetYear = Math.max(0, Math.round(Math.max(0, b.surplus) * N(S.surplusShare) / 100 * 12 / 100) * 100); changed(); toast(`Using ${gbp(S.budgetYear)}/yr from your budget`); };
+  $('#tShare').onclick = () => { const url = location.href.split('#')[0] + '#s=' + btoa(unescape(encodeURIComponent(JSON.stringify(S)))); (navigator.clipboard ? navigator.clipboard.writeText(url) : Promise.reject()).then(() => toast('Share link copied'), () => prompt('Copy this link', url)); };
+  $('#tExport').onclick = () => download('mortgage-plan-' + new Date().toISOString().slice(0, 10) + '.json', JSON.stringify(S, null, 1), 'application/json');
+  $('#tImport').onchange = async e => { const f = e.target.files[0]; if (!f) return; try { S = deepMerge(DEF(), JSON.parse(await f.text())); buildTabs(); wire2(); changed(); toast('Plan imported'); } catch (err) { toast('Import failed: ' + err.message); } e.target.value = ''; };
+  $('#tPrint').onclick = () => print();
+  $('#tReset').onclick = () => { if (!confirm('Reset every input to the defaults?')) return; S = DEF(); buildTabs(); wire2(); changed(); toast('Reset'); };
+}
+function wire2() { $('#schedView').onchange = renderSched; $('#schedCsv').onclick = schedCsv; $('#useSurplus').onclick = () => { const b = budgetCalc(); S.budgetYear = Math.max(0, Math.round(Math.max(0, b.surplus) * N(S.surplusShare) / 100 * 12 / 100) * 100); changed(); }; go(CUR); }
+
+load(); buildTabs(); wire(); applyShow();
+let t0 = 'home'; try { t0 = localStorage.getItem(STORE + '.tab') || 'home'; } catch (e) {}
+go(RENDER[t0] ? t0 : 'home');
+</script>
+</body>
+</html>

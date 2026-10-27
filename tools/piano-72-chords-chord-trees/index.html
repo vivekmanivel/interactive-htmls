@@ -1,0 +1,315 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Piano 72 Chords: Chord Trees with Keyboard Positions</title>
+<meta name="description" content="Every major and minor piano chord in every inversion, shown on a keyboard and grouped into 12 chord trees. Free study sheet by Usualy Labs.">
+<style>
+:root{--bg:#10151c;--card:#19212c;--line:#2a3544;--tx:#e8edf3;--mut:#9aa7b6;--gold:#ffb03a;--green:#46d19a;--blue:#6aa8ff;--red:#ff6b6b}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.5 -apple-system,system-ui,Segoe UI,Roboto,sans-serif;padding:0 16px 80px}
+.wrap{max-width:760px;margin:0 auto}
+h1{font-size:26px;margin:28px 0 4px}
+h2{font-size:20px;margin:36px 0 10px;color:var(--gold)}
+h3{font-size:16px;margin:0 0 4px}
+p{margin:8px 0}
+.sub{color:var(--mut);margin:0 0 16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin:12px 0}
+.math{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-weight:700;font-size:20px;margin:10px 0}
+.math span{background:#0c1117;border:1px solid var(--line);border-radius:8px;padding:4px 10px}
+.math .hl{background:var(--gold);color:#111;border-color:var(--gold)}
+.math .g{background:var(--green);color:#111;border-color:var(--green)}
+.grid{display:grid;grid-template-columns:1fr;gap:10px}
+@media(min-width:560px){.grid{grid-template-columns:1fr 1fr}}
+.tag{display:inline-block;font-size:12px;font-weight:700;border-radius:6px;padding:1px 8px;margin-right:6px}
+.maj{background:#3a2d12;color:var(--gold)}
+.min{background:#16294a;color:var(--blue)}
+.note{color:var(--mut);font-size:14px}
+.top{color:var(--gold);font-weight:700}
+.prog{position:sticky;top:0;z-index:5;background:var(--bg);padding:10px 0 8px;border-bottom:1px solid var(--line)}
+.bar{height:10px;background:#0c1117;border-radius:6px;overflow:hidden;position:relative}
+.bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--gold),var(--green));transition:width .25s}
+.bar b{position:absolute;left:50%;top:0;bottom:0;width:2px;background:#fff6}
+.row{display:flex;justify-content:space-between;align-items:center;font-size:14px;color:var(--mut);margin-bottom:6px}
+button{background:#0c1117;color:var(--tx);border:1px solid var(--line);border-radius:8px;padding:6px 12px;font-size:14px}
+.tree{background:var(--card);border:1px solid var(--line);border-radius:14px;margin:14px 0;overflow:hidden}
+.tree.done{border-color:var(--green)}
+.thead{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;background:#1f2937}
+.thead .big{font-size:22px;font-weight:800}
+.chord{display:flex;gap:12px;align-items:flex-start;padding:12px 16px;border-top:1px solid var(--line)}
+.chord input{width:24px;height:24px;margin-top:2px;accent-color:var(--green);flex:none}
+.chord label{flex:1;cursor:pointer}
+.cn{font-size:19px;font-weight:800}
+.cd{font-size:14px;color:var(--mut)}
+.tones span{display:inline-block;min-width:34px;text-align:center;border:1px solid var(--line);border-radius:6px;padding:0 6px;margin-right:4px;font-weight:700;background:#0c1117}
+.tones span.t{background:var(--gold);color:#111;border-color:var(--gold)}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{padding:6px 8px;border-bottom:1px solid var(--line);text-align:left}
+th{color:var(--mut);font-weight:600}
+.half{text-align:center;color:var(--gold);font-weight:700;margin:22px 0;letter-spacing:.5px}
+ol,ul{padding-left:22px;margin:8px 0}
+li{margin:4px 0}
+.kbwrap{margin:8px 0 2px;max-width:504px}
+.kbwrap svg{width:100%;height:auto;display:block;border-radius:6px}
+.leg{display:flex;flex-wrap:wrap;gap:12px;font-size:13px;color:var(--mut);margin:6px 0}
+.leg i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+</style>
+<meta name="author" content="Usualy Labs">
+<meta name="color-scheme" content="light dark">
+<script>/* Usualy Labs theme switcher: auto | light | dark, remembered in this browser only */
+(function(){var K='usualy.theme',d=document.documentElement,m=window.matchMedia?matchMedia('(prefers-color-scheme: dark)'):null;
+function p(){try{return localStorage.getItem(K)||'auto'}catch(e){return 'auto'}}
+function a(){var v=p();d.setAttribute('data-theme',v==='auto'?(m&&m.matches?'dark':'light'):v)}
+a();if(m&&m.addEventListener)m.addEventListener('change',a);
+window.setTheme=function(v){try{localStorage.setItem(K,v)}catch(e){}a()};
+document.addEventListener('DOMContentLoaded',function(){var s=document.getElementById('themeSel');if(s){s.value=p();s.onchange=function(){setTheme(s.value)}}})})();
+</script>
+<style>
+.ul-theme{position:fixed;top:10px;right:10px;z-index:50;display:flex;gap:6px;align-items:center;font-size:13px;color:var(--mut);background:var(--card);border:1px solid var(--line);border-radius:99px;padding:4px 6px 4px 12px}
+.ul-theme select{background:var(--bg);color:var(--tx);border:1px solid var(--line);border-radius:99px;padding:3px 6px;font:inherit}
+:root[data-theme=light]{--bg:#f6f7fb;--card:#fff;--line:#dfe4ee;--tx:#172033;--mut:#5b6578;--gold:#a65f00;--green:#18794e;--blue:#2f5fd0;--red:#c53030}
+[data-theme=light] .math span,[data-theme=light] .bar,[data-theme=light] button,[data-theme=light] .tones span{background:#eef1f6}
+[data-theme=light] .math .hl{background:var(--gold);color:#fff}
+[data-theme=light] .math .g{background:var(--green);color:#fff}
+[data-theme=light] .tones span.t{background:var(--gold);color:#fff}
+[data-theme=light] .thead{background:#eef1f6}
+[data-theme=light] .maj{background:#fff1d6}
+[data-theme=light] .min{background:#e3ecff}
+[data-theme=light] .bar b{background:#0003}
+.ul-about li{margin:4px 0}
+</style>
+</head>
+<body>
+<label class="ul-theme">Theme <select id="themeSel" aria-label="Colour theme"><option value="auto">Auto</option><option value="light">Light</option><option value="dark">Dark</option></select></label>
+
+<div class="wrap">
+
+<h1>72 Piano Chords</h1>
+<p class="sub">Every major &amp; minor chord, in every inversion – practice sheet using the &ldquo;chord trees&rdquo; method (credits at the end).</p>
+
+<h2>1. Where "72" comes from</h2>
+<div class="card">
+  <div class="math"><span>12</span>+<span>12</span>=<span class="hl">24</span>×<span>3</span>=<span class="g">72</span></div>
+  <ul>
+    <li><b>12</b> major chords (one for each note)</li>
+    <li><b>12</b> minor chords (one for each note)</li>
+    <li><b>24</b> chords in total</li>
+    <li>Each can be played <b>3 ways</b> (root position, 1st inversion, 2nd inversion) → <b>72</b> shapes</li>
+  </ul>
+</div>
+
+<h2>2. What everything means</h2>
+<div class="grid">
+  <div class="card"><h3>Triad</h3><p>A 3-note chord: <b>Root</b>, <b>3rd</b>, <b>5th</b>. Every chord on this page is a triad.</p></div>
+  <div class="card"><h3>Root</h3><p>The note the chord is named after. In <b>C</b> major the root is C.</p></div>
+  <div class="card"><h3><span class="tag maj">MAJOR</span></h3><p>Root + <b>4</b> semitones (major 3rd) + <b>3</b> more (minor 3rd on top). Sounds bright, happy, open. <span class="note">C major = C E G</span></p></div>
+  <div class="card"><h3><span class="tag min">MINOR</span></h3><p>Root + <b>3</b> semitones (minor 3rd) + <b>4</b> more. Sounds darker, sadder, more emotional. Written with a small "m". <span class="note">C minor = C E♭ G</span></p></div>
+  <div class="card"><h3>Semitone</h3><p>The smallest step on the piano – one key to the very next key (white or black).</p></div>
+  <div class="card"><h3>Inversion</h3><p>Same three notes, different order from bottom to top. Same chord, different shape.</p></div>
+  <div class="card"><h3>Root position</h3><p>Root at the bottom, 5th on top: <b>R – 3 – 5</b>.</p></div>
+  <div class="card"><h3>1st inversion</h3><p>3rd at the bottom, root on top: <b>3 – 5 – R</b>.</p></div>
+  <div class="card"><h3>2nd inversion</h3><p>5th at the bottom, 3rd on top: <b>5 – R – 3</b>.</p></div>
+  <div class="card"><h3>Sharps / flats</h3><p>♯ = one key up, ♭ = one key down. Same black key, two names: <b>A♭ = G♯</b>, <b>D♭ = C♯</b>. The name depends on the chord.</p></div>
+</div>
+
+<h2>3. The method: chord trees</h2>
+<div class="card">
+  <p><b>Don't memorise 72 shapes one by one.</b> Pick one note and keep it on <span class="top">top</span> of your right hand. It never moves. Only the chord underneath changes.</p>
+  <ul>
+    <li>Exactly <b>6 triads</b> contain any given note: <b>3 major + 3 minor</b> (it can be the root, the 3rd or the 5th).</li>
+    <li>That note is the <b>common note</b> – it links all 6 chords, so they flow together smoothly.</li>
+    <li>Play the <b>root</b> of each chord in your <b>left hand</b>, the triad in your right.</li>
+    <li>Pick a different top note and you get a new tree: <b>12 trees × 6 chords = 72</b>.</li>
+    <li><b>6 trees = 36 chords = halfway.</b></li>
+  </ul>
+  <p class="note">Examples: the D tree is D → B♭ → G → Bm → Gm → Dm. The A♭ tree is A♭, G♯m, D♭, C♯m, E, Fm – A♭ never moves.</p>
+</div>
+
+<h2>4. Know your keys</h2>
+<div class="card">
+  <div class="kbwrap" id="guide"></div>
+  <ul>
+    <li><b>C</b> = the white key just left of the group of <b>two</b> black keys.</li>
+    <li><b>G</b> = the white key between the 1st and 2nd black keys of the group of <b>three</b>.</li>
+    <li>Use C and G as landmarks, then count up or down from them. Black keys have two names (e.g. C♯ = D♭).</li>
+  </ul>
+  <p class="note">The keyboards in the chord cards run from C to B over three octaves. <b>C</b> and <b>G</b> are labelled on every one.</p>
+</div>
+
+<h2>5. Practice: the 12 trees</h2>
+<div class="leg"><span><i style="background:#4f8cff"></i>Left hand (root)</span><span><i style="background:#ff5a5a"></i>Right hand (triad)</span><span><i style="background:#ffb03a"></i>Gold outline = top note</span></div>
+<div class="prog">
+  <div class="row"><span id="count">0 / 72</span><button id="reset">Reset</button></div>
+  <div class="bar"><i id="fill"></i><b></b></div>
+</div>
+<p class="note">Tick each chord once you can play it cleanly with the gold note on top. Progress is saved on this device if your browser allows it.</p>
+<div id="trees"></div>
+
+<h2>6. Quick reference: all 24 chords</h2>
+<div class="card"><table id="ref"></table></div>
+<p class="note">Notes are listed root → 3rd → 5th. Black-key chords use the common names (e.g. D♭ major, C♯ minor).</p>
+
+<h2>7. How to practise</h2>
+<div class="card">
+  <ol>
+    <li>Take one tree. Find the top note and hold it as your right-hand top finger.</li>
+    <li>Play the 6 chords in order, root in the left hand. Go slowly – smooth beats fast.</li>
+    <li>Repeat until you can do it without looking, then go backwards.</li>
+    <li>Say the chord name out loud and whether it's major or minor.</li>
+    <li>Move to the next tree. Revisit finished trees to keep them fresh.</li>
+  </ol>
+</div>
+
+<h2>8. About, sources &amp; disclaimer</h2>
+<div class="card ul-about" id="about">
+  <p><b>Piano 72 Chords: Chord Trees</b> &middot; published by <b>Usualy Labs</b> &middot; version 1.0.0.</p>
+  <h3>Sources and credits</h3>
+  <ul>
+    <li>Chord spellings, intervals and inversions follow standard Western music theory, which is common knowledge and not owned by anyone.</li>
+    <li>The &ldquo;chord trees&rdquo; practice idea (keeping one common top note while the six major and minor triads that contain it change underneath) is credited to piano teacher <b>Jason Zachariah</b>, whose video lesson inspired this sheet. Usualy Labs is not affiliated with or endorsed by him. All text, diagrams and code here are original; please see his own lessons for his full method.</li>
+    <li>Keyboard diagrams are drawn by this page; no images or libraries are loaded.</li>
+  </ul>
+  <h3>Your privacy</h3>
+  <p>Usualy Labs collects nothing and this page makes no network requests. Your ticks and theme choice are saved only in your browser on this device.</p>
+  <h3>Disclaimer</h3>
+  <p>A free study aid for general educational use, provided &ldquo;as is&rdquo; without warranty. It is not professional advice and not a substitute for a qualified music teacher. To the fullest extent permitted by law, Usualy Labs accepts no responsibility or liability arising from its use. Nothing here limits any liability that cannot be limited by law.</p>
+  <p>Spotted a mistake? Please report it through the project's GitHub Issues page.</p>
+</div>
+
+</div>
+
+<script>
+var L=['C','D','E','F','G','A','B'], NAT=[0,2,4,5,7,9,11];
+var MAJ=['C','Db','D','Eb','E','F','Gb','G','Ab','A','Bb','B'];
+var MIN=['C','C#','D','Eb','E','F','F#','G','G#','A','Bb','B'];
+function pretty(s){return s.replace(/#/g,'♯').replace(/b/g,'♭');}
+function accStr(d){return d===0?'':d>0?(d===1?'#':'##'):(d===-1?'b':'bb');}
+function spell(root,minor){
+  var li=L.indexOf(root[0]), acc=0;
+  for(var i=1;i<root.length;i++){acc+=root[i]==='#'?1:-1;}
+  var rs=((NAT[li]+acc)%12+12)%12, iv=minor?[0,3,7]:[0,4,7], out=[];
+  for(var k=0;k<3;k++){
+    var l=(li+2*k)%7, tg=(rs+iv[k])%12;
+    var d=(((tg-NAT[l])%12)+12)%12; if(d>6)d-=12;
+    out.push(L[l]+accStr(d));
+  }
+  return out;
+}
+var SPEC=[
+  {m:false,role:0,off:0},
+  {m:false,role:1,off:-4},
+  {m:false,role:2,off:-7},
+  {m:true,role:1,off:-3},
+  {m:true,role:2,off:-7},
+  {m:true,role:0,off:0}
+];
+var ROLE=['Root','3rd','5th'];
+var INV={2:'Root position',0:'1st inversion',1:'2nd inversion'};
+var WH=[0,2,4,5,7,9,11], BLK=[1,3,6,8,10];
+var NAMES=['C','D','E','F','G','A','B'];
+var BNAMES={1:'C♯/D♭',3:'D♯/E♭',6:'F♯/G♭',8:'G♯/A♭',10:'A♯/B♭'};
+function keyboardSvg(pressed,lo,hi,guide){
+  var W=24,H=88,BW=14,BH=54,i,m,pc,idx=0,wi={},w='',b='',t='';
+  for(m=lo;m<=hi;m++){
+    pc=((m%12)+12)%12;
+    if(WH.indexOf(pc)>=0){
+      wi[m]=idx;
+      var p=pressed[m], fill='#f4f1ea', tc='#8a8f98', lab='';
+      if(p){fill=p.h==='l'?'#4f8cff':'#ff5a5a';tc='#fff';lab=pretty(p.n);}
+      else if(guide&&(pc===0||pc===7)){fill='#ffd27a';tc='#222';}
+      if(!lab){ if(guide)lab=NAMES[WH.indexOf(pc)]; else if(pc===0||pc===7)lab=NAMES[WH.indexOf(pc)]; }
+      var bold=(pc===0||pc===7||p)?'700':'500';
+      w+='<rect x="'+(idx*W)+'" y="0" width="'+W+'" height="'+H+'" fill="'+fill+'" stroke="#222" stroke-width="1"/>';
+      if(p&&p.top)w+='<rect x="'+(idx*W+2)+'" y="2" width="'+(W-4)+'" height="'+(H-4)+'" fill="none" stroke="#ffb03a" stroke-width="3"/>';
+      if(lab)t+='<text x="'+(idx*W+W/2)+'" y="'+(H-7)+'" text-anchor="middle" font-size="11" font-weight="'+bold+'" fill="'+tc+'" font-family="sans-serif">'+lab+'</text>';
+      idx++;
+    }
+  }
+  for(m=lo;m<=hi;m++){
+    pc=((m%12)+12)%12;
+    if(BLK.indexOf(pc)>=0&&wi[m-1]!==undefined&&m+1<=hi){
+      var q=pressed[m], f2='#1a1a1a';
+      if(q)f2=q.h==='l'?'#1f57c9':'#d12f2f';
+      var x=(wi[m-1]+1)*W-BW/2;
+      b+='<rect x="'+x+'" y="0" width="'+BW+'" height="'+BH+'" rx="2" fill="'+f2+'" stroke="#000" stroke-width="1"/>';
+      if(q&&q.top)b+='<rect x="'+(x+1.5)+'" y="1.5" width="'+(BW-3)+'" height="'+(BH-3)+'" rx="2" fill="none" stroke="#ffb03a" stroke-width="2.5"/>';
+      if(q)b+='<text x="'+(x+BW/2)+'" y="'+(BH-8)+'" text-anchor="middle" font-size="9" font-weight="700" fill="#fff" font-family="sans-serif">'+pretty(q.n)+'</text>';
+      else if(guide)b+='<text x="'+(x+BW/2)+'" y="'+(BH-6)+'" text-anchor="middle" font-size="5.5" fill="#bbb" font-family="sans-serif">'+BNAMES[pc].split('/')[0].replace('#','♯')+'</text>';
+    }
+  }
+  return '<svg viewBox="0 0 '+(idx*W)+' '+H+'" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Piano keyboard">'+w+b+t+'</svg>';
+}
+function kbSvg(rs,m,tones,role){
+  var iv=m?[0,3,7]:[0,4,7], pcs=iv.map(function(x){return (rs+x)%12;});
+  var order=role===0?[1,2,0]:role===1?[2,0,1]:[0,1,2];
+  var mids=[],cur=60+pcs[order[2]],k,x,pr={};
+  mids[2]=cur;
+  for(k=1;k>=0;k--){x=cur-1;while(((x%12)+12)%12!==pcs[order[k]])x--;mids[k]=x;cur=x;}
+  for(k=0;k<3;k++){pr[mids[k]]={n:tones[order[k]],h:'r',top:k===2};}
+  pr[36+rs]={n:tones[0],h:'l'};
+  return '<div class="kbwrap">'+keyboardSvg(pr,36,71,false)+'</div>';
+}
+var store={};
+try{store=JSON.parse(localStorage.getItem('chords72')||'{}')}catch(e){store={}}
+function save(){try{localStorage.setItem('chords72',JSON.stringify(store))}catch(e){}}
+
+function build(){
+  var h='';
+  for(var t=0;t<12;t++){
+    var top=MAJ[t];
+    h+='<div class="tree" id="tree'+t+'"><div class="thead"><div><div class="note">Tree '+(t+1)+' of 12'+(t===5?' · halfway after this one':'')+'</div><div class="big">Top note: <span class="top">'+pretty(top)+'</span></div></div><div class="note" id="tc'+t+'">0 / 6</div></div>';
+    for(var c=0;c<6;c++){
+      var s=SPEC[c], rs=((t+s.off)%12+12)%12;
+      var rn=s.m?MIN[rs]:MAJ[rs], tones=spell(rn,s.m);
+      var name=rn+(s.m?'m':'');
+      var id=t+'-'+c;
+      var tn=tones.map(function(n,i){return '<span'+(i===s.role?' class="t"':'')+'>'+pretty(n)+'</span>';}).join('');
+      h+='<div class="chord"><input type="checkbox" id="c'+id+'" data-t="'+t+'" data-id="'+id+'"'+(store[id]?' checked':'')+'>'+
+         '<label for="c'+id+'"><div class="cn">'+pretty(name)+' <span class="tag '+(s.m?'min':'maj')+'">'+(s.m?'MINOR':'MAJOR')+'</span></div>'+
+         '<div class="tones">'+tn+'</div>'+kbSvg(rs,s.m,tones,s.role)+
+         '<div class="cd">'+pretty(top)+' is the <b>'+ROLE[s.role]+'</b> · '+INV[s.role]+' · left hand: '+pretty(rn)+'</div></label></div>';
+    }
+    h+='</div>';
+    if(t===5)h+='<div class="half">— 36 OUT OF 72 · HALFWAY —</div>';
+  }
+  document.getElementById('trees').innerHTML=h;
+  document.getElementById('guide').innerHTML=keyboardSvg({},48,71,true);
+
+  var r='<tr><th>Major</th><th>Notes</th><th>Minor</th><th>Notes</th></tr>';
+  for(var i=0;i<12;i++){
+    r+='<tr><td><b>'+pretty(MAJ[i])+'</b></td><td>'+spell(MAJ[i],false).map(pretty).join(' ')+'</td><td><b>'+pretty(MIN[i])+'m</b></td><td>'+spell(MIN[i],true).map(pretty).join(' ')+'</td></tr>';
+  }
+  document.getElementById('ref').innerHTML=r;
+}
+function update(){
+  var total=0, per=[];
+  for(var t=0;t<12;t++){
+    var n=0;
+    for(var c=0;c<6;c++){if(store[t+'-'+c])n++;}
+    per.push(n); total+=n;
+  }
+  var cnt=document.getElementById('count'); if(cnt)cnt.textContent=total+' / 72'+(total>=72?' 🎉':total>=36?' · past halfway':'');
+  var f=document.getElementById('fill'); if(f)f.style.width=(total/72*100)+'%';
+  for(var t2=0;t2<12;t2++){
+    var e=document.getElementById('tc'+t2); if(e)e.textContent=per[t2]+' / 6';
+    var tr=document.getElementById('tree'+t2); if(tr){tr.className='tree'+(per[t2]===6?' done':'');}
+  }
+}
+build(); update();
+document.addEventListener('change',function(e){
+  var el=e.target;
+  if(el&&el.getAttribute&&el.getAttribute('data-id')){
+    store[el.getAttribute('data-id')]=el.checked?1:0; save(); update();
+  }
+});
+var rb=document.getElementById('reset');
+if(rb)rb.addEventListener('click',function(){
+  store={}; save();
+  var boxes=document.querySelectorAll('.chord input');
+  for(var i=0;i<boxes.length;i++)boxes[i].checked=false;
+  update();
+});
+</script>
+</body>
+</html>

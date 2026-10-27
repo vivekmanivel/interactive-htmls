@@ -1,0 +1,12 @@
+{
+  "slug": "piano-72-chords-chord-trees",
+  "title": "Piano 72 Chords: Chord Trees with Keyboard Positions",
+  "version": "1.0.0",
+  "status": "approved",
+  "summary": "All 24 major and minor triads in all 3 positions (72 shapes), each drawn on a keyboard with left- and right-hand notes, grouped into 12 common-top-note chord trees with a progress tracker.",
+  "category": "Music",
+  "data_sources": ["Standard music theory", "Chord trees method (credit: Jason Zachariah)"],
+  "external_requests": false,
+  "data_last_checked": "2026-10",
+  "licence": "MIT"
+}
