@@ -91,6 +91,19 @@
 }
 ,
 {
+  "slug": "uk-cash-flow-simulator",
+  "title": "UK Small Business Cash Flow Simulator",
+  "version": "1.0.0",
+  "status": "approved",
+  "summary": "Day-by-day cash flow for a UK small business on the real banking calendar: Bacs Direct Debit and card settlement timing, bank holidays, failed payments and retries, invoices, payroll, HMRC PAYE, VAT and Corporation Tax dates, overdraft and buffer alerts, with a Monte Carlo view. Fully offline.",
+  "category": "Payments & business",
+  "data_sources": ["GOV.UK bank holiday rules", "Pay.UK / Bacs processing cycle", "HMRC PAYE, VAT and Corporation Tax deadlines", "Illustrative payment assumptions"],
+  "external_requests": false,
+  "data_last_checked": "2026-10",
+  "licence": "MIT"
+}
+,
+{
   "slug": "uk-mortgage-planner",
   "title": "UK Mortgage Planner",
   "version": "1.0.0",

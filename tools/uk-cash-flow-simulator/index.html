@@ -1,0 +1,963 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>UK Small Business Cash Flow Simulator</title>
+<meta name="description" content="A UK cash flow simulator for small businesses: Bacs Direct Debit and card settlement on the real banking calendar, bank holidays, failed payment retries, payroll, HMRC and VAT dates, a 13 to 52 week forecast and a stress test.">
+<style>
+:root{
+  --bg:#0a1120;--bg2:#0d1628;--panel:#111b30;--panel2:#16233d;--ink:#f3eee4;--muted:#93a0b7;--line:#22314d;
+  --acc:#ff6a2b;--acc2:#ffa063;--blue:#5aa2ff;--good:#3fd18b;--bad:#ff6161;--warn:#ffb648;--violet:#b48cff;--teal:#2ec4c4;--pink:#ff7ab6;
+  --serif:Georgia,serif;--sans:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;--mono:ui-monospace,Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.5 var(--sans)}
+a{color:var(--acc2)}
+h1,h2,h3{font-family:var(--serif);font-weight:600;letter-spacing:-.01em}
+h2{font-size:22px;margin:0 0 4px}
+h3{font-size:16px;margin:22px 0 8px}
+.mono{font-family:var(--mono)}
+small,.hint{color:var(--muted);font-size:12.5px}
+.hint{margin:6px 0 10px}
+.app{display:grid;grid-template-columns:268px minmax(0,1fr);min-height:100vh}
+nav.side{position:sticky;top:0;height:100vh;overflow:auto;background:linear-gradient(180deg,var(--bg2),var(--bg));border-right:1px solid var(--line);padding:20px 16px}
+.brand{display:flex;gap:10px;align-items:center;margin-bottom:18px}
+.logo{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,var(--acc),#ff3d6e);display:grid;place-items:center;font-family:var(--serif);font-weight:700;font-size:19px;color:#fff;flex:none}
+.brand b{font-family:var(--serif);font-size:17px;display:block;line-height:1.15}
+.brand span{font:10.5px var(--mono);color:var(--muted);letter-spacing:.06em}
+ol.pipe{list-style:none;margin:0;padding:0;position:relative}
+ol.pipe::before{content:"";position:absolute;left:15px;top:14px;bottom:14px;width:2px;background:linear-gradient(180deg,var(--acc),var(--violet),var(--blue));opacity:.55;border-radius:2px}
+ol.pipe li{position:relative;margin:2px 0}
+ol.pipe button{all:unset;cursor:pointer;display:grid;grid-template-columns:32px 1fr;gap:10px;align-items:center;width:100%;padding:7px 6px;border-radius:10px;box-sizing:border-box}
+ol.pipe button:hover{background:rgba(255,255,255,.04)}
+ol.pipe .n{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;background:var(--panel);border:1px solid var(--line);font:600 12px var(--mono);color:var(--muted);position:relative;z-index:1}
+ol.pipe .t{font-weight:600;font-size:13.5px;line-height:1.2}
+ol.pipe .d{display:block;font-size:11.5px;color:var(--muted);font-weight:400}
+ol.pipe button.active .n{background:var(--acc);border-color:var(--acc);color:#fff;box-shadow:0 0 0 4px rgba(255,106,43,.18)}
+ol.pipe button.active .t{color:var(--acc2)}
+.tools{margin-top:18px;border-top:1px solid var(--line);padding-top:14px;display:flex;flex-wrap:wrap;gap:6px}
+.family{margin-top:14px;font-size:12px;color:var(--muted)}
+.family a{display:block;margin:3px 0;text-decoration:none}
+main{min-width:0;padding:0 26px 60px}
+.kpis{position:sticky;top:0;z-index:20;background:rgba(10,17,32,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);margin:0 -26px 18px;padding:10px 26px;display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px}
+.kpis:empty{display:none}
+.kpis.nok{padding:0;border:0;margin-bottom:18px}
+.kpi .l{font:11px var(--mono);color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.kpi .v{font:600 17px var(--mono);white-space:nowrap}
+.kpi .s{font-size:11.5px;color:var(--muted)}
+.tab{display:none;padding-top:4px}.tab.active{display:block;animation:fade .25s ease}
+@keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+.tabhead{margin:6px 0 14px}
+.eyebrow{font:11.5px var(--mono);color:var(--acc2);letter-spacing:.12em;text-transform:uppercase}
+.grid2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.3fr);gap:16px;align-items:start}
+.grid2.even{grid-template-columns:1fr 1fr}
+.grid2.wideL{grid-template-columns:minmax(0,1.5fr) minmax(0,1fr)}
+@media (max-width:1150px){.grid2,.grid2.even,.grid2.wideL{grid-template-columns:1fr}}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px 18px;min-width:0}
+.panel+.panel{margin-top:16px}
+fieldset{border:1px solid var(--line);border-radius:12px;padding:10px 12px 12px;margin:0 0 12px;min-width:0}
+legend{font:600 11.5px var(--mono);color:var(--acc2);text-transform:uppercase;letter-spacing:.08em;padding:0 6px}
+.fg{display:grid;grid-template-columns:repeat(auto-fill,minmax(165px,1fr));gap:10px}
+label{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--muted);font-weight:500}
+label>small{font-size:11px;line-height:1.3}
+input,select,textarea{font:13px var(--mono);color:var(--ink);background:var(--bg2);border:1px solid var(--line);border-radius:8px;padding:7px 9px;width:100%;min-width:0}
+select{font-family:var(--sans)}
+input:focus,select:focus,textarea:focus{outline:2px solid var(--acc);outline-offset:-1px}
+input[type=range]{padding:0;accent-color:var(--acc)}
+label.chk{flex-direction:row;align-items:center;gap:8px;color:var(--ink);font-size:13px}
+label.chk input{width:auto;accent-color:var(--acc)}
+.btn{font:600 12.5px var(--sans);border:1px solid var(--line);background:var(--panel2);color:var(--ink);padding:7px 12px;border-radius:8px;cursor:pointer;text-decoration:none;display:inline-block}
+.btn:hover{border-color:var(--acc)}
+.btn.pri{background:var(--acc);border-color:var(--acc);color:#fff}
+.btn.sm{padding:4px 9px;font-size:12px}
+.btn.on{background:rgba(255,106,43,.18);border-color:var(--acc);color:var(--acc2)}
+.btn.del{color:var(--bad);padding:3px 8px}
+.filebtn{position:relative;overflow:hidden}.filebtn input{position:absolute;inset:0;opacity:0;cursor:pointer}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;margin:10px 0}
+.stat{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:10px 12px;min-width:0}
+.stat .l{font-size:11.5px;color:var(--muted);font-weight:600}
+.stat .v{font:600 19px var(--mono);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.stat .s{font-size:11.5px;color:var(--muted)}
+.stat.good .v{color:var(--good)}.stat.bad .v{color:var(--bad)}.stat.warn .v{color:var(--warn)}.stat.acc .v{color:var(--acc2)}
+.stat.hero{background:linear-gradient(135deg,rgba(255,106,43,.16),rgba(90,162,255,.08));border-color:rgba(255,106,43,.45)}
+.note,.warnbox,.badbox,.okbox{padding:8px 12px;border-radius:8px;margin:8px 0;font-size:13px}
+.note{border-left:3px solid var(--blue);background:rgba(90,162,255,.08)}
+.warnbox{border-left:3px solid var(--warn);background:rgba(255,182,72,.08)}
+.badbox{border-left:3px solid var(--bad);background:rgba(255,97,97,.08)}
+.okbox{border-left:3px solid var(--good);background:rgba(63,209,139,.08)}
+.reco{border:1px solid rgba(255,106,43,.5);background:linear-gradient(135deg,rgba(255,106,43,.14),rgba(180,140,255,.06));border-radius:14px;padding:14px 16px;margin:10px 0}
+.reco .big{font:600 26px var(--mono);color:var(--acc2);line-height:1.2}
+.reco p{margin:6px 0}
+table{border-collapse:collapse;width:100%}
+.tbl th,.tbl td{padding:6px 8px;border-bottom:1px solid var(--line);font-size:12.5px;text-align:right;white-space:nowrap}
+.tbl th{color:var(--muted);font-weight:600;position:sticky;top:0;background:var(--panel);z-index:1}
+.tbl td:first-child,.tbl th:first-child,.tbl td.l,.tbl th.l{text-align:left}
+.tbl td{font-family:var(--mono)}
+.tbl td.l,.tbl td.t{font-family:var(--sans)}
+.tbl td.t{white-space:normal;text-align:left;min-width:180px}
+.tbl tr.tot td{font-weight:700;border-top:2px solid var(--line)}
+.tbl tr.hl td{background:rgba(255,106,43,.1)}
+.tbl tr.yr{cursor:pointer}.tbl tr.yr:hover td{background:rgba(255,255,255,.03)}
+.tbl tr.mo td{color:var(--muted);background:var(--bg2)}
+.tbl input,.tbl select{padding:4px 6px;font-size:12px}
+.wrap{overflow:auto;max-height:70vh;border:1px solid var(--line);border-radius:10px}
+.wrap.short{max-height:none}
+.chart svg{width:100%;height:auto;display:block}
+.chart text{fill:var(--muted);font:11px var(--mono)}
+.chart .gl{stroke:var(--line)}
+.chart .hit{fill:transparent;cursor:crosshair}
+.tip{position:fixed;pointer-events:none;background:#030712;border:1px solid var(--line);color:var(--ink);padding:7px 10px;border-radius:8px;font:12px var(--mono);z-index:999;display:none;white-space:pre;box-shadow:0 8px 24px rgba(0,0,0,.4);max-width:420px}
+.toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:var(--acc);color:#fff;padding:9px 16px;border-radius:10px;z-index:999;font-weight:600}
+.toast.hidden{display:none}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.between{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.hbar{display:grid;grid-template-columns:200px 1fr 96px;gap:8px;align-items:center;font-size:12.5px;margin:3px 0}
+.hbar .t{height:10px;background:var(--bg2);border-radius:6px;overflow:hidden}
+.hbar .t i{display:block;height:100%}
+.hbar .v{text-align:right;font-family:var(--mono)}
+.pill{display:inline-block;padding:1px 8px;border-radius:99px;background:var(--panel2);border:1px solid var(--line);font:11px var(--mono);color:var(--muted);white-space:nowrap}
+.pill.g{color:var(--good);border-color:rgba(63,209,139,.4)}.pill.b{color:var(--bad);border-color:rgba(255,97,97,.4)}.pill.w{color:var(--warn);border-color:rgba(255,182,72,.4)}.pill.a{color:var(--acc2);border-color:rgba(255,106,43,.5)}.pill.v{color:var(--violet);border-color:rgba(180,140,255,.45)}.pill.bl{color:var(--blue);border-color:rgba(90,162,255,.45)}
+details.more{border:1px dashed var(--line);border-radius:10px;padding:6px 12px;margin:10px 0}
+details.more summary{cursor:pointer;font-weight:600;color:var(--muted)}
+.hero{position:relative;overflow:hidden;border-radius:18px;padding:34px 30px;border:1px solid var(--line);background:radial-gradient(900px 300px at 0% 0%,rgba(255,106,43,.22),transparent 60%),radial-gradient(700px 300px at 100% 100%,rgba(90,162,255,.18),transparent 60%),var(--panel)}
+.hero h1{font-size:clamp(28px,4.2vw,46px);line-height:1.05;margin:8px 0 12px;max-width:860px}
+.hero h1 em{font-style:italic;color:var(--acc2)}
+.hero p{color:#cdd5e3;max-width:780px;font-size:15px}
+.steps{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px;margin-top:16px}
+.step{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px;cursor:pointer;transition:border-color .15s,transform .15s}
+.step:hover{border-color:var(--acc);transform:translateY(-2px)}
+.step .n{font:600 12px var(--mono);color:var(--acc2)}
+.step b{display:block;font-family:var(--serif);font-size:17px;margin:4px 0}
+.step p{margin:0;color:var(--muted);font-size:13px}
+.cols3{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px}
+.cols3 ul{padding-left:18px;margin:6px 0}.cols3 li{margin:3px 0;font-size:13px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font:12px var(--sans);border:1px solid var(--line);background:var(--panel2);color:var(--muted);border-radius:99px;padding:3px 10px;cursor:pointer}
+.chip.on{background:var(--acc);border-color:var(--acc);color:#fff}
+@media (max-width:900px){
+  .app{grid-template-columns:1fr}
+  nav.side{position:static;height:auto;padding:12px}
+  ol.pipe{display:flex;overflow-x:auto;gap:4px}
+  ol.pipe::before{display:none}
+  ol.pipe button{grid-template-columns:28px auto;white-space:nowrap}
+  ol.pipe .d,.family{display:none}
+  main{padding:0 14px 50px}
+  .kpis{margin:0 -14px 14px;padding:8px 14px;position:static}
+  .hbar{grid-template-columns:120px 1fr 80px}
+}
+@media print{nav.side,.kpis,.tools,.btn{display:none!important}.app{display:block}.tab{display:block!important;page-break-after:always}}
+
+
+.cal{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:3px}
+.cal .h{font:11px var(--mono);color:var(--muted);text-align:center;padding:2px 0}
+.cal .c{min-height:70px;background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:4px 5px;font-size:11px;position:relative;min-width:0}
+.cal .c.we{background:#0c1426}
+.cal .c.bh{background:rgba(255,182,72,.09);border-color:rgba(255,182,72,.45)}
+.cal .c.out{visibility:hidden}
+.cal .c.today{outline:2px solid var(--acc);outline-offset:-1px}
+.cal .dn{font:600 11px var(--mono);color:var(--muted)}
+.cal .bhn{font:9.5px var(--sans);color:var(--warn);display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ev{display:block;border-radius:4px;padding:1px 4px;margin-top:2px;font:600 10.5px var(--sans);color:#0a1120;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cnt{position:absolute;top:3px;right:4px;font:600 10px var(--mono);border-radius:99px;padding:0 6px;color:#0a1120}
+.keyrow{display:flex;flex-wrap:wrap;gap:10px;font-size:12px;color:var(--muted);margin:8px 0}
+.keyrow i{display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+.lanes{overflow:auto;border:1px solid var(--line);border-radius:10px}
+.lanes table{border-collapse:separate;border-spacing:2px}
+.lanes th{font:10.5px var(--mono);color:var(--muted);font-weight:500;padding:3px 2px;white-space:nowrap}
+.lanes th.we,.lanes td.we{background:#0c1426}
+.lanes th.bh,.lanes td.bh{background:rgba(255,182,72,.12)}
+.lanes td{min-width:34px;height:28px;text-align:center;border-radius:5px;font:600 10.5px var(--mono);color:#0a1120}
+.lanes td.lab{color:var(--ink);font:600 12px var(--sans);text-align:left;padding:0 8px;white-space:nowrap;min-width:120px}
+.lanes tr.sumr td{color:var(--ink);background:var(--panel2)}
+.lanes tr.sumr td.hot{background:var(--acc);color:#fff}
+.months{display:grid;grid-template-columns:repeat(auto-fit,minmax(330px,1fr));gap:14px}
+.months h4{margin:0 0 6px;font-family:var(--serif);font-size:15px}
+.mini .c{min-height:46px}
+.big .c{min-height:96px}
+
+</style>
+<meta name="author" content="Usualy Labs">
+<meta name="color-scheme" content="light dark">
+<script>/* Usualy Labs theme switcher: auto | light | dark, remembered in this browser only */
+(function(){var K='usualy.theme',d=document.documentElement,m=window.matchMedia?matchMedia('(prefers-color-scheme: dark)'):null;
+function p(){try{return localStorage.getItem(K)||'auto'}catch(e){return 'auto'}}
+function a(){var v=p();d.setAttribute('data-theme',v==='auto'?(m&&m.matches?'dark':'light'):v);var s=document.getElementById('themeSel');if(s)s.value=v}
+a();if(m&&m.addEventListener)m.addEventListener('change',a);
+window.setTheme=function(v){try{localStorage.setItem(K,v)}catch(e){}a()};
+document.addEventListener('change',function(e){if(e.target&&e.target.id==='themeSel')setTheme(e.target.value)});
+document.addEventListener('DOMContentLoaded',a);})();
+</script>
+<style>
+.ul-theme{display:flex;gap:8px;align-items:center;margin-top:10px;font-size:12.5px;color:var(--muted)}
+.ul-theme select{background:var(--panel);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:4px 8px;font:inherit}
+:root[data-theme=light]{--bg:#f7f5f0;--bg2:#efece4;--panel:#ffffff;--panel2:#f3f1ec;--ink:#1b2333;--muted:#5d6678;--line:#dcd7cc;--acc:#d9531a;--acc2:#b8460f;--blue:#2f6fd6;--good:#1d8f5a;--bad:#cc3333;--warn:#a86d12;--violet:#7650d0}
+[data-theme=light] .kpis{background:rgba(247,245,240,.94)}
+[data-theme=light] ol.pipe button:hover{background:rgba(0,0,0,.04)}
+.ul-about{margin:28px 0 8px;padding:18px 20px;border:1px solid var(--line);border-radius:14px;background:var(--panel);font-size:13px;line-height:1.6}
+.ul-about h2{font-size:18px}.ul-about h3{font-size:14px;margin:14px 0 4px}.ul-about ul{margin:4px 0;padding-left:20px}
+@media print{.ul-theme{display:none}}
+[data-theme=light] .family a{color:var(--acc2)}
+</style>
+</head>
+<body>
+<div class="app"><nav class="side" id="side"></nav><main><header class="kpis" id="kpis"></header><div id="tabs"></div>
+<footer class="ul-about" id="about">
+  <h2>About, data sources &amp; disclaimer</h2>
+  <p><b>UK Small Business Cash Flow Simulator</b> &middot; published by <b>Usualy Labs</b> &middot; version 1.0.0 &middot; rules last checked October 2026.</p>
+  <h3>Not advice</h3>
+  <p>For general information and planning only. It is <b>not</b> financial, accounting, tax, legal or banking advice. Results are simulations based on your inputs and on assumptions about payment timing, failure and retry rates that may not match your bank, payment provider or customers. Actual settlement times, cut-offs, fees and HMRC deadlines depend on your providers and circumstances. Check with your bank, payment provider, accountant or HMRC before relying on it.</p>
+  <p>Provided &ldquo;as is&rdquo; without warranty of any kind. To the fullest extent permitted by law, Usualy Labs and contributors accept no responsibility or liability for any loss or decision arising from its use. Nothing here limits any liability that cannot be limited by law.</p>
+  <h3>Your privacy</h3>
+  <p>Usualy Labs collects nothing. This page makes no network requests: no accounts, analytics, cookies, trackers or web fonts. Inputs are saved only in <b>your browser&rsquo;s local storage</b> on this device. &ldquo;Copy share link&rdquo; puts your inputs into the link itself; it is only shared if you send it, so treat it like a private document. Export and Import use a file on your own device.</p>
+  <h3>Data sources and credits</h3>
+  <p>All credit for the underlying information belongs to these publishers; inclusion does not imply their endorsement.</p>
+  <ul>
+    <li><b>GOV.UK</b> &ndash; bank holidays in England and Wales (calculated by this page using the standard rules; special one-off holidays may need adding manually) (OGL v3.0).</li>
+    <li><b>Pay.UK / Bacs</b> &ndash; the public Bacs three-day processing cycle, advance notice and Direct Debit Guarantee principles, and ARUDD unpaid reporting, as publicly documented.</li>
+    <li><b>HM Revenue &amp; Customs / GOV.UK</b> &ndash; PAYE and National Insurance payment deadlines, VAT return stagger periods and payment dates, Corporation Tax payment timing, and 2026/27 tax figures (OGL v3.0).</li>
+    <li>Card settlement timing, Direct Debit and card failure rates, retry success rates, fees, customer numbers and sales patterns are <b>illustrative assumptions</b>, not data from any business, bank or payment provider.</li>
+  </ul>
+  <p>Bacs and Direct Debit are trade marks of their owners. Usualy Labs is not affiliated with or endorsed by Pay.UK, any bank or payment provider. Contains public sector information licensed under the Open Government Licence v3.0. No third-party code libraries are used.</p>
+  <p>Spotted a mistake or out-of-date rule? Please report it through the project&rsquo;s GitHub Issues page.</p>
+</footer>
+</main></div>
+<div class="tip" id="tip"></div><div class="toast hidden" id="toast"></div>
+<script>
+'use strict';
+/* ===== Usualy Labs · shared kit (TEMPV01) ===== */
+const $ = (s, e = document) => e.querySelector(s), $$ = (s, e = document) => [...e.querySelectorAll(s)];
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const fin = n => typeof n === 'number' && isFinite(n);
+const N = v => { const x = parseFloat(v); return isFinite(x) ? x : 0; };
+const gbp = n => fin(n) ? (n < 0 ? '−£' : '£') + Math.abs(Math.round(n)).toLocaleString('en-GB') : '–';
+const gbp2 = n => fin(n) ? (n < 0 ? '−£' : '£') + Math.abs(n).toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '–';
+const pct = (n, d = 1) => fin(n) ? n.toFixed(d) + '%' : '–';
+const num0 = n => fin(n) ? Math.round(n).toLocaleString('en-GB') : '–';
+const kfmt = v => { const a = Math.abs(v), s = v < 0 ? '−' : ''; return a >= 1e6 ? s + '£' + (a / 1e6).toFixed(2) + 'm' : a >= 1e3 ? s + '£' + Math.round(a / 1e3) + 'k' : s + '£' + Math.round(a); };
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+const sum = (arr, f) => arr.reduce((a, x) => a + (+(f ? (typeof f === 'function' ? f(x) : x[f]) : x) || 0), 0);
+const yrsMo = m => { m = Math.round(m); return m < 12 ? `${m} mo` : `${Math.floor(m / 12)} yr${m % 12 ? ' ' + (m % 12) + ' mo' : ''}`; };
+const todayYM = () => new Date().toISOString().slice(0, 7);
+const monthsAdd = (ym, k) => { const [y, m] = ym.split('-').map(Number); return new Date(Date.UTC(y, m - 1 + k, 1)).toISOString().slice(0, 7); };
+const ymLabel = ym => { const [y, m] = ym.split('-').map(Number); return new Date(Date.UTC(y, m - 1, 1)).toLocaleDateString('en-GB', { month: 'short', year: 'numeric', timeZone: 'UTC' }); };
+const debounce = (fn, ms) => { let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), ms); }; };
+function toast(m) { const t = $('#toast'); t.textContent = m; t.classList.remove('hidden'); clearTimeout(toast.t); toast.t = setTimeout(() => t.classList.add('hidden'), 2600); }
+function showTip(e, txt) { const t = $('#tip'); t.textContent = txt; t.style.display = 'block'; t.style.left = Math.min(e.clientX + 14, innerWidth - 300) + 'px'; t.style.top = (e.clientY + 14) + 'px'; }
+function hideTip() { $('#tip').style.display = 'none'; }
+function download(name, text, type) { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([text], { type })); a.download = name; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 2000); }
+
+/* ---------- finance primitives ---------- */
+function pmt(P, r, n) { if (n <= 0) return P; if (Math.abs(r) < 1e-12) return P / n; return P * r / (1 - Math.pow(1 + r, -n)); }
+function nper(P, r, A) { if (P <= 0) return 0; if (Math.abs(r) < 1e-12) return P / A; if (A <= P * r) return Infinity; return -Math.log(1 - P * r / A) / Math.log(1 + r); }
+function pvA(r, n, A) { if (A <= 0) return 0; if (Math.abs(r) < 1e-12) return A * n; return A * (1 - Math.pow(1 + r, -n)) / r; }
+function rng(seed) { return () => { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+function gauss(rand) { let u = 0, v = 0; while (u === 0) u = rand(); while (v === 0) v = rand(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v); }
+const mRate = annualPct => Math.pow(1 + annualPct / 100, 1 / 12) - 1;
+
+/* ---------- UK tax engine (2026/27 defaults; every figure overridable) ---------- */
+const UK = {
+  year: '2026/27', pa: 12570, taper: 100000, basic: 37700, addl: 125140,
+  pt: 12570, uel: 50270, ee: .08, ee2: .02, er: .15, st: 5000, ea: 10500, c4: .06, c4b: .02,
+  divAllow: 500, div: [.1075, .3575, .3935], psa: [1000, 500, 0],
+  sl: { p1: 26065, p2: 28470, p4: 32745, p5: 25000, pg: 21000 },
+  scot: [[2827, .19], [14921, .20], [31092, .21], [62430, .42], [125140, .45], [Infinity, .48]],
+  cb: [27.05, 17.90], hicbc: [60000, 80000], sp: 241.30, lumpCap: 268275, ma: 1260,
+  ct: { small: .19, main: .25, lo: 50000, hi: 250000 }
+};
+/* ns: earnings/pension/rental income; div: dividends; ras: gross relief-at-source pension contributions (extend bands) */
+function ukTax({ ns = 0, div = 0, ras = 0, scot = false, paOverride = null } = {}) {
+  ns = Math.max(0, ns); div = Math.max(0, div);
+  const ani = ns + div - ras;
+  const pa = paOverride != null ? paOverride : Math.max(0, UK.pa - Math.max(0, (ani - UK.taper) / 2));
+  const paNS = Math.min(pa, ns), paD = Math.min(pa - paNS, div), tNS = ns - paNS, tD = div - paD;
+  const ext = Math.max(0, ras), B1 = UK.basic + ext, B2 = UK.addl + ext, bands = [];
+  let taxNS = 0;
+  if (scot) {
+    let prev = 0;
+    UK.scot.forEach(([lim, r], i) => { const L = lim === Infinity ? Infinity : lim + ext, amt = Math.max(0, Math.min(tNS, L) - prev); if (amt > 0) { bands.push({ label: ['Starter', 'Basic', 'Intermediate', 'Higher', 'Advanced', 'Top'][i] + ` ${Math.round(r * 100)}%`, amt, r, tax: amt * r }); taxNS += amt * r; } prev = L; });
+  } else {
+    const b = [[B1, .20, 'Basic 20%'], [B2, .40, 'Higher 40%'], [Infinity, .45, 'Additional 45%']]; let prev = 0;
+    b.forEach(([L, r, l]) => { const amt = Math.max(0, Math.min(tNS, L) - prev); if (amt > 0) { bands.push({ label: l, amt, r, tax: amt * r }); taxNS += amt * r; } prev = L; });
+  }
+  // dividends sit on top of non-savings income, using UK bands
+  let taxDiv = 0, pos = tNS, allow = Math.min(UK.divAllow, tD), left = tD;
+  const db = [[B1, UK.div[0], 'Dividend basic'], [B2, UK.div[1], 'Dividend higher'], [Infinity, UK.div[2], 'Dividend additional']];
+  for (const [L, r, l] of db) {
+    if (left <= 0) break; const room = Math.max(0, L - pos); if (room <= 0) continue;
+    let amt = Math.min(left, room), free = Math.min(allow, amt); allow -= free; const taxed = amt - free;
+    if (free > 0) bands.push({ label: 'Dividend allowance 0%', amt: free, r: 0, tax: 0 });
+    if (taxed > 0) { bands.push({ label: l + ` ${(r * 100).toFixed(2)}%`, amt: taxed, r, tax: taxed * r }); taxDiv += taxed * r; }
+    pos += amt; left -= amt;
+  }
+  return { ani, pa, taxNS, taxDiv, total: taxNS + taxDiv, bands };
+}
+const niEE = pay => UK.ee * Math.max(0, Math.min(pay, UK.uel) - UK.pt) + UK.ee2 * Math.max(0, pay - UK.uel);
+const niER = (pay, ea = 0) => Math.max(0, UK.er * Math.max(0, pay - UK.st) - ea);
+const niC4 = p => UK.c4 * Math.max(0, Math.min(p, UK.uel) - UK.pt) + UK.c4b * Math.max(0, p - UK.uel);
+const slRepay = (plan, inc) => { if (!plan || plan === 'none') return 0; const t = UK.sl[plan]; return t == null ? 0 : (plan === 'pg' ? .06 : .09) * Math.max(0, inc - t); };
+function corpTax(profit) { const c = UK.ct; if (profit <= 0) return 0; if (profit <= c.lo) return profit * c.small; if (profit >= c.hi) return profit * c.main; return profit * c.main - (c.hi - profit) * 3 / 200; }
+function hicbc(ani, kids) { if (!kids) return { cb: 0, charge: 0 }; const cb = (UK.cb[0] + UK.cb[1] * (kids - 1)) * 52; const [lo, hi] = UK.hicbc; const p = clamp((ani - lo) / (hi - lo), 0, 1); return { cb, charge: Math.floor(cb * p) }; }
+function sdlt(price, buyer = 'ftb', nonRes = false) {
+  if (buyer === 'none') return { tax: 0, parts: [] };
+  const std = [[125000, 0], [250000, .02], [925000, .05], [1500000, .10], [Infinity, .12]];
+  let bands = std;
+  if (buyer === 'ftb' && price <= 500000) bands = [[300000, 0], [500000, .05]];
+  else if (buyer === 'add' && price >= 40000) bands = std.map(([t, r]) => [t, r + .05]);
+  if (nonRes) bands = bands.map(([t, r]) => [t, r + .02]);
+  let prev = 0, tax = 0; const parts = [];
+  for (const [t, r] of bands) { if (price <= prev) break; const sl = Math.min(price, t) - prev; parts.push({ from: prev, to: Math.min(price, t), rate: r, tax: sl * r }); tax += sl * r; prev = t; }
+  return { tax: Math.floor(tax), parts };
+}
+
+/* ---------- state ---------- */
+let S = {}, APP = null, CUR = null, LISTS = {};
+function deepMerge(base, add) { for (const k in add) { if (add[k] && typeof add[k] === 'object' && !Array.isArray(add[k]) && base[k] && typeof base[k] === 'object' && !Array.isArray(base[k])) deepMerge(base[k], add[k]); else if (add[k] !== undefined) base[k] = add[k]; } return base; }
+const getP = (o, p) => p.split('.').reduce((a, k) => a == null ? a : a[k], o);
+const setP = (o, p, v) => { const ks = p.split('.'); let a = o; ks.slice(0, -1).forEach(k => a = a[k] = a[k] || {}); a[ks[ks.length - 1]] = v; };
+function loadState() {
+  S = APP.def();
+  try { const h = location.hash; if (h.startsWith('#s=')) { S = deepMerge(APP.def(), JSON.parse(decodeURIComponent(escape(atob(h.slice(3)))))); history.replaceState(null, '', location.pathname); setTimeout(() => toast('Loaded from link'), 300); return; } } catch (e) { console.warn(e); }
+  try { const s = localStorage.getItem(APP.key); if (s) S = deepMerge(APP.def(), JSON.parse(s)); } catch (e) {}
+}
+const saveState = debounce(() => { try { localStorage.setItem(APP.key, JSON.stringify(S)); } catch (e) {} }, 300);
+
+/* ---------- form helpers ---------- */
+function fld(k, label, o = {}) {
+  const t = o.type || 'num', v = getP(S, k), sh = o.show ? ` data-show="${o.show}"` : '', h = o.hint ? `<small>${o.hint}</small>` : '';
+  if (t === 'chk') return `<label class="chk"${sh}><input type="checkbox" data-k="${k}" ${v ? 'checked' : ''}> <span>${label}</span></label>`;
+  if (t === 'sel') return `<label${sh}><span>${label}</span><select data-k="${k}">${o.opts.map(([val, l]) => `<option value="${esc(val)}" ${String(v) === String(val) ? 'selected' : ''}>${esc(l)}</option>`).join('')}</select>${h}</label>`;
+  if (t === 'range') return `<label${sh}><span>${label}: <b class="mono" data-rv="${k}">${esc(v)}${o.unit || ''}</b></span><input type="range" data-k="${k}" min="${o.min}" max="${o.max}" step="${o.step || 1}" value="${esc(v)}" data-unit="${o.unit || ''}">${h}</label>`;
+  const it = t === 'num' ? 'type="number" inputmode="decimal" step="any"' : t === 'month' ? 'type="month"' : t === 'date' ? 'type="date"' : 'type="text"';
+  return `<label${sh}><span>${label}</span><input ${it} data-k="${k}" value="${esc(v ?? '')}"${o.min != null ? ` min="${o.min}"` : ''}${o.ph ? ` placeholder="${esc(o.ph)}"` : ''}>${h}</label>`;
+}
+const fs = (title, inner, show) => `<fieldset${show ? ` data-show="${show}"` : ''}><legend>${title}</legend><div class="fg">${inner}</div></fieldset>`;
+const stat = (l, v, s = '', c = '') => `<div class="stat ${c}"><div class="l">${l}</div><div class="v" title="${esc(String(v).replace(/<[^>]+>/g, ''))}">${v}</div><div class="s">${s}</div></div>`;
+const head = (i, title, sub) => `<div class="tabhead"><div class="eyebrow">Step ${String(i).padStart(2, '0')}</div><h2>${title}</h2><div class="hint" style="margin:0">${sub}</div></div>`;
+function applyShow() {
+  $$('[data-show]').forEach(el => {
+    const ok = el.dataset.show.split('&').every(cond => { const m = cond.match(/^([\w.]+)(!?=|>|<)(.*)$/); if (!m) return true; const raw = getP(S, m[1]), v = String(raw), vals = m[3].split('|'); if (m[2] === '>') return N(raw) > N(m[3]); if (m[2] === '<') return N(raw) < N(m[3]); return m[2] === '=' ? vals.includes(v) : !vals.includes(v); });
+    el.style.display = ok ? '' : 'none';
+  });
+}
+function syncInputs() { $$('[data-k]').forEach(el => { if (el === document.activeElement) return; const v = getP(S, el.dataset.k); if (el.type === 'checkbox') el.checked = !!v; else if (String(el.value) !== String(v ?? '')) el.value = v ?? ''; }); $$('[data-rv]').forEach(b => { const inp = $(`input[type=range][data-k="${b.dataset.rv}"]`); b.textContent = getP(S, b.dataset.rv) + (inp ? inp.dataset.unit : ''); }); }
+function listHTML(name) {
+  const L = LISTS[name], arr = getP(S, name) || [];
+  return `<div class="wrap short"><table class="tbl"><thead><tr>${L.cols.map(c => `<th class="l">${c[1]}</th>`).join('')}<th></th></tr></thead><tbody>${arr.map((r, i) => `<tr>${L.cols.map(([f, , t, opts]) => `<td class="l">${t === 'sel' ? `<select data-l="${name}" data-i="${i}" data-f="${f}">${opts.map(([v, l]) => `<option value="${esc(v)}" ${String(r[f]) === String(v) ? 'selected' : ''}>${esc(l)}</option>`).join('')}</select>` : t === 'chk' ? `<input type="checkbox" data-l="${name}" data-i="${i}" data-f="${f}" ${r[f] ? 'checked' : ''}>` : `<input ${t === 'num' ? 'type="number" step="any"' : t === 'month' ? 'type="month"' : t === 'date' ? 'type="date"' : 'type="text"'} data-l="${name}" data-i="${i}" data-f="${f}" value="${esc(r[f] ?? '')}"${t === 'text' ? ' style="min-width:130px"' : ''}>`}</td>`).join('')}<td>${L.min && arr.length <= L.min ? '' : `<button class="btn del" data-del="${name}:${i}" title="Remove">✕</button>`}</td></tr>`).join('') || `<tr><td class="l hint" colspan="${L.cols.length + 1}">Nothing added yet.</td></tr>`}</tbody></table></div>
+  ${!L.max || arr.length < L.max ? `<button class="btn sm" data-add="${name}" style="margin-top:6px">+ Add</button>` : ''}`;
+}
+function renderLists(name) { $$(`[data-list${name ? `="${name}"` : ''}]`).forEach(el => el.innerHTML = listHTML(el.dataset.list)); }
+
+/* ---------- charts ---------- */
+function lineChart(el, o) {
+  if (!el) return;
+  const W = 780, H = o.h || 260, pl = 66, pr = 18, pt = 30, pb = 30, xs = o.xs, n = xs.length;
+  const vals = o.series.flatMap(s => s.ys).filter(fin);
+  if (!vals.length) { el.innerHTML = ''; return; }
+  let mn = Math.min(o.yMin ?? 0, ...vals), mx = Math.max(o.yMax ?? -Infinity, ...vals); if (mx - mn < 1e-9) mx = mn + 1;
+  const pad = (mx - mn) * .06; mx += pad; if (mn < 0) mn -= pad;
+  const X = i => pl + (W - pl - pr) * (n > 1 ? i / (n - 1) : .5), Y = v => pt + (H - pt - pb) * (1 - (v - mn) / (mx - mn));
+  const yf = o.yFmt || kfmt; let g = '';
+  (o.bands || []).forEach(b => { g += `<rect x="${X(b.from)}" y="${pt}" width="${Math.max(0, X(b.to) - X(b.from))}" height="${H - pt - pb}" fill="${b.color}" opacity="${b.op || .08}"/>`; if (b.label) g += `<text x="${X(b.from) + 4}" y="${H - pb - 6}" style="fill:${b.tc || 'var(--muted)'}">${esc(b.label)}</text>`; });
+  for (let k = 0; k <= 4; k++) { const v = mn + (mx - mn) * k / 4; g += `<line class="gl" x1="${pl}" x2="${W - pr}" y1="${Y(v)}" y2="${Y(v)}"/><text x="${pl - 8}" y="${Y(v) + 4}" text-anchor="end">${yf(v)}</text>`; }
+  if (mn < 0) g += `<line x1="${pl}" x2="${W - pr}" y1="${Y(0)}" y2="${Y(0)}" stroke="var(--muted)"/>`;
+  const st = Math.max(1, Math.ceil(n / 8)); for (let i = 0; i < n; i += st) g += `<text x="${X(i)}" y="${H - 9}" text-anchor="middle">${esc(xs[i])}</text>`;
+  (o.markers || []).forEach(m => { if (m.i == null || m.i < 0 || m.i >= n) return; g += `<line x1="${X(m.i)}" x2="${X(m.i)}" y1="${pt}" y2="${H - pb}" stroke="${m.color || 'var(--warn)'}" stroke-dasharray="4 4"/><text x="${X(m.i) + 5}" y="${pt + 12 + (m.dy || 0)}" style="fill:${m.color || 'var(--warn)'}">${esc(m.label)}</text>`; });
+  (o.hlines || []).forEach(m => { g += `<line x1="${pl}" x2="${W - pr}" y1="${Y(m.y)}" y2="${Y(m.y)}" stroke="${m.color || 'var(--warn)'}" stroke-dasharray="4 4"/><text x="${W - pr - 4}" y="${Y(m.y) - 5}" text-anchor="end" style="fill:${m.color || 'var(--warn)'}">${esc(m.label)}</text>`; });
+  o.series.forEach(s => {
+    if (s.band) { const lo = s.band[0], hi = s.band[1]; let d = ''; hi.forEach((v, i) => d += (i ? 'L' : 'M') + X(i).toFixed(1) + ',' + Y(v).toFixed(1)); for (let i = lo.length - 1; i >= 0; i--) d += 'L' + X(i).toFixed(1) + ',' + Y(lo[i]).toFixed(1); g += `<path d="${d}Z" fill="${s.color}" opacity=".14"/>`; }
+    let d = '', pen = false; s.ys.forEach((v, i) => { if (!fin(v)) { pen = false; return; } d += (pen ? 'L' : 'M') + X(i).toFixed(1) + ',' + Y(v).toFixed(1); pen = true; });
+    if (s.area && d) { const f = s.ys.findIndex(fin), l = s.ys.length - 1 - [...s.ys].reverse().findIndex(fin); g += `<path d="${d}L${X(l)},${Y(Math.max(mn, 0))}L${X(f)},${Y(Math.max(mn, 0))}Z" fill="${s.color}" opacity=".12"/>`; }
+    g += `<path d="${d}" fill="none" stroke="${s.color}" stroke-width="${s.w || 2.4}" ${s.dash ? `stroke-dasharray="${s.dash}"` : ''} stroke-linejoin="round" stroke-linecap="round"/>`;
+  });
+  let lx = pl; g += `<g transform="translate(0,${pt - 16})">` + o.series.filter(s => !s.noLegend).map(s => { const t = `<rect x="${lx}" y="0" width="14" height="4" rx="2" fill="${s.color}"/><text x="${lx + 19}" y="6">${esc(s.name)}</text>`; lx += 30 + s.name.length * 6.6; return t; }).join('') + '</g>';
+  el.innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(o.label || 'chart')}">${g}<line class="cur" x1="0" x2="0" y1="${pt}" y2="${H - pb}" stroke="var(--ink)" stroke-opacity=".35" style="opacity:0"/><rect class="hit" x="${pl}" y="${pt}" width="${W - pl - pr}" height="${H - pt - pb}"/></svg>`;
+  const svg = el.querySelector('svg'), hit = svg.querySelector('.hit'), cur = svg.querySelector('.cur');
+  hit.addEventListener('mousemove', e => { const r = hit.getBoundingClientRect(), i = clamp(Math.round((e.clientX - r.left) / r.width * (n - 1)), 0, n - 1); cur.setAttribute('x1', X(i)); cur.setAttribute('x2', X(i)); cur.style.opacity = 1; showTip(e, (o.tipTitle ? o.tipTitle(i) : xs[i]) + '\n' + o.series.filter(s => !s.noTip).map(s => `${s.name}: ${fin(s.ys[i]) ? (s.fmt || o.tipFmt || gbp)(s.ys[i]) : '–'}`).join('\n')); });
+  hit.addEventListener('mouseleave', () => { hideTip(); cur.style.opacity = 0; });
+}
+function barChart(el, o) {
+  if (!el) return;
+  const W = 780, H = o.h || 250, pl = 66, pr = 18, pt = 30, pb = o.pb || 30, n = o.cats.length;
+  const pos = o.cats.map((_, i) => o.stacks.reduce((a, s) => a + Math.max(0, s.vals[i] || 0), 0)), neg = o.cats.map((_, i) => o.stacks.reduce((a, s) => a + Math.min(0, s.vals[i] || 0), 0));
+  const mx = Math.max(...pos, 1) * 1.06, mn = Math.min(...neg, 0) * 1.06;
+  const bw = (W - pl - pr) / Math.max(1, n), Y = v => pt + (H - pt - pb) * (1 - (v - mn) / (mx - mn)), yf = o.yFmt || kfmt;
+  let g = '';
+  for (let k = 0; k <= 4; k++) { const v = mn + (mx - mn) * k / 4; g += `<line class="gl" x1="${pl}" x2="${W - pr}" y1="${Y(v)}" y2="${Y(v)}"/><text x="${pl - 8}" y="${Y(v) + 4}" text-anchor="end">${yf(v)}</text>`; }
+  if (mn < 0) g += `<line x1="${pl}" x2="${W - pr}" y1="${Y(0)}" y2="${Y(0)}" stroke="var(--muted)"/>`;
+  o.cats.forEach((c, i) => {
+    let up = 0, dn = 0; const x0 = pl + i * bw + bw * .14, w = bw * .72;
+    g += `<g class="bg" data-i="${i}">` + o.stacks.map(s => { const v = s.vals[i] || 0; if (!v) return ''; let y1, y2; if (v > 0) { y1 = Y(up + v); y2 = Y(up); up += v; } else { y1 = Y(dn); y2 = Y(dn + v); dn += v; } return `<rect x="${x0}" y="${y1}" width="${w}" height="${Math.max(0, y2 - y1)}" rx="2" fill="${s.color}"/>`; }).join('') + `<rect x="${pl + i * bw}" y="${pt}" width="${bw}" height="${H - pt - pb}" fill="transparent"/></g>`;
+    if (n <= 14 || i % Math.ceil(n / 12) === 0) g += `<text x="${x0 + w / 2}" y="${H - pb + 18}" text-anchor="middle">${esc(c)}</text>`;
+  });
+  let lx = pl; g += `<g transform="translate(0,${pt - 18})">` + o.stacks.map(s => { const t = `<rect x="${lx}" y="0" width="10" height="10" rx="2" fill="${s.color}"/><text x="${lx + 14}" y="9">${esc(s.name)}</text>`; lx += 26 + s.name.length * 6.6; return t; }).join('') + '</g>';
+  el.innerHTML = `<svg viewBox="0 0 ${W} ${H}">${g}</svg>`;
+  $$('.bg', el).forEach(b => { b.addEventListener('mousemove', e => { const i = +b.dataset.i; showTip(e, (o.tipTitle ? o.tipTitle(i) : o.cats[i]) + '\n' + o.stacks.map(s => `${s.name}: ${(o.tipFmt || gbp)(s.vals[i] || 0)}`).join('\n')); }); b.addEventListener('mouseleave', hideTip); });
+}
+const hbars = (items, color = 'var(--acc)', fmt = gbp) => { const mx = Math.max(...items.map(x => Math.abs(x[1])), 1e-9); return items.map(([l, v, c]) => `<div class="hbar"><span>${esc(l)}</span><div class="t"><i style="width:${Math.abs(v) / mx * 100}%;background:${c || color}"></i></div><span class="v">${fmt(v)}</span></div>`).join(''); };
+
+/* ---------- shell ---------- */
+const FAMILY = [['..', 'All tools', '../../'], ['uk-mortgage-planner', 'Mortgage planner'], ['rent-vs-buy-calculator', 'Rent vs buy'], ['uk-take-home-pay-calculator', 'Take-home & contracting'], ['fi-planner-uk', 'Financial independence'], ['debt-payoff-planner', 'Debt payoff'], ['payment-methods-explorer', 'Payment methods explorer'], ['uk-cash-flow-simulator', 'Cash flow simulator']];
+function go(t) { CUR = t; $$('#pipe button').forEach(b => b.classList.toggle('active', b.dataset.t === t)); $$('.tab').forEach(s => s.classList.toggle('active', s.id === 't-' + t)); try { localStorage.setItem(APP.key + '.tab', t); } catch (e) {} render(); scrollTo({ top: 0 }); }
+function render() { APP.reset && APP.reset(); try { const k = APP.kpis ? APP.kpis() : null; const el = $('#kpis'); el.innerHTML = k ? k.map(([l, v, s]) => `<div class="kpi"><div class="l">${l}</div><div class="v">${v}</div><div class="s">${s || ''}</div></div>`).join('') : ''; (APP.render[CUR] || (() => {}))(); } catch (e) { console.error(e); } }
+const renderSoon = debounce(render, 160);
+function changed(now = true) { saveState(); applyShow(); syncInputs(); now ? render() : renderSoon(); }
+function readEl(el) { return el.type === 'checkbox' ? el.checked : (el.type === 'number' || el.type === 'range') ? (el.value === '' ? '' : parseFloat(el.value)) : el.value; }
+function buildShell() {
+  const here = 'uk-cash-flow-simulator';
+  $('#side').innerHTML = `<div class="brand"><div class="logo">${APP.logo || '£'}</div><div><b>${APP.title}</b><span>${APP.sub}</span></div></div><ol class="pipe" id="pipe">${APP.tabs.map(([k, t, d], i) => `<li><button data-t="${k}"><span class="n">${String(i).padStart(2, '0')}</span><span class="t">${t}<span class="d">${d}</span></span></button></li>`).join('')}</ol>
+  <div class="tools"><button class="btn sm" data-tool="share" title="Copy a link that holds all your inputs">Copy share link</button><button class="btn sm" data-tool="export">Export</button><label class="btn sm filebtn">Import<input type="file" id="tImport" accept=".json"></label><button class="btn sm" data-tool="print">Print</button><button class="btn sm del" data-tool="reset">Reset</button></div>
+  <p class="hint" style="margin-top:12px">Inputs save in this browser only. Nothing is sent anywhere.</p>
+  <label class="ul-theme">Theme <select id="themeSel" aria-label="Colour theme"><option value="auto">Auto</option><option value="light">Light</option><option value="dark">Dark</option></select></label>
+  <div class="family"><div class="eyebrow" style="margin-bottom:4px">More from Usualy Labs</div>${FAMILY.filter(([f]) => f !== here).map(([f, l, h]) => `<a href="${h || '../' + f + '/'}">${l} →</a>`).join('')}</div>`;
+  $('#tabs').innerHTML = APP.build();
+  renderLists();
+}
+function wire() {
+  document.addEventListener('input', e => {
+    const el = e.target;
+    if (el.dataset.k) { setP(S, el.dataset.k, readEl(el)); saveState(); applyShow(); const b = $(`[data-rv="${el.dataset.k}"]`); if (b) b.textContent = el.value + (el.dataset.unit || ''); $$(`[data-k="${el.dataset.k}"]`).forEach(o => { if (o !== el && o.type !== 'checkbox') o.value = el.value; }); renderSoon(); }
+    else if (el.dataset.l) { getP(S, el.dataset.l)[+el.dataset.i][el.dataset.f] = readEl(el); saveState(); renderSoon(); }
+  });
+  document.addEventListener('change', e => { const el = e.target; if (el.dataset.k) { setP(S, el.dataset.k, readEl(el)); changed(); } else if (el.dataset.l) { getP(S, el.dataset.l)[+el.dataset.i][el.dataset.f] = readEl(el); changed(); } });
+  document.addEventListener('click', e => {
+    const t = e.target.closest('[data-go],[data-t],[data-add],[data-del],[data-set],[data-tool]'); if (!t) return;
+    if (t.dataset.set && t.dataset.go) { const o = JSON.parse(t.dataset.set); for (const k in o) setP(S, k, o[k]); saveState(); applyShow(); syncInputs(); go(t.dataset.go); }
+    else if (t.dataset.go) go(t.dataset.go);
+    else if (t.dataset.t) go(t.dataset.t);
+    else if (t.dataset.add) { getP(S, t.dataset.add).push(LISTS[t.dataset.add].add()); renderLists(t.dataset.add); changed(); }
+    else if (t.dataset.del) { const [n, i] = t.dataset.del.split(':'); getP(S, n).splice(+i, 1); renderLists(n); changed(); }
+    else if (t.dataset.set) { const o = JSON.parse(t.dataset.set); for (const k in o) setP(S, k, o[k]); if (t.dataset.relist) renderLists(t.dataset.relist); changed(); }
+    else if (t.dataset.tool === 'share') { const url = location.href.split('#')[0] + '#s=' + btoa(unescape(encodeURIComponent(JSON.stringify(S)))); (navigator.clipboard ? navigator.clipboard.writeText(url) : Promise.reject()).then(() => toast('Share link copied'), () => prompt('Copy this link', url)); }
+    else if (t.dataset.tool === 'export') download(APP.file + '-' + new Date().toISOString().slice(0, 10) + '.json', JSON.stringify(S, null, 1), 'application/json');
+    else if (t.dataset.tool === 'print') print();
+    else if (t.dataset.tool === 'reset') { if (!confirm('Reset every input to the defaults?')) return; S = APP.def(); rebuild(); toast('Reset'); }
+  });
+  document.addEventListener('change', async e => { if (e.target.id !== 'tImport') return; const f = e.target.files[0]; if (!f) return; try { S = deepMerge(APP.def(), JSON.parse(await f.text())); rebuild(); toast('Imported'); } catch (err) { toast('Import failed: ' + err.message); } e.target.value = ''; });
+}
+function rebuild() { $('#tabs').innerHTML = APP.build(); renderLists(); APP.afterBuild && APP.afterBuild(); saveState(); applyShow(); go(CUR); }
+function boot(app) {
+  APP = app; LISTS = app.lists || {}; loadState(); buildShell(); wire(); APP.afterBuild && APP.afterBuild(); applyShow();
+  let t0 = app.tabs[0][0]; try { t0 = localStorage.getItem(APP.key + '.tab') || t0; } catch (e) {}
+  go(app.render[t0] ? t0 : app.tabs[0][0]);
+}
+
+</script>
+<script>
+// title: UK Small Business Cash Flow Simulator
+// desc: A UK cash flow simulator for small businesses: Bacs Direct Debit and card settlement on the real banking calendar, bank holidays, failed payment retries, payroll, HMRC and VAT dates, a 13 to 52 week forecast and a stress test.
+
+
+/* ================= banking calendar (England & Wales; used by Bacs UK-wide) ================= */
+const DN = s => { if (!s) return NaN; const [y, m, d] = String(s).split('-').map(Number); return Date.UTC(y, m - 1, d || 1) / 864e5; };
+const DNy = (y, m, d) => Date.UTC(y, m - 1, d) / 864e5;
+const ISO = n => new Date(n * 864e5).toISOString().slice(0, 10);
+const YMD = n => { const t = new Date(n * 864e5); return [t.getUTCFullYear(), t.getUTCMonth() + 1, t.getUTCDate()]; };
+const dow = n => ((n + 4) % 7 + 7) % 7; // 0 Sun … 6 Sat
+const DOW = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+const MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+const MONL = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+const dim = (y, m) => new Date(Date.UTC(y, m, 0)).getUTCDate();
+const fd = n => fin(n) ? `${DOW[dow(n)]} ${YMD(n)[2]} ${MON[YMD(n)[1] - 1]}` : '–';
+const fdy = n => fin(n) ? fd(n) + ' ' + YMD(n)[0] : '–';
+const mLabel = (y, m) => `${MON[m - 1]} ${y}`;
+const todayDN = () => Math.floor(Date.now() / 864e5);
+function easter(y) { const a = y % 19, b = Math.floor(y / 100), c = y % 100, d = Math.floor(b / 4), e = b % 4, f = Math.floor((b + 8) / 25), g = Math.floor((b - f + 1) / 3), h = (19 * a + b - d - g + 15) % 30, i = Math.floor(c / 4), k = c % 4, l = (32 + 2 * e + 2 * i - h - k) % 7, m = Math.floor((a + 11 * h + 22 * l) / 451), mo = Math.floor((h + l - 7 * m + 114) / 31), da = ((h + l - 7 * m + 114) % 31) + 1; return DNy(y, mo, da); }
+const firstMon = (y, m) => { let d = DNy(y, m, 1); while (dow(d) !== 1) d++; return d; };
+const lastMon = (y, m) => { let d = DNy(y, m, dim(y, m)); while (dow(d) !== 1) d--; return d; };
+const HCACHE = {};
+function ewHolidays(y) {
+  if (HCACHE[y]) return HCACHE[y];
+  const h = {}, wk = d => dow(d) !== 0 && dow(d) !== 6;
+  const subst = (list) => { const fixed = list.filter(([d]) => wk(d)); fixed.forEach(([d, n]) => h[d] = n); list.filter(([d]) => !wk(d)).forEach(([d, n]) => { let x = d + 1; while (!wk(x) || h[x]) x++; h[x] = n + ' (substitute day)'; }); };
+  subst([[DNy(y, 1, 1), "New Year's Day"]]);
+  const E = easter(y); h[E - 2] = 'Good Friday'; h[E + 1] = 'Easter Monday';
+  h[firstMon(y, 5)] = 'Early May bank holiday'; h[lastMon(y, 5)] = 'Spring bank holiday'; h[lastMon(y, 8)] = 'Summer bank holiday';
+  subst([[DNy(y, 12, 25), 'Christmas Day'], [DNy(y, 12, 26), 'Boxing Day']]);
+  return HCACHE[y] = h;
+}
+function holName(n) { const x = (S.r.extra || []).find(e => DN(e.date) === n); if (x) return x.label || 'Non-banking day'; if ((S.r.off || []).some(e => DN(e.date) === n)) return null; return ewHolidays(YMD(n)[0])[n] || null; }
+const isBD = n => dow(n) !== 0 && dow(n) !== 6 && !holName(n);
+const nextBD = n => { while (!isBD(n)) n++; return n; };
+const prevBD = n => { while (!isBD(n)) n--; return n; };
+const addBD = (n, k) => { k = Math.round(k); let x = n; while (k > 0) { x++; if (isBD(x)) k--; } return x; };
+const subBD = (n, k) => { k = Math.round(k); let x = n; while (k > 0) { x--; if (isBD(x)) k--; } return x; };
+const bdBetween = (a, b) => { let c = 0; for (let x = a + 1; x <= b; x++) if (isBD(x)) c++; return c; };
+const lastBD = (y, m) => prevBD(DNy(y, m, dim(y, m)));
+const cardPay = (d, extra = 0) => S.r.cardPayAnyDay ? d + Math.round(N(S.r.cardPayout)) + extra : addBD(d, N(S.r.cardPayout) + extra);
+const gapsArr = () => [0, 1, 2, 3, 4, 5].map(i => Math.max(0, Math.round(N(getP(S, 'r.gaps.' + i)))));
+const retryOn = (fail, i, card) => { const d = fail + gapsArr()[i] + 1; return card && !S.r.cardRetryBD ? d : nextBD(d); };
+function cutoff(orig, posted) { const [oy, om] = YMD(orig), [py, pm, pd] = YMD(posted); if (py * 12 + pm > oy * 12 + om && pd > N(S.r.closeDay)) return DNy(py, pm, 1); return orig; }
+const period = n => { const [y, m] = YMD(n); return mLabel(y, m); };
+
+/* ================= event kinds ================= */
+const K = {
+  notice: ['Advance notice due', '#93a0b7'], run: ['Submitted', '#5aa2ff'], due: ['Collected (due date)', '#b48cff'], rev: ['Revenue posted', '#2ec4c4'],
+  cash: ['Cash in bank', '#3fd18b'], fail: ['Failure reported', '#ff6161'], retry: ['Retry submitted', '#ff6a2b'], fee: ['Fee added', '#ff7ab6'],
+  cancel: ['Customer cancelled', '#c4cad6'], sale: ['Card payment taken', '#5aa2ff'], decline: ['Card declined', '#ff6161'], mandate: ['Mandate cancelled', '#ffb648']
+};
+const evTag = (k, txt) => `<span class="ev" style="background:${K[k][1]}" title="${esc(txt || K[k][0])}">${esc(txt || K[k][0])}</span>`;
+
+/* ================= defaults ================= */
+const DEF = () => ({
+  r: { ddCollect: 2, ddPayout: 2, ddFail: 2, postLag: 1, notice: 3, cardPayout: 2, cardPayAnyDay: false, cardRunAnyDay: true, cardRetryBD: false, retries: 2, gaps: [3, 1, 1, 1, 1, 1], fee: 15, mcDays: 5, closeDay: 5, extra: [], off: [], hy: 0 },
+  tl: { run: '', method: 'dd', out: 'ins-fail', outC: 'ok', succ: 2, amount: 30, mc: '' },
+  bu: { week: '', method: 'dd', upto: 3, cardView: 'payout' },
+  mv: { month: '', method: 'dd', upto: 3 },
+  bdc: { from: '', n: 3 },
+  biz: {
+    start: '', weeks: 13, opening: 25000, overdraft: 10000, buffer: 5000,
+    dd: { on: true, customers: 400, amount: 30, newPerMonth: 25, churn: 2, spread: false, days: [{ day: 1, share: 70 }, { day: 15, share: 30 }], ins: 3, other: .5, mc: 1, ok: [55, 35, 25, 20, 15, 10], feePct: 1, feeFixed: .2, feeCap: 4, indemnity: .1 },
+    cs: { on: false, customers: 200, amount: 25, newPerMonth: 10, churn: 3, days: [{ day: 1, share: 100 }], decline: 6, ok: [45, 30, 20, 15, 10, 10], feePct: 1.5, feeFixed: .2 },
+    card: { on: true, daily: 900, dow: [100, 90, 95, 100, 110, 140, 70], bh: 60, growth: 0, feePct: 1.4, feeFixed: .1, ticket: 28 },
+    inv: { on: false, monthly: 6000, day: 28, terms: 30, onTime: 55, lateDays: 21, bad: 2, growth: 0 },
+    pay: { on: true, freq: 'monthly', rule: 'lastBD', day: 28, net: 14000, weekday: 5, hmrc: 5200, pension: 800 },
+    vat: { on: true, stagger: 1, pct: 11, dd: true },
+    ct: { amount: 0, date: '' },
+    out: [
+      { label: 'Rent (quarterly in advance)', amt: 7500, freq: 'quarterdays', day: 25, month: 3, date: '', rule: 'prev' },
+      { label: 'Suppliers', amt: 9000, freq: 'monthly', day: 20, month: 1, date: '', rule: 'next' },
+      { label: 'Business loan', amt: 850, freq: 'monthly', day: 5, month: 1, date: '', rule: 'next' },
+      { label: 'Utilities', amt: 900, freq: 'monthly', day: 12, month: 1, date: '', rule: 'next' },
+      { label: 'Software & subscriptions', amt: 450, freq: 'monthly', day: 1, month: 1, date: '', rule: 'any' },
+      { label: 'Insurance (annual)', amt: 2400, freq: 'annual', day: 1, month: 4, date: '', rule: 'next' }
+    ],
+    inOther: []
+  },
+  st: { runs: 300, failVol: 35, salesCV: 30, monthVol: 8, spike: 0, salesDrop: 0, payoutDelay: 0, ddDelay: 0, lateExtra: 0, payrollRise: 0 }
+});
+const FREQ = [['once', 'Once'], ['weekly', 'Weekly'], ['monthly', 'Monthly'], ['quarterly', 'Quarterly'], ['quarterdays', 'Quarter days (25 Mar, 24 Jun, 29 Sep, 25 Dec)'], ['annual', 'Annually']];
+const RULE = [['prev', 'Banking day before'], ['next', 'Next banking day'], ['any', 'On the day (card / any day)']];
+const LISTS0 = {
+  'r.extra': { cols: [['date', 'Date', 'date'], ['label', 'Reason', 'text']], add: () => ({ date: ISO(todayDN() + 30), label: 'Extra bank holiday' }) },
+  'r.off': { cols: [['date', 'Date', 'date'], ['label', 'Note', 'text']], add: () => ({ date: '', label: 'Moved / not observed' }) },
+  'biz.dd.days': { cols: [['day', 'Due day of month', 'num'], ['share', 'Share of customers %', 'num']], add: () => ({ day: 28, share: 10 }) },
+  'biz.cs.days': { cols: [['day', 'Billing day of month', 'num'], ['share', 'Share of customers %', 'num']], add: () => ({ day: 15, share: 20 }) },
+  'biz.out': { cols: [['label', 'What', 'text'], ['amt', 'Amount £', 'num'], ['freq', 'How often', 'sel', FREQ], ['day', 'Day (month day, or 1=Mon…7=Sun weekly)', 'num'], ['month', 'Starting month (1–12)', 'num'], ['date', 'Date (one-off)', 'date'], ['rule', 'If not a banking day', 'sel', RULE]], add: () => ({ label: 'New cost', amt: 500, freq: 'monthly', day: 1, month: 1, date: '', rule: 'next' }) },
+  'biz.inOther': { cols: [['label', 'What', 'text'], ['amt', 'Amount £', 'num'], ['freq', 'How often', 'sel', FREQ], ['day', 'Day', 'num'], ['month', 'Starting month', 'num'], ['date', 'Date (one-off)', 'date'], ['rule', 'If not a banking day', 'sel', RULE]], add: () => ({ label: 'Grant / investment', amt: 5000, freq: 'once', day: 1, month: 1, date: ISO(todayDN() + 45), rule: 'next' }) }
+};
+
+/* ================= single-payment flows (timeline engine) ================= */
+function ddFlow(run0, out, o = {}) {
+  const R = S.r, amt = N(o.amount ?? S.tl.amount), fee = N(R.fee), ev = [], je = [], notes = [];
+  const add = (d, k, label, extra) => ev.push({ d, k, label: label || K[k][0], ...extra });
+  const J = (posted, entry, orig, amount, acct) => { const a = acct ?? cutoff(orig, posted); je.push({ posted, entry, orig, acct: a, amount, redated: a !== orig }); };
+  const run = nextBD(run0);
+  if (run !== run0) notes.push(`Direct Debit is only submitted on banking days, so ${fd(run0)} rolls forward to ${fd(run)}.`);
+  const res = { run, ev, je, notes, method: 'dd' };
+  const mcD = o.mc != null ? o.mc : (S.tl.mc ? DN(S.tl.mc) : run - 2);
+  if (out === 'mc-before') {
+    add(mcD, 'mandate', 'Mandate cancelled by customer'); add(run, 'run', 'Run day: customer skipped (no mandate)');
+    const c = mcD + N(R.mcDays) + 1; add(c, 'cancel'); res.end = c; res.cancel = c; return res;
+  }
+  const collect = addBD(run, R.ddCollect); res.due = collect;
+  if (N(R.notice) > 0) add(subBD(collect, R.notice), 'notice', `Advance notice must reach customer (${N(R.notice)} BD)`);
+  add(run, 'run', 'P1 submitted'); add(collect, 'due', 'P1 collected: due date');
+  const post = collect + N(R.postLag); add(post, 'rev'); J(post, 'Revenue (P1)', collect, amt, collect); res.post = post;
+  const f1 = addBD(collect, R.ddFail), c1 = addBD(collect, R.ddPayout);
+  if (out === 'paid') { add(c1, 'cash', `Cash in bank ${gbp2(amt)}`); res.cash = c1; res.end = c1; res.confirm = Math.max(f1, c1); return res; }
+  res.confirm = f1;
+  if (out === 'other') { add(f1, 'fail', 'P1 failed (other reason)'); J(f1, 'Revenue reversed (P1)', collect, -amt); add(f1, 'cancel'); res.end = f1; res.cancel = f1; return res; }
+  if (out === 'mc-during') { add(mcD, 'mandate', 'Mandate cancelled during collection'); add(f1, 'fail', 'P1 failed (mandate cancelled)'); J(f1, 'Revenue reversed (P1)', collect, -amt); const c = Math.max(f1, mcD + N(R.mcDays) + 1); add(c, 'cancel'); res.end = c; res.cancel = c; return res; }
+  // insufficient funds chain
+  add(f1, 'fail', 'P1 failed: insufficient funds (D1)'); J(f1, 'Revenue reversed (P1)', collect, -amt);
+  const n = clamp(Math.round(N(R.retries)), 0, 6), succ = out === 'ins-ok' ? clamp(Math.round(N(o.succ ?? S.tl.succ)), 2, n + 1) : 99;
+  let fail = f1; res.attempts = [];
+  for (let i = 0; i < n; i++) {
+    const P = 'P' + (i + 2), rr = retryOn(fail, i, false), rc = addBD(rr, R.ddCollect), rp = rc + N(R.postLag);
+    add(rr, 'retry', `${P} submitted${fee && i === 0 ? ` with ${gbp(fee)} fee` : ''}`); add(rc, 'due', `${P} collected`);
+    if (fee && i === 0) add(rr, 'fee', `${gbp(fee)} failed-payment fee`);
+    J(rp, `Revenue re-presented (${P})`, collect, amt); if (fee) J(rp, `Failed-payment fee (${P})`, rr, fee);
+    res.attempts.push({ P, rr, rc });
+    if (i + 2 === succ) { const cd = addBD(rc, R.ddPayout); add(cd, 'cash', `Cash in bank ${gbp2(amt + fee)}`); res.cash = cd; res.end = cd; res.confirm = Math.max(addBD(rc, R.ddFail), cd); return res; }
+    fail = addBD(rc, R.ddFail); add(fail, 'fail', `${P} failed (D${i + 2})`); J(fail, `Revenue reversed (${P})`, collect, -amt); if (fee) J(fail, `Fee reversed (${P})`, rr, -fee);
+  }
+  add(fail, 'cancel'); res.end = fail; res.cancel = fail; res.confirm = fail; return res;
+}
+function cardFlow(run0, out, o = {}) {
+  const R = S.r, amt = N(o.amount ?? S.tl.amount), ev = [], je = [], notes = [];
+  const add = (d, k, label) => ev.push({ d, k, label: label || K[k][0] });
+  const run = R.cardRunAnyDay ? run0 : nextBD(run0);
+  if (run !== run0) notes.push(`Card runs are set to banking days only, so ${fd(run0)} rolls to ${fd(run)}.`);
+  const res = { run, ev, je, notes, method: 'card', post: run, due: run };
+  if (out === 'ok') { add(run, 'sale', `Payment taken ${gbp2(amt)}`); add(run, 'rev'); je.push({ posted: run, entry: 'Revenue', orig: run, acct: run, amount: amt }); const c = cardPay(run); add(c, 'cash', `Payout ${gbp2(amt)}`); res.cash = c; res.end = c; res.confirm = run; return res; }
+  add(run, 'decline', 'Declined (P1)'); je.push({ posted: run, entry: 'Revenue', orig: run, acct: run, amount: amt }, { posted: run, entry: 'Revenue reversed (decline)', orig: run, acct: run, amount: -amt });
+  const n = clamp(Math.round(N(R.retries)), 0, 6), succ = out === 'dec-ok' ? clamp(Math.round(N(o.succ ?? S.tl.succ)), 2, n + 1) : 99;
+  let fail = run;
+  for (let i = 0; i < n; i++) {
+    const P = 'P' + (i + 2), rr = retryOn(fail, i, true);
+    if (i + 2 === succ) { add(rr, 'sale', `${P} approved`); add(rr, 'rev'); je.push({ posted: rr, entry: `Revenue (${P})`, orig: rr, acct: rr, amount: amt }); const c = cardPay(rr); add(c, 'cash', `Payout ${gbp2(amt)}`); res.cash = c; res.end = c; res.confirm = rr; return res; }
+    add(rr, 'decline', `${P} declined`); fail = rr;
+  }
+  add(fail, 'cancel'); res.end = fail; res.cancel = fail; res.confirm = fail; return res;
+}
+
+/* ================= forecast engine ================= */
+const startDN = () => S.biz.start ? DN(S.biz.start) : todayDN();
+function genDates(it, s, e) {
+  const out = [], f = it.freq, day = Math.round(N(it.day)) || 1, roll = d => it.rule === 'prev' ? prevBD(d) : it.rule === 'next' ? nextBD(d) : d;
+  const [sy, sm] = YMD(s - 40);
+  const monthsIter = cb => { let y = sy, m = sm; for (let k = 0; k < 40; k++) { cb(y, m); m++; if (m > 12) { m = 1; y++; } } };
+  if (f === 'once') { if (it.date) out.push(roll(DN(it.date))); }
+  else if (f === 'weekly') { const wd = (day % 7 + 7) % 7; for (let d = s - 7; d <= e; d++) if (dow(d) === wd) out.push(roll(d)); }
+  else if (f === 'monthly') monthsIter((y, m) => out.push(roll(DNy(y, m, Math.min(day, dim(y, m))))));
+  else if (f === 'quarterly') monthsIter((y, m) => { if (((m - (Math.round(N(it.month)) || 1)) % 3 + 3) % 3 === 0) out.push(roll(DNy(y, m, Math.min(day, dim(y, m))))); });
+  else if (f === 'quarterdays') monthsIter((y, m) => { const q = { 3: 25, 6: 24, 9: 29, 12: 25 }[m]; if (q) out.push(roll(DNy(y, m, q))); });
+  else if (f === 'annual') monthsIter((y, m) => { if (m === (Math.round(N(it.month)) || 1)) out.push(roll(DNy(y, m, Math.min(day, dim(y, m))))); });
+  return out.filter(d => d >= s && d <= e);
+}
+function forecast(o = {}) {
+  const B = S.biz, R = S.r, rand = o.rand || null, sc = o.sc || {}, s = startDN(), e = s + Math.max(1, Math.round(N(B.weeks))) * 7 - 1;
+  const ev = [], accr = [];
+  const IN = (d, amt, stream, acc) => { if (amt && fin(amt)) ev.push({ d, amt, stream, acc, io: 1 }); };
+  const OUT = (d, amt, stream) => { if (amt && fin(amt)) ev.push({ d, amt: -Math.abs(amt), stream, io: -1 }); };
+  const ACC = (d, amt, stream) => { if (amt) accr.push({ d, amt, stream }); };
+  const draw = (n, p) => { p = clamp(p, 0, 1); if (!rand) return n * p; const sd = Math.sqrt(Math.max(0, n * p * (1 - p))); return clamp(n * p + sd * gauss(rand), 0, n); };
+  const shock = rand ? Math.exp(gauss(rand) * N(S.st.failVol) / 100 - .5 * Math.pow(N(S.st.failVol) / 100, 2)) : 1;
+  const [sy, sm] = YMD(s), [ey, em] = YMD(e), months = [];
+  { let y = sy, m = sm - 4; while (m < 1) { m += 12; y--; } while (y * 12 + m <= ey * 12 + em) { months.push([y, m, (y * 12 + m) - (sy * 12 + sm)]); m++; if (m > 12) { m = 1; y++; } } }
+  const mShock = {}; months.forEach(([y, m, k]) => mShock[k] = rand ? Math.exp(gauss(rand) * N(S.st.monthVol) / 100) : 1);
+  const n0 = Math.round(N(R.retries)), feeAmt = N(R.fee);
+  const subStream = (cfg, kind) => {
+    if (!cfg.on) return;
+    let c = N(cfg.customers);
+    const shares = (cfg === B.dd && cfg.spread) ? null : (cfg.days || []).filter(x => N(x.share) > 0);
+    const tot = shares ? sum(shares, x => N(x.share)) || 1 : 1;
+    const pI = Math.min(.95, ((kind === 'dd' ? N(cfg.ins) : N(cfg.decline)) + N(sc.spike)) / 100 * shock), pO = kind === 'dd' ? N(cfg.other) / 100 * shock : 0, pM = kind === 'dd' ? N(cfg.mc) / 100 : 0;
+    const label = kind === 'dd' ? 'Direct Debit' : 'Card subscriptions', fee = (k, a) => kind === 'dd' ? k * Math.min(N(cfg.feeCap) || Infinity, a * N(cfg.feePct) / 100 + N(cfg.feeFixed)) : k * (a * N(cfg.feePct) / 100 + N(cfg.feeFixed));
+    for (const [y, m, k] of months) {
+      const list = shares ? shares.map(x => [Math.min(Math.round(N(x.day)) || 1, dim(y, m)), N(x.share) / tot]) : Array.from({ length: dim(y, m) }, (_, i) => [i + 1, 1 / dim(y, m)]);
+      let lost = 0; const amt = N(cfg.amount);
+      for (const [day, sh] of list) {
+        const target = DNy(y, m, day), n = c * sh;
+        if (kind === 'dd') {
+          const collect = nextBD(target); ACC(collect, n * amt, label);
+          const nI = draw(n, pI), nO = draw(n - nI, pO / Math.max(1e-9, 1 - pI)), nM = draw(n - nI - nO, pM / Math.max(1e-9, 1 - pI - pO)), ok = Math.max(0, n - nI - nO - nM);
+          const c1 = addBD(collect, N(R.ddPayout) + N(sc.ddDelay)); IN(c1, ok * amt - fee(ok, amt), label, collect);
+          if (N(cfg.indemnity)) OUT(nextBD(c1 + 35), ok * amt * N(cfg.indemnity) / 100, 'DD Guarantee claims');
+          let rem = nI, f = addBD(collect, R.ddFail);
+          for (let i = 0; i < n0 && rem > 1e-6; i++) { const rr = retryOn(f, i, false), rc = addBD(rr, R.ddCollect), got = draw(rem, N((cfg.ok || [])[i]) / 100); IN(addBD(rc, N(R.ddPayout) + N(sc.ddDelay)), got * (amt + feeAmt) - fee(got, amt + feeAmt), 'DD retries', collect); if (feeAmt) ACC(rr, got * feeAmt, 'Failed-payment fees'); rem -= got; f = addBD(rc, R.ddFail); }
+          lost += rem + nO + nM; if (rem > 0) ACC(collect, -rem * amt, 'Bad debt (failed DD)');
+        } else {
+          const run = R.cardRunAnyDay ? target : nextBD(target); ACC(run, n * amt, label);
+          const nD = draw(n, pI), ok = n - nD; IN(cardPay(run, N(sc.payoutDelay)), ok * amt - fee(ok, amt), label, run);
+          let rem = nD, f = run;
+          for (let i = 0; i < n0 && rem > 1e-6; i++) { const rr = retryOn(f, i, true), got = draw(rem, N((cfg.ok || [])[i]) / 100); IN(cardPay(rr, N(sc.payoutDelay)), got * amt - fee(got, amt), 'Card retries', run); rem -= got; f = rr; }
+          lost += rem; if (rem > 0) ACC(run, -rem * amt, 'Bad debt (declined cards)');
+        }
+      }
+      if (k >= 0) c = Math.max(0, c * (1 - N(cfg.churn) / 100) - lost + N(cfg.newPerMonth));
+    }
+  };
+  subStream(B.dd, 'dd'); subStream(B.cs, 'cs');
+  // card sales
+  if (B.card.on) {
+    const w = B.card.dow.map(N), mw = sum(w) / 7 || 1, cv = N(S.st.salesCV) / 100;
+    for (let d = s - 21; d <= e; d++) {
+      const k = Math.floor((d - s) / 30.44);
+      let v = N(B.card.daily) * (w[(dow(d) + 6) % 7] / mw) * (holName(d) ? N(B.card.bh) / 100 : 1) * Math.pow(1 + N(B.card.growth) / 100, Math.max(0, k)) * (1 - N(sc.salesDrop) / 100);
+      if (rand) v *= Math.exp(gauss(rand) * cv - cv * cv / 2) * (mShock[Math.max(-4, Math.min(k, 99))] || 1);
+      if (v <= 0) continue;
+      ACC(d, v, 'Card sales');
+      IN(cardPay(d, N(sc.payoutDelay)), v - v * N(B.card.feePct) / 100 - (v / Math.max(1, N(B.card.ticket))) * N(B.card.feeFixed), 'Card sales', d);
+    }
+  }
+  // invoices
+  if (B.inv.on) for (const [y, m, k] of months) {
+    const inv = DNy(y, m, Math.min(Math.round(N(B.inv.day)) || 28, dim(y, m))), amt = N(B.inv.monthly) * Math.pow(1 + N(B.inv.growth) / 100, Math.max(0, k)) * (rand ? mShock[k] : 1);
+    ACC(inv, amt, 'Invoices'); const on = N(B.inv.onTime) / 100, bad = N(B.inv.bad) / 100, late = Math.max(0, 1 - on - bad);
+    const lateD = (N(B.inv.lateDays) + N(sc.lateExtra)) * (rand ? .4 + rand() * 1.2 : 1);
+    IN(nextBD(inv + Math.round(N(B.inv.terms))), amt * on, 'Invoices', inv); IN(nextBD(inv + Math.round(N(B.inv.terms) + lateD)), amt * late, 'Invoices (late)', inv);
+    if (bad) ACC(inv, -amt * bad, 'Bad debt (invoices)');
+  }
+  (B.inOther || []).forEach(it => genDates(it, s - 60, e).forEach(d => IN(d, N(it.amt), it.label || 'Other income', d)));
+  // payroll & HMRC
+  if (B.pay.on) {
+    const rise = 1 + N(sc.payrollRise) / 100;
+    if (B.pay.freq === 'weekly') { const wd = (Math.round(N(B.pay.weekday)) % 7 + 7) % 7; for (let d = s - 7; d <= e; d++) if (dow(d) === wd) OUT(prevBD(d), N(B.pay.net) * rise, 'Payroll'); }
+    else for (const [y, m] of months) OUT(B.pay.rule === 'lastBD' ? lastBD(y, m) : prevBD(DNy(y, m, Math.min(Math.round(N(B.pay.day)) || 28, dim(y, m)))), N(B.pay.net) * rise, 'Payroll');
+    for (const [y, m] of months) { let ny = y, nm = m + 1; if (nm > 12) { nm = 1; ny++; } OUT(prevBD(DNy(ny, nm, 22)), (N(B.pay.hmrc) + N(B.pay.pension)) * rise, 'HMRC PAYE/NI & pension'); }
+  }
+  // VAT
+  if (B.vat.on) {
+    const byM = {}; accr.forEach(a => { if (a.amt > 0 && !/fee/i.test(a.stream)) { const [y, m] = YMD(a.d); byM[y * 12 + m] = (byM[y * 12 + m] || 0) + a.amt; } });
+    const vals = Object.values(byM), avg = vals.length ? sum(vals) / vals.length : 0, ends = { 1: [3, 6, 9, 12], 2: [1, 4, 7, 10], 3: [2, 5, 8, 11] }[B.vat.stagger] || [3, 6, 9, 12];
+    for (let y = sy - 1; y <= ey + 1; y++) for (const qm of ends) {
+      let dy = y, dm = qm + 2; while (dm > 12) { dm -= 12; dy++; }
+      const due = DNy(dy, dm, 7), pay = B.vat.dd ? addBD(due, 3) : prevBD(due);
+      if (pay < s || pay > e) continue;
+      let q = 0; for (let j = 0; j < 3; j++) { let mm = qm - j, yy = y; if (mm < 1) { mm += 12; yy--; } q += byM[yy * 12 + mm] ?? avg; }
+      OUT(pay, q * N(B.vat.pct) / 100, 'VAT');
+    }
+  }
+  if (N(B.ct.amount) && B.ct.date) OUT(prevBD(DN(B.ct.date)), N(B.ct.amount), 'Corporation tax');
+  (B.out || []).forEach(it => genDates(it, s - 60, e).forEach(d => OUT(d, N(it.amt), it.label || 'Other cost')));
+  // ledger
+  const E = ev.filter(x => x.d >= s && x.d <= e), n = e - s + 1, inA = new Float64Array(n), outA = new Float64Array(n), bal = new Float64Array(n);
+  E.forEach(x => { if (x.amt > 0) inA[x.d - s] += x.amt; else outA[x.d - s] += -x.amt; });
+  let b = N(B.opening), min = Infinity, minD = s, below0 = 0, belowOD = 0, belowBuf = 0;
+  for (let i = 0; i < n; i++) { b += inA[i] - outA[i]; bal[i] = b; if (b < min) { min = b; minD = s + i; } if (b < 0) below0++; if (b < -N(B.overdraft)) belowOD++; if (b < N(B.buffer)) belowBuf++; }
+  return { s, e, n, ev: E, allEv: ev, accr, inA, outA, bal, min, minD, below0, belowOD, belowBuf, end: bal[n - 1] };
+}
+const GROUP = st => /^Direct Debit|^DD retries/.test(st) ? 'Direct Debit' : /^Card sub|^Card retries/.test(st) ? 'Card subscriptions' : /^Card sales/.test(st) ? 'Card sales' : /^Invoices/.test(st) ? 'Invoices' : 'Other income';
+let F = null;
+
+/* ================= rendering helpers ================= */
+function monthCal(y, m, cell, cls = '') {
+  const first = DNy(y, m, 1), lead = (dow(first) + 6) % 7, days = dim(y, m), td = todayDN();
+  let h = `<div class="cal ${cls}">${['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map(x => `<div class="h">${x}</div>`).join('')}`;
+  for (let i = 0; i < lead; i++) h += '<div class="c out"></div>';
+  for (let d = 1; d <= days; d++) { const n = DNy(y, m, d), hn = holName(n), we = dow(n) === 0 || dow(n) === 6; h += `<div class="c ${we ? 'we' : ''} ${hn ? 'bh' : ''} ${n === td ? 'today' : ''}"><span class="dn">${d}</span>${hn ? `<span class="bhn">${esc(hn)}</span>` : ''}${cell(n)}</div>`; }
+  return h + '</div>';
+}
+const keyRow = ks => `<div class="keyrow">${ks.map(k => `<span><i style="background:${K[k][1]}"></i>${K[k][0]}</span>`).join('')}<span><i style="background:#0c1426;border:1px solid var(--line)"></i>Weekend</span><span><i style="background:rgba(255,182,72,.25)"></i>Bank holiday</span></div>`;
+const monthsSpan = (a, b) => { const out = []; let [y, m] = YMD(a); const [ey, em] = YMD(b); while (y * 12 + m <= ey * 12 + em && out.length < 4) { out.push([y, m]); m++; if (m > 12) { m = 1; y++; } } return out; };
+const defRun = () => { let d = todayDN(); while (dow(d) !== 3) d++; return ISO(d); };
+const mondayOf = n => n - ((dow(n) + 6) % 7);
+
+/* ================= app ================= */
+const APPX = {
+  key: 'cash-flow-simulator.v1', file: 'cash-flow-simulator', title: 'Cash Flow Simulator', sub: 'UK · BACS · CARD · BANK HOLIDAYS · v1.0', logo: '⇅',
+  def: DEF, lists: LISTS0,
+  reset() { F = forecast(); },
+  kpis() { const B = S.biz; return [['Opening balance', gbp(N(B.opening)), fd(F.s)], ['Lowest balance', gbp(F.min), fd(F.minD)], ['Closing balance', gbp(F.end), fd(F.e)], ['Days overdrawn', F.below0, F.belowOD ? `${F.belowOD} beyond the overdraft` : `of ${F.n} days`], ['Net cash flow', gbp(F.end - N(B.opening)), Math.round(N(B.weeks)) + ' weeks']]; },
+  tabs: [['home', 'Start here', 'What it does & how to use it'], ['rules', 'Calendar & rules', 'Bank holidays, Bacs & card timing'], ['timeline', 'Payment timeline', 'One payment, every date'], ['bunch', 'Retry bunching', 'Where a week of failures lands'], ['month', 'Month view', 'Cash and retries by day'], ['biz', 'Your business', 'Income, costs, tax dates'], ['forecast', 'Cash flow forecast', 'Daily balance, weeks, months'], ['stress', 'Stress test', 'Failures, delays, bad months'], ['guide', 'Guide', 'Rules, codes, finance notes']],
+  build() {
+    const ddOut = [['paid', 'Collected first time'], ['ins-ok', 'Insufficient funds, then a retry succeeds'], ['ins-fail', 'Insufficient funds, every retry fails'], ['other', 'Fails for another reason (no retry)'], ['mc-before', 'Mandate cancelled before the run'], ['mc-during', 'Mandate cancelled during collection']];
+    const cardOut = [['ok', 'Approved'], ['dec-ok', 'Declined, then a retry succeeds'], ['dec-fail', 'Declined, every retry fails']];
+    S.tl.run = S.tl.run || defRun(); S.bu.week = S.bu.week || ISO(mondayOf(todayDN())); S.mv.month = S.mv.month || todayYM(); S.bdc.from = S.bdc.from || ISO(todayDN());
+    const gapF = p => [0, 1, 2, 3, 4].map(i => fld('r.gaps.' + i, `Clear days before P${i + 2}`, { show: `r.retries>${i}` })).join('');
+    return `
+<section class="tab" id="t-home"><div class="hero"><div class="eyebrow">UK small business · Bacs Direct Debit · card settlement · bank holidays</div><h1>Revenue is when they owe you. <em>Cash is when it lands.</em></h1>
+<p>Direct Debits take three banking days to collect and longer to reach your account. Card money arrives days after the sale. Failed payments retry on their own schedule, and weekends, bank holidays and month ends push everything around. This simulator plays every one of those rules out on the real UK banking calendar, then builds your day-by-day cash flow around payroll, HMRC, VAT, rent and suppliers.</p>
+<div class="row" style="margin-top:14px"><button class="btn pri" data-go="biz">Set up my business →</button><button class="btn" data-go="forecast">See the forecast</button><button class="btn" data-go="timeline">Trace one payment</button></div></div>
+<div class="steps">${[['rules', 'Calendar & rules', 'The England and Wales banking calendar Bacs runs on, with every bank holiday and substitute day calculated for any year, and editable. Set your provider\'s timing, retry gaps, fees and month-end close.'], ['timeline', 'Payment timeline', 'Pick a run date and an outcome. See submission, collection, revenue, failure, each retry, the fee, cancellation and the day cash reaches your bank, on a calendar.'], ['bunch', 'Retry bunching', 'Run every day of a week through the failure path and see how Wednesday, Thursday and Friday failures all land on the same Monday.'], ['month', 'Month view', 'For any month: where each run day\'s cash and retries land, and how card payouts pile up after weekends and holidays.'], ['biz', 'Your business', 'Direct Debit and card subscribers, card takings by weekday, invoices, payroll, HMRC, VAT, rent quarter days and any other cost.'], ['forecast', 'Cash flow forecast', 'A 13 to 52 week daily balance with your overdraft, weekly and monthly tables, revenue against cash, cash in transit at each month end, and a CSV export.'], ['stress', 'Stress test', 'Hundreds of simulated months with varying failure rates and takings, plus what-ifs: a failure spike, slower payouts, late invoices, a sales drop.'], ['guide', 'Guide', 'Bacs in plain English, failure codes, HMRC dates, late payment rights, and notes for whoever keeps the books.']].map(([k, t, d], i) => `<div class="step" data-go="${k}"><div class="n">${String(i + 1).padStart(2, '0')}</div><b>${t}</b><p>${d}</p></div>`).join('')}</div>
+<div class="cols3" style="margin-top:18px"><div class="panel"><h3 style="margin-top:0">Words used here</h3><ul><li><b>BD</b>: a banking day (Monday to Friday, not a bank holiday).</li><li><b>CD</b>: a calendar day, weekends included.</li><li><b>Run</b>: the day a payment is submitted (Bacs day 1) or a card is charged.</li><li><b>P1, P2, P3</b>: the first attempt and each retry. <b>D1, D2</b>: the day each failure is reported.</li><li><b>Clear days</b>: whole calendar days between a failure and the next retry.</li></ul></div>
+<div class="panel"><h3 style="margin-top:0">How to use it</h3><ul><li>Check the timing rules match your Direct Debit and card provider (Calendar & rules).</li><li>Trace a few payments around a weekend, month end and Christmas to see the edge cases.</li><li>Enter your business, then read the forecast. Every number updates as you type.</li><li>Use the stress test to choose an overdraft or cash buffer you're comfortable with.</li></ul></div>
+<div class="panel"><h3 style="margin-top:0">Limits</h3><ul><li>Bacs and card schemes follow the England and Wales calendar across the UK. You can add, remove or move any holiday on the Calendar & rules tab.</li><li>Provider timings vary. Defaults are typical, not any provider's actual terms.</li><li>A planning tool, not accounting or tax advice.</li></ul></div></div></section>
+
+<section class="tab" id="t-rules">${head(1, 'Banking calendar & rules', 'Every other tab uses these. Set them to match your Direct Debit provider, card provider and accounting close.')}
+<div class="grid2"><div>
+${fs('Direct Debit (Bacs)', fld('r.ddCollect', 'Collection: run + BD', { hint: 'Bacs day 3 = run + 2 BD' }) + fld('r.ddPayout', 'Cash: collection + BD', { hint: 'Own Bacs SUN: 0 · via a provider: often 2' }) + fld('r.ddFail', 'Failure reported: collection + BD', { hint: 'ARUDD report ≈ day 5' }) + fld('r.notice', 'Advance notice (BD before collection)', { hint: 'Scheme default 10, min 3 if agreed' }) + fld('r.postLag', 'Revenue posted: due date + CD') + `<label><span>Presets</span><div class="row"><button class="btn sm" data-set='{"r.ddPayout":2}'>Via a provider</button><button class="btn sm" data-set='{"r.ddPayout":0}'>Own Bacs SUN</button></div></label>`)}
+${fs('Card', fld('r.cardPayout', 'Payout: sale + days', { hint: 'Typically T+1 to T+3' }) + fld('r.cardPayAnyDay', 'Provider pays out every day (days are calendar days)', { type: 'chk' }) + fld('r.cardRunAnyDay', 'Card payments can be taken at weekends', { type: 'chk' }) + fld('r.cardRetryBD', 'Card retries only on banking days', { type: 'chk' }))}
+${fs('Failed payments (dunning)', fld('r.retries', 'Retries after the first attempt', { hint: '0 to 5' }) + gapF() + fld('r.fee', 'Failed-payment fee £', { hint: 'Added once, on the first retry. 0 = none' }) + fld('r.mcDays', 'Clear days after a mandate cancellation before cancelling'))}
+${fs('Month-end close', fld('r.closeDay', 'Books close on day', { hint: 'A reversal posted after this day of a later month is dated the 1st of that month' }))}
+<fieldset><legend>Amend the holiday calendar</legend>
+<p class="hint" style="margin-top:0">Tick or untick any holiday in the table on the right to switch it on or off. To <b>move</b> a holiday, switch off the original date and add the new one below. Changes apply to every tab.</p>
+<h3 style="margin:8px 0 4px;font-size:14px">Added non-banking days</h3><div data-list="r.extra"></div><p class="hint">One-off bank holidays (a coronation or jubilee, for example), a moved holiday's new date, or any day your bank or provider won't process.</p>
+<h3 style="margin:12px 0 4px;font-size:14px">Holidays switched off (treated as normal banking days)</h3><div data-list="r.off"></div>
+<div class="row" style="margin-top:10px"><label class="btn sm filebtn">Load GOV.UK bank-holidays.json<input type="file" id="govuk" accept=".json,application/json"></label><button class="btn sm" id="holReset">Restore the standard calendar</button></div>
+<p class="hint">Download the official list from gov.uk/bank-holidays.json and load it here: any differences from the built-in rules for the years it covers are added or switched off for you.</p></fieldset>
+</div><div><div class="panel" id="hol"></div><div class="panel" id="bdcalc"></div></div></div></section>
+
+<section class="tab" id="t-timeline">${head(2, 'Payment timeline', 'Choose a run date and what happens. Every stage below is worked out from the rules and the banking calendar.')}
+<div class="panel">${fs('Payment', fld('tl.run', 'Run date', { type: 'date' }) + fld('tl.method', 'Method', { type: 'sel', opts: [['dd', 'Direct Debit (Bacs)'], ['card', 'Card (recurring)']] }) + `<label data-show="tl.method=dd"><span>Outcome</span><select data-k="tl.out">${ddOut.map(([v, l]) => `<option value="${v}" ${S.tl.out === v ? 'selected' : ''}>${l}</option>`).join('')}</select></label><label data-show="tl.method=card"><span>Outcome</span><select data-k="tl.outC">${cardOut.map(([v, l]) => `<option value="${v}" ${S.tl.outC === v ? 'selected' : ''}>${l}</option>`).join('')}</select></label>` + fld('tl.succ', 'Succeeds on attempt (2 = P2)', { show: 'tl.method=dd&tl.out=ins-ok' }) + fld('tl.succ', 'Succeeds on attempt (2 = P2)', { show: 'tl.method=card&tl.outC=dec-ok' }) + fld('tl.amount', 'Amount £') + fld('tl.mc', 'Mandate cancelled on', { type: 'date', show: 'tl.method=dd&tl.out=mc-before|mc-during', hint: 'Blank = 2 days before the run' }))}
+<div class="row" id="quick"></div></div>
+<div id="tlOut"></div></section>
+
+<section class="tab" id="t-bunch">${head(3, 'Retry bunching', 'Each row is one run day in the chosen week, assuming every attempt fails, so you can see where retries pile up.')}
+<div class="panel">${fs('Week', fld('bu.week', 'Week starting', { type: 'date' }) + fld('bu.method', 'Method', { type: 'sel', opts: [['dd', 'Direct Debit'], ['card', 'Card']] }) + fld('bu.cardView', 'Card view', { type: 'sel', opts: [['payout', 'Payout grouping'], ['retry', 'Retry grouping']], show: 'bu.method=card' }) + fld('bu.upto', 'Show retries up to P', { hint: 'Uses the retry gaps from Calendar & rules' }))}
+<div class="row" id="bweeks"></div><div id="buOut"></div></div></section>
+
+<section class="tab" id="t-month">${head(4, 'Month view', 'What each run day sets in motion, and what lands on each day.')}
+<div class="panel">${fs('Month', fld('mv.month', 'Month', { type: 'month' }) + fld('mv.method', 'Method', { type: 'sel', opts: [['dd', 'Direct Debit'], ['card', 'Card']] }) + fld('mv.upto', 'Show retries up to P', { show: 'mv.method=dd' }))}<div id="mvOut"></div></div></section>
+
+<section class="tab" id="t-biz">${head(5, 'Your business', 'Everything that moves cash in or out. Switch off anything that does not apply.')}
+<div class="grid2 even"><div>
+${fs('Forecast', fld('biz.start', 'Start date', { type: 'date', hint: 'Blank = today' }) + fld('biz.weeks', 'Weeks to forecast', { type: 'range', min: 4, max: 52, unit: ' wks' }) + fld('biz.opening', 'Bank balance at start £') + fld('biz.overdraft', 'Overdraft limit £') + fld('biz.buffer', 'Minimum cash you want to keep £'))}
+<fieldset><legend>Direct Debit subscriptions</legend><div class="fg">${fld('biz.dd.on', 'Collect by Direct Debit', { type: 'chk' })}</div><div data-show="biz.dd.on=true"><div class="fg" style="margin-top:8px">${fld('biz.dd.customers', 'Customers now') + fld('biz.dd.amount', 'Amount each £') + fld('biz.dd.newPerMonth', 'New customers a month') + fld('biz.dd.churn', 'Customers leaving % a month') + fld('biz.dd.ins', 'First attempts failing: insufficient funds %') + fld('biz.dd.other', 'Failing for other reasons %') + fld('biz.dd.mc', 'Mandates cancelled before collection %') + fld('biz.dd.indemnity', 'Indemnity claims % of collected') + fld('biz.dd.feePct', 'Provider fee %') + fld('biz.dd.feeFixed', 'Provider fee £ per payment') + fld('biz.dd.feeCap', 'Fee cap £ per payment') + [0, 1, 2, 3, 4].map(i => fld(`biz.dd.ok.${i}`, `P${i + 2} retries that succeed %`, { show: `r.retries>${i}` })).join('') + fld('biz.dd.spread', 'Due dates spread evenly through the month', { type: 'chk' })}</div><div data-show="biz.dd.spread!=true" style="margin-top:8px"><div data-list="biz.dd.days"></div></div></div></fieldset>
+<fieldset><legend>Card subscriptions (recurring card payments)</legend><div class="fg">${fld('biz.cs.on', 'Take recurring card payments', { type: 'chk' })}</div><div data-show="biz.cs.on=true"><div class="fg" style="margin-top:8px">${fld('biz.cs.customers', 'Customers now') + fld('biz.cs.amount', 'Amount each £') + fld('biz.cs.newPerMonth', 'New a month') + fld('biz.cs.churn', 'Leaving % a month') + fld('biz.cs.decline', 'First attempts declined %') + fld('biz.cs.feePct', 'Card fee %') + fld('biz.cs.feeFixed', 'Card fee £ per payment') + [0, 1, 2, 3, 4].map(i => fld(`biz.cs.ok.${i}`, `P${i + 2} retries that succeed %`, { show: `r.retries>${i}` })).join('')}</div><div style="margin-top:8px" data-list="biz.cs.days"></div></div></fieldset>
+<fieldset><legend>Card takings (shop, café, online)</legend><div class="fg">${fld('biz.card.on', 'Take card payments', { type: 'chk' })}</div><div data-show="biz.card.on=true"><div class="fg" style="margin-top:8px">${fld('biz.card.daily', 'Average day £') + fld('biz.card.growth', 'Growth % a month') + fld('biz.card.bh', 'Bank holiday trade % of normal') + fld('biz.card.feePct', 'Card fee %') + fld('biz.card.feeFixed', 'Card fee £ per transaction') + fld('biz.card.ticket', 'Average transaction £') + ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((d, i) => fld(`biz.card.dow.${i}`, `${d} (index)`)).join('')}</div><p class="hint">Weekday index: 100 = an average day. Saturday at 140 takes 40% more than average.</p></div></fieldset>
+<fieldset><legend>Invoices to business customers</legend><div class="fg">${fld('biz.inv.on', 'Invoice customers', { type: 'chk' })}</div><div data-show="biz.inv.on=true"><div class="fg" style="margin-top:8px">${fld('biz.inv.monthly', 'Invoiced £ a month') + fld('biz.inv.day', 'Invoice day of month') + fld('biz.inv.terms', 'Payment terms (days)') + fld('biz.inv.onTime', 'Paid on time %') + fld('biz.inv.lateDays', 'Late payers: days late on average') + fld('biz.inv.bad', 'Never paid %') + fld('biz.inv.growth', 'Growth % a month')}</div></div></fieldset>
+</div><div>
+<fieldset><legend>Payroll & HMRC</legend><div class="fg">${fld('biz.pay.on', 'Run payroll', { type: 'chk' })}</div><div data-show="biz.pay.on=true"><div class="fg" style="margin-top:8px">${fld('biz.pay.freq', 'Paid', { type: 'sel', opts: [['monthly', 'Monthly'], ['weekly', 'Weekly']] }) + fld('biz.pay.rule', 'Pay day', { type: 'sel', opts: [['lastBD', 'Last banking day of the month'], ['fixed', 'Fixed date (earlier if not a banking day)']], show: 'biz.pay.freq=monthly' }) + fld('biz.pay.day', 'Day of month', { show: 'biz.pay.rule=fixed' }) + fld('biz.pay.weekday', 'Weekday (1=Mon … 5=Fri)', { show: 'biz.pay.freq=weekly' }) + fld('biz.pay.net', 'Net pay per run £') + fld('biz.pay.hmrc', 'PAYE, NI & student loans £/month', { hint: 'Due 22nd of next month' }) + fld('biz.pay.pension', 'Pension contributions £/month', { hint: 'Due by the 22nd' })}</div></div></fieldset>
+${fs('VAT', fld('biz.vat.on', 'VAT registered', { type: 'chk' }) + fld('biz.vat.stagger', 'Quarters end', { type: 'sel', opts: [[1, 'Mar, Jun, Sep, Dec'], [2, 'Jan, Apr, Jul, Oct'], [3, 'Feb, May, Aug, Nov']], show: 'biz.vat.on=true' }) + fld('biz.vat.pct', 'VAT to pay as % of gross receipts', { show: 'biz.vat.on=true', hint: 'Output VAT minus input VAT; ≈ 8–14% for many' }) + fld('biz.vat.dd', 'Pay HMRC by Direct Debit (taken 3 BD after the due date)', { type: 'chk', show: 'biz.vat.on=true' }))}
+${fs('Corporation tax', fld('biz.ct.amount', 'Amount £') + fld('biz.ct.date', 'Due date', { type: 'date', hint: '9 months and 1 day after the year end' }))}
+<fieldset><legend>Other costs</legend><div data-list="biz.out"></div><p class="hint">"If not a banking day" decides when money leaves: rent and Direct Debits to suppliers usually go the banking day before or after; card subscriptions leave on the day.</p></fieldset>
+<fieldset><legend>Other income</legend><div data-list="biz.inOther"></div></fieldset>
+</div></div></section>
+
+<section class="tab" id="t-forecast">${head(6, 'Cash flow forecast', 'Your day-by-day bank balance, with every payment timed on the banking calendar.')}<div id="fcOut"></div></section>
+
+<section class="tab" id="t-stress">${head(7, 'Stress test', 'Real months are noisy. This reruns your forecast hundreds of times with varying failure rates, takings and late payers, plus any what-ifs you add.')}
+<div class="grid2"><div>
+${fs('How noisy', fld('st.runs', 'Simulations') + fld('st.failVol', 'Failure rate variability %', { hint: 'How much failure rates swing run to run' }) + fld('st.salesCV', 'Daily takings variability %') + fld('st.monthVol', 'Month-to-month demand swing %'))}
+${fs('What if…', fld('st.spike', 'Failure rate +% points') + fld('st.salesDrop', 'Card takings fall %') + fld('st.payoutDelay', 'Card payouts delayed by extra BD') + fld('st.ddDelay', 'Direct Debit cash delayed by extra BD') + fld('st.lateExtra', 'Invoices paid extra days late') + fld('st.payrollRise', 'Payroll costs rise %'))}
+<div class="row"><button class="btn sm" data-set='{"st.spike":0,"st.salesDrop":0,"st.payoutDelay":0,"st.ddDelay":0,"st.lateExtra":0,"st.payrollRise":0}'>Clear what-ifs</button><button class="btn sm" data-set='{"st.spike":3,"st.salesDrop":15,"st.lateExtra":14}'>Bad quarter</button><button class="btn sm" data-set='{"st.payoutDelay":5}'>Payouts held 1 week</button><button class="btn sm" data-set='{"st.payrollRise":6.7}'>Wage rise</button></div>
+</div><div id="stOut"></div></div></section>
+
+<section class="tab" id="t-guide">${head(8, 'Guide', 'The rules behind the timings, and what they mean for the people who keep the books.')}<div id="guideOut"></div></section>`;
+  },
+  render: {}
+};
+APPX.render.home = () => {};
+
+/* ---------- rules tab ---------- */
+APPX.render.rules = () => {
+  const y0 = YMD(todayDN())[0] + N(S.r.hy);
+  const yrs = [y0, y0 + 1, y0 + 2];
+  $('#hol').innerHTML = `<div class="between"><h3 style="margin-top:0">Bank holidays (England & Wales)</h3><div class="row"><button class="btn sm" data-set='{"r.hy":${N(S.r.hy) - 1}}'>←</button><button class="btn sm" data-set='{"r.hy":${N(S.r.hy) + 1}}'>→</button></div></div>
+  <div class="wrap short"><table class="tbl"><thead><tr><th class="l">Holiday</th>${yrs.map(y => `<th>${y}</th>`).join('')}</tr></thead><tbody>${["New Year's Day", 'Good Friday', 'Easter Monday', 'Early May bank holiday', 'Spring bank holiday', 'Summer bank holiday', 'Christmas Day', 'Boxing Day'].map(nm => `<tr><td class="l">${nm}</td>${yrs.map(y => { const h = ewHolidays(y), d = Object.keys(h).find(k => h[k].startsWith(nm)); if (!d) return '<td>–</td>'; const off = (S.r.off || []).some(e => DN(e.date) === +d); return `<td><label class="chk" style="justify-content:flex-end" title="${off ? 'Switched off: treated as a banking day' : 'Untick to treat as a banking day'}"><span style="${off ? 'text-decoration:line-through;color:var(--muted)' : ''}">${fd(+d)}${h[d].includes('substitute') ? ' <span class="pill w">sub</span>' : ''}</span><input type="checkbox" data-hol="${ISO(+d)}" data-holname="${esc(h[d])}" ${off ? '' : 'checked'}></label></td>`; }).join('')}</tr>`).join('')}${(S.r.extra || []).filter(x => x.date && yrs.includes(YMD(DN(x.date))[0])).map(x => `<tr><td class="l">${esc(x.label)} <span class="pill a">added</span></td>${yrs.map(y => `<td>${YMD(DN(x.date))[0] === y ? fd(DN(x.date)) : ''}</td>`).join('')}</tr>`).join('')}</tbody></table></div>
+  ${(S.r.extra || []).length || (S.r.off || []).length ? `<div class="warnbox">Custom calendar in use: ${(S.r.extra || []).length} added, ${(S.r.off || []).length} switched off.</div>` : ''}
+  <p class="hint">Calculated from the statutory rules, including substitute days when a holiday falls at a weekend. Bacs and the card schemes use this calendar across the UK. Scotland and Northern Ireland have different staff holidays, but payments still follow England and Wales.</p>`;
+  $$('#hol [data-hol]').forEach(cb => cb.onchange = () => { const d = cb.dataset.hol; S.r.off = (S.r.off || []).filter(e => e.date !== d); if (!cb.checked) S.r.off.push({ date: d, label: cb.dataset.holname + ' switched off' }); renderLists('r.off'); changed(); });
+  $('#holReset').onclick = () => { if (!confirm('Remove all added days and switch every standard holiday back on?')) return; S.r.extra = []; S.r.off = []; renderLists('r.extra'); renderLists('r.off'); changed(); toast('Standard calendar restored'); };
+  $('#govuk').onchange = async e => { const file = e.target.files[0]; if (!file) return; try { const j = JSON.parse(await file.text()), evs = (j['england-and-wales'] || j).events; if (!Array.isArray(evs)) throw new Error('no England and Wales events found'); const official = new Map(evs.map(x => [x.date, x.title])), years = [...new Set(evs.map(x => +x.date.slice(0, 4)))]; let add = 0, off = 0; S.r.extra = (S.r.extra || []).filter(x => !years.includes(+String(x.date).slice(0, 4))); S.r.off = (S.r.off || []).filter(x => !years.includes(+String(x.date).slice(0, 4))); years.forEach(y => { const h = ewHolidays(y); Object.keys(h).forEach(k => { const iso = ISO(+k); if (!official.has(iso)) { S.r.off.push({ date: iso, label: h[k] + ' (not in GOV.UK list)' }); off++; } }); }); official.forEach((t, d) => { if (!ewHolidays(+d.slice(0, 4))[DN(d)]) { S.r.extra.push({ date: d, label: t }); add++; } }); renderLists('r.extra'); renderLists('r.off'); changed(); toast(`GOV.UK list loaded: ${years[0]}–${years[years.length - 1]}, ${add} added, ${off} switched off`); } catch (err) { toast('Could not read that file: ' + err.message); } e.target.value = ''; };
+  const f = DN(S.bdc.from), n = Math.round(N(S.bdc.n));
+  $('#bdcalc').innerHTML = `<h3 style="margin-top:0">Banking-day calculator</h3><div class="fg">${fld('bdc.from', 'From', { type: 'date' })}${fld('bdc.n', 'Add banking days')}</div>${fin(f) ? `<div class="cards">${stat(`${fd(f)} + ${n} BD`, fdy(n >= 0 ? addBD(f, n) : subBD(f, -n)), `${Math.abs((n >= 0 ? addBD(f, n) : subBD(f, -n)) - f)} calendar days`)}${stat('Next banking day on or after', fdy(nextBD(f)), isBD(f) ? 'already a banking day' : holName(f) || 'weekend')}${stat('Previous banking day', fdy(prevBD(f - 1)), '')}${stat('Last banking day of the month', fdy(lastBD(YMD(f)[0], YMD(f)[1])), '')}</div>` : ''}
+  <h3>Your Direct Debit cycle at a glance</h3>${(() => { const r = nextBD(f || todayDN()), c = addBD(r, S.r.ddCollect); return `<div class="wrap short"><table class="tbl"><tbody><tr><td class="l">Advance notice by</td><td>${fdy(subBD(c, S.r.notice))}</td></tr><tr><td class="l">Submit (day 1)</td><td>${fdy(r)}</td></tr><tr><td class="l">Collected from customer</td><td>${fdy(c)}</td></tr><tr><td class="l">Failures reported</td><td>${fdy(addBD(c, S.r.ddFail))}</td></tr><tr><td class="l">Cash in your bank</td><td>${fdy(addBD(c, S.r.ddPayout))}</td></tr><tr><td class="l">Card sale that day paid out</td><td>${fdy(cardPay(r))}</td></tr></tbody></table></div>`; })()}`;
+};
+
+/* ---------- timeline tab ---------- */
+APPX.render.timeline = () => {
+  const run0 = DN(S.tl.run), card = S.tl.method === 'card';
+  if (!fin(run0)) { $('#tlOut').innerHTML = '<div class="panel"><p class="hint">Pick a run date.</p></div>'; return; }
+  const out = card ? (S.tl.outC || 'ok') : S.tl.out, R = card ? cardFlow(run0, out) : ddFlow(run0, out);
+  const qd = []; { let d = todayDN(); const want = [['Monday', d0 => dow(d0) === 1], ['Wednesday', d0 => dow(d0) === 3], ['Friday', d0 => dow(d0) === 5]]; want.forEach(([l, f]) => { let x = d; while (!f(x)) x++; qd.push([l, x]); }); const [y, m] = YMD(d); qd.push(['3rd-last BD of month', subBD(lastBD(y, m), 2)]); qd.push(['Christmas week', mondayOf(DNy(y, 12, 22))]); const E = easter(YMD(d)[0] + (d > easter(YMD(d)[0]) ? 1 : 0)); qd.push(['Before Easter', E - 5]); }
+  $('#quick').innerHTML = '<span class="hint">Try:</span>' + qd.map(([l, d]) => `<button class="btn sm" data-set='{"tl.run":"${ISO(d)}"}'>${l} · ${fd(d)}</button>`).join('');
+  const ev = [...R.ev].sort((a, b) => a.d - b.d), run = R.run, end = R.end ?? run;
+  const unconf = R.post != null && R.confirm != null ? Math.max(0, R.confirm - R.post) : 0;
+  const crosses = R.cash != null && YMD(R.cash)[1] !== YMD(R.due ?? run)[1];
+  const hols = []; for (let x = run; x <= end; x++) if (holName(x)) hols.push(x);
+  $('#tlOut').innerHTML = `<div class="panel"><div class="cards">
+    ${stat('Run', fd(run), (card ? 'card charged · ' : 'Bacs day 1 · ') + YMD(run)[0])}
+    ${R.due != null && !card ? stat('Due date (accounting date)', fd(R.due), `run + ${bdBetween(run, R.due)} BD · ${YMD(R.due)[0]}`) : ''}
+    ${stat('Cash in bank', R.cash != null ? fd(R.cash) : 'never', R.cash != null ? `${R.cash - run} CD · ${bdBetween(run, R.cash)} BD after the run` : 'no money received', R.cash != null ? 'good' : 'bad')}
+    ${!card ? stat('Revenue unconfirmed for', unconf + (unconf === 1 ? ' day' : ' days'), 'posted until it can no longer fail', unconf > 3 ? 'warn' : '') : ''}
+    ${R.cancel != null ? stat('Customer cancelled', fd(R.cancel), `${R.cancel - run} CD after the run`, 'bad') : ''}
+    ${stat('Calendar days, start to finish', end - run, hols.length ? `${hols.length} bank holiday${hols.length > 1 ? 's' : ''} in the way` : '')}</div>
+    ${R.notes.map(t => `<div class="note">${esc(t)}</div>`).join('')}
+    ${crosses ? `<div class="warnbox">Revenue dated ${period(R.due ?? run)}, cash arrives in ${period(R.cash)}: this payment is cash in transit at the month end.</div>` : ''}
+    ${hols.length ? `<div class="warnbox">${hols.map(h => `${fd(h)} (${esc(holName(h))})`).join(', ')} ${hols.length > 1 ? 'are' : 'is'} not a banking day, which stretches this payment by ${hols.length} day${hols.length > 1 ? 's' : ''}.</div>` : ''}
+    <h3>Stages</h3><div class="wrap short"><table class="tbl"><thead><tr><th>Date</th><th class="l">Stage</th><th>CD from run</th><th>BD from run</th><th class="l">Day type</th></tr></thead><tbody>${ev.map(x => `<tr><td>${fdy(x.d)}</td><td class="l"><span class="ev" style="display:inline-block;background:${K[x.k][1]}">${esc(K[x.k][0])}</span> ${esc(x.label !== K[x.k][0] ? x.label : '')}</td><td>${x.d - run >= 0 ? '+' : ''}${x.d - run}</td><td>${x.d >= run ? '+' + bdBetween(run, x.d) : '−' + bdBetween(x.d, run)}</td><td class="l">${holName(x.d) ? `<span class="pill w">${esc(holName(x.d))}</span>` : dow(x.d) % 6 === 0 ? '<span class="pill">Weekend</span>' : 'Banking day'}</td></tr>`).join('')}</tbody></table></div>
+    <h3>On the calendar</h3>${keyRow(card ? ['sale', 'rev', 'decline', 'cash', 'cancel'] : ['notice', 'run', 'due', 'rev', 'fail', 'retry', 'fee', 'cash', 'cancel', 'mandate'])}
+    <div class="months">${monthsSpan(Math.min(run, ...ev.map(x => x.d)), Math.max(end, ...ev.map(x => x.d))).map(([y, m]) => `<div><h4>${MONL[m - 1]} ${y}</h4>${monthCal(y, m, n => ev.filter(x => x.d === n).map(x => evTag(x.k, x.label)).join(''))}</div>`).join('')}</div></div>
+  <div class="panel"><h3 style="margin-top:0">Accounting entries</h3><p class="hint">Three dates per entry: when it's posted, the original date it relates to, and the accounting date after the month-end close rule (books close on day ${N(S.r.closeDay)}). Redated rows are highlighted.</p>
+    <div class="wrap short"><table class="tbl"><thead><tr><th>Posted</th><th class="l">Entry</th><th>Original date</th><th>Accounting date</th><th>Period</th><th>Amount</th></tr></thead><tbody>${R.je.sort((a, b) => a.posted - b.posted).map(j => `<tr class="${j.redated ? 'hl' : ''}"><td>${fdy(j.posted)}</td><td class="l">${esc(j.entry)}</td><td>${fdy(j.orig)}</td><td>${fdy(j.acct)}${j.redated ? ' <span class="pill w">redated</span>' : ''}</td><td>${period(j.acct)}</td><td style="color:var(--${j.amount < 0 ? 'bad' : 'good'})">${gbp2(j.amount)}</td></tr>`).join('')}</tbody></table></div>
+    ${(() => { const byP = {}; R.je.forEach(j => { const p = period(j.acct); byP[p] = (byP[p] || 0) + j.amount; }); return `<div class="cards">${Object.entries(byP).map(([p, v]) => stat('Net in ' + p, gbp2(v), '', v < -0.005 ? 'bad' : v > 0.005 ? 'good' : '')).join('')}</div>${Object.keys(byP).length > 1 && Object.values(byP).some(v => Math.abs(v) > .005) ? '<div class="warnbox">The entries for this one payment fall in more than one accounting period. Month-end reconciliations need to say which date they use: accounting, posting or cash.</div>' : ''}`; })()}</div>`;
+};
+
+/* ---------- bunching tab ---------- */
+const CODE = { run: 'R', due: 'C', fail: 'F', retry: 'P', cash: '£', cancel: '✕', sale: 'S', decline: 'D', fee: '+' };
+APPX.render.bunch = () => {
+  const w0 = mondayOf(DN(S.bu.week) || todayDN()), card = S.bu.method === 'card', upto = clamp(Math.round(N(S.bu.upto)), 2, Math.round(N(S.r.retries)) + 1);
+  $('#bweeks').innerHTML = '<span class="hint">Jump to:</span>' + [['This week', mondayOf(todayDN())], ['Next week', mondayOf(todayDN()) + 7], ['Month end', mondayOf(subBD(lastBD(...YMD(todayDN()).slice(0, 2)), 3))], ['Into Christmas', mondayOf(DNy(YMD(todayDN())[0], 12, 15))], ['Christmas week', mondayOf(DNy(YMD(todayDN())[0], 12, 22))], ['Easter', mondayOf(easter(YMD(todayDN())[0] + (todayDN() > easter(YMD(todayDN())[0]) ? 1 : 0)) - 7)]].map(([l, d]) => `<button class="btn sm" data-set='{"bu.week":"${ISO(d)}"}'>${l}</button>`).join('');
+  const save = S.r.retries; S.r.retries = upto - 1;
+  const days = card ? [0, 1, 2, 3, 4, 5, 6].map(i => w0 + i) : [0, 1, 2, 3, 4].map(i => w0 + i).filter(isBD);
+  const lanes = days.map(d => { const f = card ? cardFlow(d, S.bu.cardView === 'payout' ? 'ok' : 'dec-fail') : ddFlow(d, 'ins-fail', { mc: d - 99 }); return { d, f }; });
+  S.r.retries = save;
+  const maxD = Math.max(w0 + 6, ...lanes.flatMap(l => l.f.ev.map(e => e.d))), cols = []; for (let x = w0; x <= maxD; x++) cols.push(x);
+  const count = {}; lanes.forEach(l => l.f.ev.forEach(e => { const key = card && S.bu.cardView === 'payout' ? (e.k === 'cash' ? 'cash' : null) : (e.k === 'retry' || (card && e.k === 'decline' && e.d !== l.d) ? 'retry' : null); if (key) count[e.d] = (count[e.d] || 0) + 1; }));
+  const hot = Math.max(0, ...Object.values(count));
+  $('#buOut').innerHTML = `${keyRow(card ? ['sale', 'decline', 'cash', 'cancel'] : ['run', 'due', 'fail', 'retry', 'cash', 'cancel'])}<p class="hint">Codes: R run · C collected · F failure reported · P retry · S card taken · D declined · £ cash · ✕ cancelled. ${card ? '' : 'Retries can only be submitted on banking days, so different failure days roll onto the same retry day.'}</p>
+  <div class="lanes"><table><thead><tr><th></th>${cols.map(x => `<th class="${dow(x) % 6 === 0 ? 'we' : ''} ${holName(x) ? 'bh' : ''}" title="${esc(holName(x) || '')}">${DOW[dow(x)].slice(0, 2)}<br>${YMD(x)[2]}/${YMD(x)[1]}</th>`).join('')}</tr></thead><tbody>
+  ${lanes.map(l => `<tr><td class="lab">Run ${fd(l.d)}</td>${cols.map(x => { const es = l.f.ev.filter(e => e.d === x && CODE[e.k] && e.k !== 'fee'); if (!es.length) return `<td class="${dow(x) % 6 === 0 ? 'we' : ''} ${holName(x) ? 'bh' : ''}"></td>`; const e = es[es.length - 1]; const lab = e.k === 'retry' ? (e.label.match(/P\d/) || ['P'])[0] : e.k === 'fail' ? 'F' + ((e.label.match(/D(\d)/) || [0, ''])[1]) : e.k === 'decline' && e.d !== l.d ? (e.label.match(/P\d/) || ['D'])[0] : CODE[e.k]; return `<td style="background:${K[e.k][1]}" title="${esc(es.map(z => z.label).join(' · '))}">${lab}</td>`; }).join('')}</tr>`).join('')}
+  <tr class="sumr"><td class="lab">${card && S.bu.cardView === 'payout' ? 'Payouts landing' : 'Retries landing'}</td>${cols.map(x => `<td class="${count[x] && count[x] === hot && hot > 1 ? 'hot' : ''}">${count[x] || ''}</td>`).join('')}</tr></tbody></table></div>
+  ${hot > 1 ? `<div class="warnbox">${(() => { const peaks = Object.entries(count).filter(([, v]) => v === hot).map(([d]) => fd(+d)); return `${hot} run days ${card && S.bu.cardView === 'payout' ? 'pay out' : 'retry'} on ${peaks.join(' and ')}. ${card && S.bu.cardView === 'payout' ? 'Expect a much larger deposit that day and nothing on the days before it.' : 'Retry volume, failed-payment fees and support calls all spike on that day, so plan staffing and cash around it.'}`; })()}</div>` : '<div class="okbox">No day collects more than one run in this week.</div>'}`;
+};
+
+/* ---------- month view ---------- */
+APPX.render.month = () => {
+  const [y, m] = (S.mv.month || todayYM()).split('-').map(Number), card = S.mv.method === 'card', upto = clamp(Math.round(N(S.mv.upto)), 1, Math.round(N(S.r.retries)) + 1);
+  const a = DNy(y, m, 1) - 40, b = DNy(y, m, dim(y, m));
+  const land = {}, retry = {}, covers = {};
+  for (let d = a; d <= b; d++) {
+    if (card) { if (!S.r.cardRunAnyDay && !isBD(d)) continue; const c = cardPay(d); (land[c] = land[c] || []).push(d); continue; }
+    if (!isBD(d)) continue;
+    const c = addBD(d, S.r.ddCollect), cash = addBD(c, S.r.ddPayout); (land[cash] = land[cash] || []).push(d);
+    const pc = addBD(prevBD(d - 1), S.r.ddCollect); covers[d] = c - pc;
+    let f = addBD(c, S.r.ddFail); for (let i = 0; i < Math.min(upto - 1, Math.round(N(S.r.retries))); i++) { const rr = retryOn(f, i, false); (retry[rr] = retry[rr] || []).push(['P' + (i + 2), d]); f = addBD(addBD(rr, S.r.ddCollect), S.r.ddFail); }
+  }
+  const maxL = Math.max(1, ...Object.entries(land).filter(([d]) => +d >= DNy(y, m, 1) && +d <= b).map(([, v]) => v.length));
+  $('#mvOut').innerHTML = `${keyRow(card ? ['sale', 'cash'] : ['run', 'due', 'cash', 'retry'])}<p class="hint">${card ? 'Each day shows when that day\'s card takings reach your bank. The badge counts how many days of takings land on that date.' : 'Each banking day shows the collection date and cash date for a run submitted that day, and how many due dates it covers (due dates on weekends and holidays roll forward). The badge counts runs whose cash lands that day; orange rows are retries landing if every attempt fails.'}</p>
+  ${monthCal(y, m, n => { let h = ''; const L = land[n] || [];
+    if (L.length) h += `<span class="cnt" style="background:${L.length > 1 ? 'var(--acc)' : 'var(--good)'}" title="Cash from runs on ${L.map(fd).join(', ')}">${L.length}</span>`;
+    if (card) { if (S.r.cardRunAnyDay || isBD(n)) h += evTag('cash', '→ £ ' + fd(cardPay(n))); }
+    else if (isBD(n)) { const c = addBD(n, S.r.ddCollect); h += evTag('due', 'C ' + fd(c) + (covers[n] > 1 ? ` ·${covers[n]}d` : '')); h += evTag('cash', '£ ' + fd(addBD(c, S.r.ddPayout))); }
+    (retry[n] || []).forEach(([P, d]) => h += evTag('retry', `${P} from ${fd(d)}`));
+    return h; }, 'big')}
+  <div class="cards">${(() => { const inM = Object.entries(land).filter(([d]) => +d >= DNy(y, m, 1) && +d <= b), big = inM.filter(([, v]) => v.length === maxL); const rs = Object.entries(retry).filter(([d]) => +d >= DNy(y, m, 1) && +d <= b), rmax = Math.max(0, ...rs.map(([, v]) => v.length)); return stat('Busiest cash day', big.length ? fd(+big[0][0]) : '–', `${maxL} run day${maxL > 1 ? 's' : ''} of cash land together`, maxL > 2 ? 'warn' : '') + (card ? '' : stat('Busiest retry day', rmax ? fd(+rs.find(([, v]) => v.length === rmax)[0]) : '–', rmax ? `${rmax} retries submitted` : '', rmax > 2 ? 'warn' : '')) + stat('Banking days', Array.from({ length: dim(y, m) }, (_, i) => DNy(y, m, i + 1)).filter(isBD).length, `of ${dim(y, m)} days`) + stat('Last banking day', fd(lastBD(y, m)), 'typical payday'); })()}</div>`;
+};
+
+/* ---------- business tab ---------- */
+APPX.render.biz = () => {};
+
+/* ---------- forecast tab ---------- */
+APPX.render.forecast = () => {
+  const B = S.biz, f = F, xs = [], hb = [];
+  for (let i = 0; i < f.n; i++) { const d = f.s + i; xs.push(fd(d)); if (holName(d)) hb.push({ from: i, to: i + .99, color: 'var(--warn)', op: .18 }); }
+  // weekly
+  const wk = []; for (let i = 0; i < f.n; i += 7) { const a = f.s + i, b = Math.min(f.e, a + 6), row = { a, b, in: {}, out: {}, inT: 0, outT: 0 }; f.ev.filter(x => x.d >= a && x.d <= b).forEach(x => { if (x.amt > 0) { const g = GROUP(x.stream); row.in[g] = (row.in[g] || 0) + x.amt; row.inT += x.amt; } else { row.out[x.stream] = (row.out[x.stream] || 0) - x.amt; row.outT -= x.amt; } }); row.close = f.bal[b - f.s]; wk.push(row); }
+  const inG = [...new Set(wk.flatMap(w => Object.keys(w.in)))], outG = [...new Set(wk.flatMap(w => Object.keys(w.out)))].sort((p, q) => sum(wk, w => w.out[q] || 0) - sum(wk, w => w.out[p] || 0));
+  // monthly
+  const months = monthsSpan(f.s, f.e).concat([]); { let [y, m] = YMD(f.s); const [ey, em] = YMD(f.e); months.length = 0; while (y * 12 + m <= ey * 12 + em) { months.push([y, m]); m++; if (m > 12) { m = 1; y++; } } }
+  const mrow = months.map(([y, m]) => { const a = DNy(y, m, 1), b = DNy(y, m, dim(y, m)); const A = Math.max(a, f.s), Bq = Math.min(b, f.e), rev = sum(f.accr.filter(x => x.d >= A && x.d <= Bq && x.amt > 0 && !/Bad debt/.test(x.stream)), 'amt'), bad = -sum(f.accr.filter(x => x.d >= A && x.d <= Bq && /Bad debt/.test(x.stream)), 'amt'); const cin = sum(f.ev.filter(x => x.d >= a && x.d <= b && x.amt > 0), 'amt'), cout = -sum(f.ev.filter(x => x.d >= a && x.d <= b && x.amt < 0), 'amt'); const transit = sum(f.allEv.filter(x => x.io === 1 && x.acc != null && x.acc >= a && x.acc <= b && x.d > b), 'amt'); const partial = a < f.s || b > f.e; return { y, m, rev, bad, cin, cout, transit, partial, close: f.bal[clamp(b - f.s, 0, f.n - 1)] }; });
+  // insights
+  const tips = [];
+  const big = [...f.ev.filter(x => x.amt < 0)].reduce((acc, x) => { acc[x.d] = (acc[x.d] || 0) - x.amt; return acc; }, {}); const topOut = Object.entries(big).sort((p, q) => q[1] - p[1]).slice(0, 3);
+  if (f.min < N(B.buffer)) tips.push(['warn', `Your balance drops to ${gbp(f.min)} on ${fdy(f.minD)}${f.min < 0 ? ', into your overdraft' : ''}${f.min < -N(B.overdraft) ? `, beyond the ${gbp(N(B.overdraft))} limit` : ''}. ${f.ev.filter(x => x.d === f.minD && x.amt < 0).map(x => `${x.stream} ${gbp(-x.amt)}`).join(', ') || 'Several smaller costs'} leave that day.`]);
+  else tips.push(['ok', `Your balance stays above your ${gbp(N(B.buffer))} minimum throughout. The tightest day is ${fdy(f.minD)} at ${gbp(f.min)}.`]);
+  const pays = f.ev.filter(x => x.stream === 'Payroll'); if (pays.length && B.dd.on) { const p = pays[0], nextDD = f.ev.filter(x => x.d > p.d && /Direct Debit/.test(x.stream) && x.amt > 1000)[0]; if (nextDD) tips.push(['note', `Payroll leaves on ${fd(p.d)}; the next large Direct Debit cash (${gbp(nextDD.amt)}) arrives ${fd(nextDD.d)}, ${nextDD.d - p.d} days later. Your balance has to carry payroll across that gap.`]); }
+  const hols = []; for (let d = f.s; d <= f.e; d++) if (holName(d)) hols.push(d);
+  if (hols.length) { const h = hols[0], before = prevBD(h - 1), after = nextBD(h); tips.push(['note', `${hols.length} bank holiday${hols.length > 1 ? 's' : ''} in this forecast (${hols.map(fd).join(', ')}). Around ${fd(h)}, no Bacs or card money moves between ${fd(before)} and ${fd(after)}; card takings from that period all land on ${fd(after)} or later.`]); }
+  const tr = mrow.filter(r => !r.partial || r.b > f.e).filter(r => r.transit > 0); if (mrow[0] && mrow[0].transit) tips.push(['note', `At the end of ${mLabel(mrow[0].y, mrow[0].m)}, ${gbp(mrow[0].transit)} is cash in transit: earned that month, landing in the next.`]);
+  $('#fcOut').innerHTML = `<div class="panel"><div class="cards">${stat('Lowest balance', gbp(f.min), fdy(f.minD), f.min < 0 ? 'bad' : f.min < N(B.buffer) ? 'warn' : 'good')}${stat('Closing balance', gbp(f.end), fdy(f.e))}${stat('Cash in', gbp(sum(f.inA)), `over ${Math.round(N(B.weeks))} weeks`)}${stat('Cash out', gbp(sum(f.outA)), '')}${stat('Days below your minimum', f.belowBuf, gbp(N(B.buffer)), f.belowBuf ? 'warn' : 'good')}${stat('Days overdrawn', f.below0, f.belowOD ? `${f.belowOD} beyond the limit` : 'within the limit', f.below0 ? 'bad' : 'good')}</div>
+  ${tips.map(([c, t]) => `<div class="${c === 'warn' ? 'warnbox' : c === 'ok' ? 'okbox' : 'note'}">${esc(t)}</div>`).join('')}
+  <h3>Daily bank balance</h3><div class="chart" id="chBal"></div>
+  <h3>Money in and out each day</h3><div class="chart" id="chFlow"></div></div>
+  <div class="panel"><div class="between"><h3 style="margin-top:0">Week by week</h3><button class="btn sm" id="csvW">Export CSV</button></div><div class="wrap"><table class="tbl"><thead><tr><th>Week</th>${inG.map(g => `<th>${esc(g)}</th>`).join('')}<th>Total in</th>${outG.map(g => `<th>${esc(g)}</th>`).join('')}<th>Total out</th><th>Net</th><th>Closing</th></tr></thead><tbody>${wk.map(w => `<tr class="${w.close < 0 ? 'hl' : ''}"><td>${fd(w.a)}</td>${inG.map(g => `<td>${w.in[g] ? gbp(w.in[g]) : ''}</td>`).join('')}<td><b>${gbp(w.inT)}</b></td>${outG.map(g => `<td>${w.out[g] ? gbp(-w.out[g]) : ''}</td>`).join('')}<td><b>${gbp(-w.outT)}</b></td><td style="color:var(--${w.inT - w.outT >= 0 ? 'good' : 'bad'})">${gbp(w.inT - w.outT)}</td><td>${gbp(w.close)}</td></tr>`).join('')}</tbody></table></div></div>
+  <div class="panel"><h3 style="margin-top:0">Month by month: revenue against cash</h3><p class="hint">Revenue is billed or sold in the month (on the due date for Direct Debits). Cash in transit is revenue from that month whose cash lands next month. Partial months (marked *) only count days inside the forecast.</p><div class="wrap short"><table class="tbl"><thead><tr><th>Month</th><th>Revenue</th><th>Lost to failures & bad debt</th><th>Cash in</th><th>Cash out</th><th>Net cash</th><th>Cash in transit at month end</th><th>Balance at month end</th></tr></thead><tbody>${mrow.map(r => `<tr><td>${mLabel(r.y, r.m)}${r.partial ? '*' : ''}</td><td>${gbp(r.rev)}</td><td>${gbp(r.bad)}</td><td>${gbp(r.cin)}</td><td>${gbp(r.cout)}</td><td style="color:var(--${r.cin - r.cout >= 0 ? 'good' : 'bad'})">${gbp(r.cin - r.cout)}</td><td>${gbp(r.transit)}</td><td>${gbp(r.close)}</td></tr>`).join('')}</tbody></table></div></div>
+  <div class="panel"><div class="between"><h3 style="margin-top:0">Every payment</h3><div class="row"><select id="evF" style="width:auto"><option value="">All</option><option value="in">Money in</option><option value="out">Money out</option></select><button class="btn sm" id="csvE">Export CSV</button></div></div><div class="wrap" id="evList"></div></div>`;
+  lineChart($('#chBal'), { xs, label: 'Daily balance', bands: hb, series: [{ name: 'Balance', color: 'var(--acc)', ys: [...f.bal], area: true }], hlines: [{ y: 0, label: 'zero', color: 'var(--muted)' }, { y: N(B.buffer), label: 'your minimum', color: 'var(--good)' }, ...(N(B.overdraft) && f.min < 0 ? [{ y: -N(B.overdraft), label: 'overdraft limit', color: 'var(--bad)' }] : [])], yMin: Math.min(0, f.min, f.min < 0 ? -N(B.overdraft) : 0), markers: [{ i: f.minD - f.s, label: 'lowest', color: 'var(--bad)' }], tipTitle: i => fdy(f.s + i) + (holName(f.s + i) ? ' · ' + holName(f.s + i) : '') });
+  barChart($('#chFlow'), { cats: xs, h: 240, stacks: [{ name: 'In', color: 'var(--good)', vals: [...f.inA] }, { name: 'Out', color: 'var(--bad)', vals: [...f.outA].map(v => -v) }], tipTitle: i => fdy(f.s + i) });
+  const list = () => { const fl = $('#evF').value, rows = f.ev.filter(x => !fl || (fl === 'in' ? x.amt > 0 : x.amt < 0)).sort((p, q) => p.d - q.d || q.amt - p.amt); $('#evList').innerHTML = `<table class="tbl"><thead><tr><th>Date</th><th class="l">What</th><th>Relates to</th><th>Amount</th><th>Balance that day</th></tr></thead><tbody>${rows.slice(0, 1500).map(x => `<tr><td>${fdy(x.d)}${holName(x.d) ? ' <span class="pill w">BH</span>' : ''}</td><td class="l">${esc(x.stream)}</td><td>${x.acc != null && x.acc !== x.d ? fd(x.acc) : ''}</td><td style="color:var(--${x.amt >= 0 ? 'good' : 'bad'})">${gbp2(x.amt)}</td><td>${gbp(f.bal[x.d - f.s])}</td></tr>`).join('')}</tbody></table>`; };
+  $('#evF').onchange = list; list();
+  $('#csvE').onclick = () => download('cash-flow-payments.csv', ['Date,Item,Relates to,Amount'].concat([...f.ev].sort((p, q) => p.d - q.d).map(x => [ISO(x.d), '"' + x.stream + '"', x.acc != null ? ISO(x.acc) : '', x.amt.toFixed(2)].join(','))).join('\n'), 'text/csv');
+  $('#csvW').onclick = () => download('cash-flow-weekly.csv', [['Week starting', ...inG, 'Total in', ...outG, 'Total out', 'Net', 'Closing'].join(',')].concat(wk.map(w => [ISO(w.a), ...inG.map(g => (w.in[g] || 0).toFixed(2)), w.inT.toFixed(2), ...outG.map(g => (w.out[g] || 0).toFixed(2)), w.outT.toFixed(2), (w.inT - w.outT).toFixed(2), w.close.toFixed(2)].join(','))).join('\n'), 'text/csv');
+};
+
+/* ---------- stress tab ---------- */
+let MC = null, MCkey = '';
+APPX.render.stress = () => {
+  const key = JSON.stringify([S.biz, S.r, S.st, startDN()]);
+  if (!MC || MCkey !== key) {
+    const runs = clamp(Math.round(N(S.st.runs)), 50, 1000), rand = rng(2026), sc = { spike: N(S.st.spike), salesDrop: N(S.st.salesDrop), payoutDelay: N(S.st.payoutDelay), ddDelay: N(S.st.ddDelay), lateExtra: N(S.st.lateExtra), payrollRise: N(S.st.payrollRise) };
+    const base = forecast({ sc }), res = []; for (let k = 0; k < runs; k++) res.push(forecast({ rand, sc }));
+    MC = { base, res }; MCkey = key;
+  }
+  const { base, res } = MC, B = S.biz, n = base.n, mins = res.map(r => r.min).sort((a, b) => a - b), q = (arr, p) => arr[Math.floor(p * (arr.length - 1))];
+  const p0 = res.filter(r => r.min < 0).length / res.length, pOD = res.filter(r => r.min < -N(B.overdraft)).length / res.length, pBuf = res.filter(r => r.min < N(B.buffer)).length / res.length;
+  const p10 = [], p50 = [], p90 = []; for (let i = 0; i < n; i++) { const col = res.map(r => r.bal[i]).sort((a, b) => a - b); p10.push(q(col, .1)); p50.push(q(col, .5)); p90.push(q(col, .9)); }
+  const need95 = Math.max(0, -q(mins, .05)), need95b = Math.max(0, N(B.buffer) - q(mins, .05));
+  const anyWhatIf = ['spike', 'salesDrop', 'payoutDelay', 'ddDelay', 'lateExtra', 'payrollRise'].some(k => N(S.st[k]));
+  $('#stOut').innerHTML = `<div class="panel"><div class="reco"><div class="eyebrow">${res.length} simulated futures${anyWhatIf ? ' · with your what-ifs' : ''}</div><div class="big">${pct(p0 * 100, 0)} chance of going overdrawn</div><p>${pOD ? `${pct(pOD * 100, 0)} chance of breaching your ${gbp(N(B.overdraft))} overdraft. ` : ''}In 19 out of 20 futures, the lowest balance stays above <b>${gbp(q(mins, .05))}</b>. ${need95 > 0 ? `About ${gbp(need95)} more cash (or overdraft) at the start would keep you above zero in 95% of them.` : 'You stay in credit in at least 95% of them.'}</p></div>
+  <div class="cards">${stat('Lowest balance: bad case (5%)', gbp(q(mins, .05)), '1 in 20 futures is worse', q(mins, .05) < 0 ? 'bad' : 'good')}${stat('Lowest balance: typical', gbp(q(mins, .5)), 'median', q(mins, .5) < 0 ? 'bad' : '')}${stat('Lowest balance: good case', gbp(q(mins, .9)), '90th percentile')}${stat('Chance below your minimum', pct(pBuf * 100, 0), gbp(N(B.buffer)), pBuf > .2 ? 'warn' : 'good')}${stat('Extra cash for 95% safety', gbp(need95b), 'to stay above your minimum', need95b ? 'warn' : 'good')}${stat('Without noise', gbp(base.min), 'deterministic lowest balance')}</div>
+  <h3>Range of daily balances</h3><div class="chart" id="chFan"></div><p class="hint">Shaded band: 10th to 90th percentile. Dashed: the plain forecast${anyWhatIf ? ' with your what-ifs' : ''}.</p>
+  <h3>Lowest balance across all simulations</h3><div class="chart" id="chHist"></div></div>`;
+  const xs = []; for (let i = 0; i < n; i++) xs.push(fd(base.s + i));
+  lineChart($('#chFan'), { xs, series: [{ name: 'Median', color: 'var(--acc)', ys: p50, band: [p10, p90] }, { name: 'Plain forecast', color: 'var(--blue)', ys: [...base.bal], dash: '5 4' }], hlines: [{ y: 0, label: 'zero', color: 'var(--muted)' }, ...(N(B.overdraft) && Math.min(...p10) < 0 ? [{ y: -N(B.overdraft), label: 'overdraft limit', color: 'var(--bad)' }] : [])], yMin: Math.min(0, ...p10, Math.min(...p10) < 0 ? -N(B.overdraft) : 0) });
+  const bins = 24, lo = mins[0], hi = mins[mins.length - 1], w = (hi - lo) / bins || 1, cnt = Array(bins).fill(0); mins.forEach(v => cnt[Math.min(bins - 1, Math.floor((v - lo) / w))]++);
+  barChart($('#chHist'), { cats: cnt.map((_, i) => kfmt(lo + w * (i + .5))), h: 220, yFmt: v => Math.round(v), tipFmt: v => v + ' simulations', stacks: [{ name: 'In credit', color: 'var(--good)', vals: cnt.map((c, i) => lo + w * (i + .5) >= 0 ? c : 0) }, { name: 'Overdrawn', color: 'var(--bad)', vals: cnt.map((c, i) => lo + w * (i + .5) < 0 ? c : 0) }] });
+};
+
+/* ---------- guide ---------- */
+APPX.render.guide = () => {
+  if ($('#guideOut').innerHTML) return;
+  const T = (rows, cols) => `<div class="wrap short"><table class="tbl"><thead><tr>${cols.map(c => `<th class="l">${c}</th>`).join('')}</tr></thead><tbody>${rows.map(r => `<tr>${r.map((x, i) => `<td class="${i ? 't' : 'l'}">${i ? esc(x) : `<b>${esc(x)}</b>`}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
+  $('#guideOut').innerHTML = `<div class="cols3">
+  <div class="panel"><h3 style="margin-top:0">The Bacs three-day cycle</h3><ul><li><b>Day 1 (input)</b>: you or your provider submit the collection file by the evening deadline.</li><li><b>Day 2 (processing)</b>: Bacs passes it to the customer's bank.</li><li><b>Day 3 (entry)</b>: money leaves the customer's account. This is the due date on their statement.</li><li><b>Failures</b> are reported back on an ARUDD report, typically by day 5.</li><li>Only banking days count, so a Thursday submission collects on Monday and a Friday one on Tuesday.</li></ul></div>
+  <div class="panel"><h3 style="margin-top:0">Customer rights</h3><ul><li><b>Advance notice</b>: tell customers the amount and date at least 10 working days ahead, unless they've agreed to a shorter period (commonly 3).</li><li><b>Direct Debit Guarantee</b>: customers can claim an immediate refund from their bank for any error, with no time limit. These are indemnity claims, and the money is taken back from you.</li><li><b>Failed-payment fees</b> must be fair and reflect your real costs; say so in your terms.</li></ul></div>
+  <div class="panel"><h3 style="margin-top:0">Card money</h3><ul><li>Card payments are authorised instantly but settled later, usually T+1 to T+3 banking days, depending on your provider and history.</li><li>New businesses or high-risk sectors may have longer payout delays or rolling reserves.</li><li>Weekend takings usually arrive together on Tuesday or Wednesday, and bank holidays push them back further.</li><li>Chargebacks can claw money back weeks or months later.</li></ul></div></div>
+  <div class="panel"><h3 style="margin-top:0">Direct Debit failure reasons (ARUDD)</h3>${T([['0 · Refer to payer', 'Usually insufficient funds.', 'Retry after a few days (with notice), or ask for another method.'], ['1 · Instruction cancelled', 'Customer cancelled the Direct Debit.', 'Contact them; you need a new mandate.'], ['2 · Payer deceased', '', 'Stop collections and handle sensitively.'], ['3 · Account transferred', 'Account moved to another bank.', 'Mandate may move automatically; otherwise get new details.'], ['5 · No account', 'Details are wrong.', 'Ask for correct details.'], ['6 · No instruction', 'No mandate in place at the bank.', 'Set the mandate up again.'], ['B · Account closed', '', 'Ask for new details or another method.']], ['Code', 'Meaning', 'What to do'])}<p class="hint">Only "refer to payer" is worth retrying. That's why the simulator treats insufficient funds and other failures differently.</p></div>
+  <div class="cols3">
+  <div class="panel"><h3 style="margin-top:0">HMRC dates</h3><ul><li><b>PAYE, NI and student loans</b>: by the 22nd of the next month if paid electronically. If the 22nd isn't a banking day, it must clear by the banking day before.</li><li><b>Workplace pension</b>: employee and employer contributions by the 22nd of the next month.</li><li><b>VAT</b>: one month and seven days after the quarter end. By Direct Debit, HMRC collects three working days after that.</li><li><b>Corporation tax</b>: nine months and one day after the end of your accounting period (larger companies pay in instalments).</li></ul></div>
+  <div class="panel"><h3 style="margin-top:0">Getting paid on invoices</h3><ul><li>Under the Late Payment of Commercial Debts Act you can charge interest at 8% above the Bank of England base rate on late business invoices.</li><li>You can also claim fixed compensation: £40 for debts under £1,000, £70 up to £9,999.99, £100 above that.</li><li>Agreed payment terms can be up to 60 days between businesses; without terms, payment is due after 30 days.</li></ul></div>
+  <div class="panel"><h3 style="margin-top:0">Rent quarter days</h3><ul><li>Commercial leases in England and Wales often charge rent quarterly in advance on the quarter days: 25 March, 24 June, 29 September and 25 December.</li><li>The Christmas quarter day falls on a bank holiday, so rent usually leaves the banking day before, right as card takings slow down for the holidays.</li></ul></div></div>
+  <div class="panel"><h3 style="margin-top:0">For whoever keeps the books</h3><div class="cols3"><div><b>Three dates on every payment</b><p class="hint">The accounting (due) date, the posting date and the cash date. Reconciliations need to say which one they use, because a payment collected on the 30th can be posted on the 1st and banked on the 3rd.</p></div><div><b>Unconfirmed revenue</b><p class="hint">A Direct Debit is recorded on its due date but can still fail for two more banking days. Over a weekend or Christmas that window stretches to five or six calendar days.</p></div><div><b>Retries don't respect month ends</b><p class="hint">A retried payment keeps its original due date, while a fee added on the retry belongs to the retry date. A failure reported after your close day lands in the next period, so one customer can show income in one month and the reversal in the next.</p></div></div>
+</div>`;
+};
+boot(APPX);
+
+</script>
+</body>
+</html>
