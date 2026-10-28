@@ -1,0 +1,12 @@
+{
+  "slug": "uk-take-home-pay-calculator",
+  "title": "UK Take-Home Pay & Contracting Calculator",
+  "version": "1.0.0",
+  "status": "approved",
+  "summary": "2026/27 take-home pay for employees (rUK or Scotland) with pension options, student loans, Child Benefit charge and benefits in kind, plus contractor comparisons: limited company, umbrella and permanent role. Fully offline.",
+  "category": "Personal finance",
+  "data_sources": ["HMRC 2026/27 Income Tax, NI, dividends, Corporation Tax", "Scottish income tax bands", "Student Loans Company", "IR35 guidance (GOV.UK)"],
+  "external_requests": false,
+  "data_last_checked": "2026-10",
+  "licence": "MIT"
+}

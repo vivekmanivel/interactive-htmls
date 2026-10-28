@@ -1,0 +1,12 @@
+{
+  "slug": "fi-planner-uk",
+  "title": "Financial Independence Planner (UK)",
+  "version": "1.0.0",
+  "status": "approved",
+  "summary": "When could you stop working? Projects cash, GIA, ISA, LISA and pensions to a target age, then models drawdown order, UK tax, State Pension and a Monte Carlo success rate. Fully offline.",
+  "category": "Personal finance",
+  "data_sources": ["HMRC 2026/27 tax and NI", "GOV.UK ISA, LISA and pension rules", "DWP State Pension"],
+  "external_requests": false,
+  "data_last_checked": "2026-10",
+  "licence": "MIT"
+}

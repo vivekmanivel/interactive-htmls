@@ -1,0 +1,12 @@
+{
+  "slug": "payment-methods-explorer",
+  "title": "Payment Methods Explorer",
+  "version": "1.0.0",
+  "status": "approved",
+  "summary": "Explore how people pay in 33 markets: card, wallet, real-time, direct debit, BNPL, cash and voucher methods, their roles, refunds, disputes and recurring support; plan a payment mix, model approval and retry outcomes, and look up decline and return codes.",
+  "category": "Payments & business",
+  "data_sources": ["Public scheme and regulator information", "Bacs, SEPA, Nacha and ISO reason codes", "Indicative public market reports"],
+  "external_requests": false,
+  "data_last_checked": "2026-10",
+  "licence": "MIT"
+}

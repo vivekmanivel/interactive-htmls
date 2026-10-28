@@ -1,0 +1,12 @@
+{
+  "slug": "rent-vs-buy-calculator",
+  "title": "Rent vs Buy Calculator (UK)",
+  "version": "1.0.0",
+  "status": "approved",
+  "summary": "Compare renting and investing the difference against buying over your horizon: stamp duty, mortgage, running and selling costs, house-price growth, investment returns, sensitivity ranges and a Monte Carlo view. Fully offline.",
+  "category": "Property & finance",
+  "data_sources": ["HMRC SDLT (England & NI)", "HMRC 2026/27 tax", "Editable market assumptions"],
+  "external_requests": false,
+  "data_last_checked": "2026-10",
+  "licence": "MIT"
+}

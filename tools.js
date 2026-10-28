@@ -1,5 +1,44 @@
 window.TOOLS = [
 {
+  "slug": "debt-payoff-planner",
+  "title": "Debt Payoff Planner",
+  "version": "1.0.0",
+  "status": "approved",
+  "summary": "Plan paying off several debts: avalanche, snowball or custom order, month-by-month schedule, debt-free date and interest saved, lump sums, balance-transfer and consolidation-loan checks. Any currency, UK examples. Fully offline.",
+  "category": "Personal finance",
+  "data_sources": ["FCA consumer credit rules (UK examples)", "Illustrative example debts"],
+  "external_requests": false,
+  "data_last_checked": "2026-10",
+  "licence": "MIT"
+}
+,
+{
+  "slug": "fi-planner-uk",
+  "title": "Financial Independence Planner (UK)",
+  "version": "1.0.0",
+  "status": "approved",
+  "summary": "When could you stop working? Projects cash, GIA, ISA, LISA and pensions to a target age, then models drawdown order, UK tax, State Pension and a Monte Carlo success rate. Fully offline.",
+  "category": "Personal finance",
+  "data_sources": ["HMRC 2026/27 tax and NI", "GOV.UK ISA, LISA and pension rules", "DWP State Pension"],
+  "external_requests": false,
+  "data_last_checked": "2026-10",
+  "licence": "MIT"
+}
+,
+{
+  "slug": "payment-methods-explorer",
+  "title": "Payment Methods Explorer",
+  "version": "1.0.0",
+  "status": "approved",
+  "summary": "Explore how people pay in 33 markets: card, wallet, real-time, direct debit, BNPL, cash and voucher methods, their roles, refunds, disputes and recurring support; plan a payment mix, model approval and retry outcomes, and look up decline and return codes.",
+  "category": "Payments & business",
+  "data_sources": ["Public scheme and regulator information", "Bacs, SEPA, Nacha and ISO reason codes", "Indicative public market reports"],
+  "external_requests": false,
+  "data_last_checked": "2026-10",
+  "licence": "MIT"
+}
+,
+{
   "slug": "piano-72-chords-chord-trees",
   "title": "Piano 72 Chords: Chord Trees with Keyboard Positions",
   "version": "1.0.0",
@@ -26,6 +65,19 @@ window.TOOLS = [
 }
 ,
 {
+  "slug": "rent-vs-buy-calculator",
+  "title": "Rent vs Buy Calculator (UK)",
+  "version": "1.0.0",
+  "status": "approved",
+  "summary": "Compare renting and investing the difference against buying over your horizon: stamp duty, mortgage, running and selling costs, house-price growth, investment returns, sensitivity ranges and a Monte Carlo view. Fully offline.",
+  "category": "Property & finance",
+  "data_sources": ["HMRC SDLT (England & NI)", "HMRC 2026/27 tax", "Editable market assumptions"],
+  "external_requests": false,
+  "data_last_checked": "2026-10",
+  "licence": "MIT"
+}
+,
+{
   "slug": "south-london-first-time-buyer-guide",
   "title": "South London First-Time Buyer Guide & Mortgage Planner",
   "version": "1.0.1",
@@ -46,6 +98,19 @@ window.TOOLS = [
   "summary": "End-to-end UK mortgage planner: take-home pay and borrowing, stamp duty and upfront costs, deposit saving, full repayment schedule with overpayments and remortgages, deal comparison, overpay-vs-invest sweet spot, mortgage-free target and monthly budget. Fully offline.",
   "category": "Property & finance",
   "data_sources": ["HMRC (SDLT, Income Tax, NI)", "Student Loans Company", "GOV.UK (LISA)", "Council tax 2026/27 Band D", "Bank of England Bank Rate"],
+  "external_requests": false,
+  "data_last_checked": "2026-10",
+  "licence": "MIT"
+}
+,
+{
+  "slug": "uk-take-home-pay-calculator",
+  "title": "UK Take-Home Pay & Contracting Calculator",
+  "version": "1.0.0",
+  "status": "approved",
+  "summary": "2026/27 take-home pay for employees (rUK or Scotland) with pension options, student loans, Child Benefit charge and benefits in kind, plus contractor comparisons: limited company, umbrella and permanent role. Fully offline.",
+  "category": "Personal finance",
+  "data_sources": ["HMRC 2026/27 Income Tax, NI, dividends, Corporation Tax", "Scottish income tax bands", "Student Loans Company", "IR35 guidance (GOV.UK)"],
   "external_requests": false,
   "data_last_checked": "2026-10",
   "licence": "MIT"

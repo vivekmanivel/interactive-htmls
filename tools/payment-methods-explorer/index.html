@@ -1,0 +1,908 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Payment Methods Explorer</title>
+<meta name="description" content="How the world pays online: 33 markets, 90+ payment methods, a checkout planner, decline and return codes, and a failure and settlement simulator.">
+<style>
+:root{
+  --bg:#0a1120;--bg2:#0d1628;--panel:#111b30;--panel2:#16233d;--ink:#f3eee4;--muted:#93a0b7;--line:#22314d;
+  --acc:#ff6a2b;--acc2:#ffa063;--blue:#5aa2ff;--good:#3fd18b;--bad:#ff6161;--warn:#ffb648;--violet:#b48cff;--teal:#2ec4c4;--pink:#ff7ab6;
+  --serif:Georgia,serif;--sans:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;--mono:ui-monospace,Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.5 var(--sans)}
+a{color:var(--acc2)}
+h1,h2,h3{font-family:var(--serif);font-weight:600;letter-spacing:-.01em}
+h2{font-size:22px;margin:0 0 4px}
+h3{font-size:16px;margin:22px 0 8px}
+.mono{font-family:var(--mono)}
+small,.hint{color:var(--muted);font-size:12.5px}
+.hint{margin:6px 0 10px}
+.app{display:grid;grid-template-columns:268px minmax(0,1fr);min-height:100vh}
+nav.side{position:sticky;top:0;height:100vh;overflow:auto;background:linear-gradient(180deg,var(--bg2),var(--bg));border-right:1px solid var(--line);padding:20px 16px}
+.brand{display:flex;gap:10px;align-items:center;margin-bottom:18px}
+.logo{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,var(--acc),#ff3d6e);display:grid;place-items:center;font-family:var(--serif);font-weight:700;font-size:19px;color:#fff;flex:none}
+.brand b{font-family:var(--serif);font-size:17px;display:block;line-height:1.15}
+.brand span{font:10.5px var(--mono);color:var(--muted);letter-spacing:.06em}
+ol.pipe{list-style:none;margin:0;padding:0;position:relative}
+ol.pipe::before{content:"";position:absolute;left:15px;top:14px;bottom:14px;width:2px;background:linear-gradient(180deg,var(--acc),var(--violet),var(--blue));opacity:.55;border-radius:2px}
+ol.pipe li{position:relative;margin:2px 0}
+ol.pipe button{all:unset;cursor:pointer;display:grid;grid-template-columns:32px 1fr;gap:10px;align-items:center;width:100%;padding:7px 6px;border-radius:10px;box-sizing:border-box}
+ol.pipe button:hover{background:rgba(255,255,255,.04)}
+ol.pipe .n{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;background:var(--panel);border:1px solid var(--line);font:600 12px var(--mono);color:var(--muted);position:relative;z-index:1}
+ol.pipe .t{font-weight:600;font-size:13.5px;line-height:1.2}
+ol.pipe .d{display:block;font-size:11.5px;color:var(--muted);font-weight:400}
+ol.pipe button.active .n{background:var(--acc);border-color:var(--acc);color:#fff;box-shadow:0 0 0 4px rgba(255,106,43,.18)}
+ol.pipe button.active .t{color:var(--acc2)}
+.tools{margin-top:18px;border-top:1px solid var(--line);padding-top:14px;display:flex;flex-wrap:wrap;gap:6px}
+.family{margin-top:14px;font-size:12px;color:var(--muted)}
+.family a{display:block;margin:3px 0;text-decoration:none}
+main{min-width:0;padding:0 26px 60px}
+.kpis{position:sticky;top:0;z-index:20;background:rgba(10,17,32,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);margin:0 -26px 18px;padding:10px 26px;display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px}
+.kpis:empty{display:none}
+.kpis.nok{padding:0;border:0;margin-bottom:18px}
+.kpi .l{font:11px var(--mono);color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.kpi .v{font:600 17px var(--mono);white-space:nowrap}
+.kpi .s{font-size:11.5px;color:var(--muted)}
+.tab{display:none;padding-top:4px}.tab.active{display:block;animation:fade .25s ease}
+@keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+.tabhead{margin:6px 0 14px}
+.eyebrow{font:11.5px var(--mono);color:var(--acc2);letter-spacing:.12em;text-transform:uppercase}
+.grid2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.3fr);gap:16px;align-items:start}
+.grid2.even{grid-template-columns:1fr 1fr}
+.grid2.wideL{grid-template-columns:minmax(0,1.5fr) minmax(0,1fr)}
+@media (max-width:1150px){.grid2,.grid2.even,.grid2.wideL{grid-template-columns:1fr}}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px 18px;min-width:0}
+.panel+.panel{margin-top:16px}
+fieldset{border:1px solid var(--line);border-radius:12px;padding:10px 12px 12px;margin:0 0 12px;min-width:0}
+legend{font:600 11.5px var(--mono);color:var(--acc2);text-transform:uppercase;letter-spacing:.08em;padding:0 6px}
+.fg{display:grid;grid-template-columns:repeat(auto-fill,minmax(165px,1fr));gap:10px}
+label{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--muted);font-weight:500}
+label>small{font-size:11px;line-height:1.3}
+input,select,textarea{font:13px var(--mono);color:var(--ink);background:var(--bg2);border:1px solid var(--line);border-radius:8px;padding:7px 9px;width:100%;min-width:0}
+select{font-family:var(--sans)}
+input:focus,select:focus,textarea:focus{outline:2px solid var(--acc);outline-offset:-1px}
+input[type=range]{padding:0;accent-color:var(--acc)}
+label.chk{flex-direction:row;align-items:center;gap:8px;color:var(--ink);font-size:13px}
+label.chk input{width:auto;accent-color:var(--acc)}
+.btn{font:600 12.5px var(--sans);border:1px solid var(--line);background:var(--panel2);color:var(--ink);padding:7px 12px;border-radius:8px;cursor:pointer;text-decoration:none;display:inline-block}
+.btn:hover{border-color:var(--acc)}
+.btn.pri{background:var(--acc);border-color:var(--acc);color:#fff}
+.btn.sm{padding:4px 9px;font-size:12px}
+.btn.on{background:rgba(255,106,43,.18);border-color:var(--acc);color:var(--acc2)}
+.btn.del{color:var(--bad);padding:3px 8px}
+.filebtn{position:relative;overflow:hidden}.filebtn input{position:absolute;inset:0;opacity:0;cursor:pointer}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;margin:10px 0}
+.stat{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:10px 12px;min-width:0}
+.stat .l{font-size:11.5px;color:var(--muted);font-weight:600}
+.stat .v{font:600 19px var(--mono);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.stat .s{font-size:11.5px;color:var(--muted)}
+.stat.good .v{color:var(--good)}.stat.bad .v{color:var(--bad)}.stat.warn .v{color:var(--warn)}.stat.acc .v{color:var(--acc2)}
+.stat.hero{background:linear-gradient(135deg,rgba(255,106,43,.16),rgba(90,162,255,.08));border-color:rgba(255,106,43,.45)}
+.note,.warnbox,.badbox,.okbox{padding:8px 12px;border-radius:8px;margin:8px 0;font-size:13px}
+.note{border-left:3px solid var(--blue);background:rgba(90,162,255,.08)}
+.warnbox{border-left:3px solid var(--warn);background:rgba(255,182,72,.08)}
+.badbox{border-left:3px solid var(--bad);background:rgba(255,97,97,.08)}
+.okbox{border-left:3px solid var(--good);background:rgba(63,209,139,.08)}
+.reco{border:1px solid rgba(255,106,43,.5);background:linear-gradient(135deg,rgba(255,106,43,.14),rgba(180,140,255,.06));border-radius:14px;padding:14px 16px;margin:10px 0}
+.reco .big{font:600 26px var(--mono);color:var(--acc2);line-height:1.2}
+.reco p{margin:6px 0}
+table{border-collapse:collapse;width:100%}
+.tbl th,.tbl td{padding:6px 8px;border-bottom:1px solid var(--line);font-size:12.5px;text-align:right;white-space:nowrap}
+.tbl th{color:var(--muted);font-weight:600;position:sticky;top:0;background:var(--panel);z-index:1}
+.tbl td:first-child,.tbl th:first-child,.tbl td.l,.tbl th.l{text-align:left}
+.tbl td{font-family:var(--mono)}
+.tbl td.l,.tbl td.t{font-family:var(--sans)}
+.tbl td.t{white-space:normal;text-align:left;min-width:180px}
+.tbl tr.tot td{font-weight:700;border-top:2px solid var(--line)}
+.tbl tr.hl td{background:rgba(255,106,43,.1)}
+.tbl tr.yr{cursor:pointer}.tbl tr.yr:hover td{background:rgba(255,255,255,.03)}
+.tbl tr.mo td{color:var(--muted);background:var(--bg2)}
+.tbl input,.tbl select{padding:4px 6px;font-size:12px}
+.wrap{overflow:auto;max-height:70vh;border:1px solid var(--line);border-radius:10px}
+.wrap.short{max-height:none}
+.chart svg{width:100%;height:auto;display:block}
+.chart text{fill:var(--muted);font:11px var(--mono)}
+.chart .gl{stroke:var(--line)}
+.chart .hit{fill:transparent;cursor:crosshair}
+.tip{position:fixed;pointer-events:none;background:#030712;border:1px solid var(--line);color:var(--ink);padding:7px 10px;border-radius:8px;font:12px var(--mono);z-index:999;display:none;white-space:pre;box-shadow:0 8px 24px rgba(0,0,0,.4);max-width:420px}
+.toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:var(--acc);color:#fff;padding:9px 16px;border-radius:10px;z-index:999;font-weight:600}
+.toast.hidden{display:none}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.between{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.hbar{display:grid;grid-template-columns:200px 1fr 96px;gap:8px;align-items:center;font-size:12.5px;margin:3px 0}
+.hbar .t{height:10px;background:var(--bg2);border-radius:6px;overflow:hidden}
+.hbar .t i{display:block;height:100%}
+.hbar .v{text-align:right;font-family:var(--mono)}
+.pill{display:inline-block;padding:1px 8px;border-radius:99px;background:var(--panel2);border:1px solid var(--line);font:11px var(--mono);color:var(--muted);white-space:nowrap}
+.pill.g{color:var(--good);border-color:rgba(63,209,139,.4)}.pill.b{color:var(--bad);border-color:rgba(255,97,97,.4)}.pill.w{color:var(--warn);border-color:rgba(255,182,72,.4)}.pill.a{color:var(--acc2);border-color:rgba(255,106,43,.5)}.pill.v{color:var(--violet);border-color:rgba(180,140,255,.45)}.pill.bl{color:var(--blue);border-color:rgba(90,162,255,.45)}
+details.more{border:1px dashed var(--line);border-radius:10px;padding:6px 12px;margin:10px 0}
+details.more summary{cursor:pointer;font-weight:600;color:var(--muted)}
+.hero{position:relative;overflow:hidden;border-radius:18px;padding:34px 30px;border:1px solid var(--line);background:radial-gradient(900px 300px at 0% 0%,rgba(255,106,43,.22),transparent 60%),radial-gradient(700px 300px at 100% 100%,rgba(90,162,255,.18),transparent 60%),var(--panel)}
+.hero h1{font-size:clamp(28px,4.2vw,46px);line-height:1.05;margin:8px 0 12px;max-width:860px}
+.hero h1 em{font-style:italic;color:var(--acc2)}
+.hero p{color:#cdd5e3;max-width:780px;font-size:15px}
+.steps{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px;margin-top:16px}
+.step{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px;cursor:pointer;transition:border-color .15s,transform .15s}
+.step:hover{border-color:var(--acc);transform:translateY(-2px)}
+.step .n{font:600 12px var(--mono);color:var(--acc2)}
+.step b{display:block;font-family:var(--serif);font-size:17px;margin:4px 0}
+.step p{margin:0;color:var(--muted);font-size:13px}
+.cols3{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px}
+.cols3 ul{padding-left:18px;margin:6px 0}.cols3 li{margin:3px 0;font-size:13px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font:12px var(--sans);border:1px solid var(--line);background:var(--panel2);color:var(--muted);border-radius:99px;padding:3px 10px;cursor:pointer}
+.chip.on{background:var(--acc);border-color:var(--acc);color:#fff}
+@media (max-width:900px){
+  .app{grid-template-columns:1fr}
+  nav.side{position:static;height:auto;padding:12px}
+  ol.pipe{display:flex;overflow-x:auto;gap:4px}
+  ol.pipe::before{display:none}
+  ol.pipe button{grid-template-columns:28px auto;white-space:nowrap}
+  ol.pipe .d,.family{display:none}
+  main{padding:0 14px 50px}
+  .kpis{margin:0 -14px 14px;padding:8px 14px;position:static}
+  .hbar{grid-template-columns:120px 1fr 80px}
+}
+@media print{nav.side,.kpis,.tools,.btn{display:none!important}.app{display:block}.tab{display:block!important;page-break-after:always}}
+
+
+.cart{display:grid;grid-template-columns:repeat(23,minmax(0,1fr));gap:4px;margin:8px 0}
+.tile{aspect-ratio:1;border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;border:1px solid rgba(255,255,255,.08);font:600 12px var(--mono);color:#0a1120;transition:transform .12s,box-shadow .12s;position:relative;min-width:0}
+.tile small{font:500 8.5px var(--sans);color:rgba(10,17,32,.75);display:block;max-width:100%;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;padding:0 2px}
+.tile:hover{transform:scale(1.12);z-index:2;box-shadow:0 6px 18px rgba(0,0,0,.5)}
+.tile.sel{outline:3px solid var(--ink);outline-offset:1px;z-index:3}
+.tile.dim{opacity:.25}
+.reg{font:10px var(--mono);color:var(--muted);display:flex;align-items:flex-end;padding:0 0 4px 2px;letter-spacing:.06em}
+.legendrow{display:flex;flex-wrap:wrap;gap:10px;font-size:12px;color:var(--muted);margin:6px 0}
+.legendrow i{display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+.meth{border:1px solid var(--line);border-radius:10px;padding:8px 10px;margin:6px 0;background:var(--panel2)}
+.meth .top{display:flex;justify-content:space-between;gap:8px;align-items:center;flex-wrap:wrap}
+.meth b{font-size:13.5px}
+.meth p{margin:4px 0 0;font-size:12.5px;color:#cdd5e3}
+.meth .caps{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}
+.tdot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px;vertical-align:0}
+.cmpgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}
+@media (max-width:900px){.cart{gap:2px}.tile{font-size:9px;border-radius:5px}.tile small{display:none}}
+
+</style>
+<meta name="author" content="Usualy Labs">
+<meta name="color-scheme" content="light dark">
+<script>/* Usualy Labs theme switcher: auto | light | dark, remembered in this browser only */
+(function(){var K='usualy.theme',d=document.documentElement,m=window.matchMedia?matchMedia('(prefers-color-scheme: dark)'):null;
+function p(){try{return localStorage.getItem(K)||'auto'}catch(e){return 'auto'}}
+function a(){var v=p();d.setAttribute('data-theme',v==='auto'?(m&&m.matches?'dark':'light'):v);var s=document.getElementById('themeSel');if(s)s.value=v}
+a();if(m&&m.addEventListener)m.addEventListener('change',a);
+window.setTheme=function(v){try{localStorage.setItem(K,v)}catch(e){}a()};
+document.addEventListener('change',function(e){if(e.target&&e.target.id==='themeSel')setTheme(e.target.value)});
+document.addEventListener('DOMContentLoaded',a);})();
+</script>
+<style>
+.ul-theme{display:flex;gap:8px;align-items:center;margin-top:10px;font-size:12.5px;color:var(--muted)}
+.ul-theme select{background:var(--panel);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:4px 8px;font:inherit}
+:root[data-theme=light]{--bg:#f7f5f0;--bg2:#efece4;--panel:#ffffff;--panel2:#f3f1ec;--ink:#1b2333;--muted:#5d6678;--line:#dcd7cc;--acc:#d9531a;--acc2:#b8460f;--blue:#2f6fd6;--good:#1d8f5a;--bad:#cc3333;--warn:#a86d12;--violet:#7650d0}
+[data-theme=light] .kpis{background:rgba(247,245,240,.94)}
+[data-theme=light] ol.pipe button:hover{background:rgba(0,0,0,.04)}
+.ul-about{margin:28px 0 8px;padding:18px 20px;border:1px solid var(--line);border-radius:14px;background:var(--panel);font-size:13px;line-height:1.6}
+.ul-about h2{font-size:18px}.ul-about h3{font-size:14px;margin:14px 0 4px}.ul-about ul{margin:4px 0;padding-left:20px}
+@media print{.ul-theme{display:none}}
+[data-theme=light] .family a{color:var(--acc2)}
+</style>
+</head>
+<body>
+<div class="app"><nav class="side" id="side"></nav><main><header class="kpis" id="kpis"></header><div id="tabs"></div>
+<footer class="ul-about" id="about">
+  <h2>About, data sources &amp; disclaimer</h2>
+  <p><b>Payment Methods Explorer</b> &middot; published by <b>Usualy Labs</b> &middot; version 1.0.0 &middot; figures last checked October 2026.</p>
+  <h3>Not advice</h3>
+  <p>For general information and personal research only. It is <b>not</b> financial, investment, tax, legal or debt advice, and Usualy Labs is not authorised or regulated by the Financial Conduct Authority. It does not recommend any product or provider. Results are illustrations based on your inputs and on assumptions that may be wrong; investment returns are not guaranteed and can fall as well as rise; tax rules change and depend on your circumstances. Check with the official sources and a qualified, regulated adviser before acting.</p>
+  <p>Provided &ldquo;as is&rdquo; without warranty of any kind. To the fullest extent permitted by law, Usualy Labs and contributors accept no responsibility or liability for any loss or decision arising from its use. Nothing here limits any liability that cannot be limited by law.</p>
+  <h3>Your privacy</h3>
+  <p>Usualy Labs collects nothing. This page makes no network requests: no accounts, analytics, cookies, trackers or web fonts. Inputs are saved only in <b>your browser&rsquo;s local storage</b> on this device. &ldquo;Copy share link&rdquo; puts your inputs into the link itself; it is only shared if you send it, so treat it like a private document. Export and Import use a file on your own device.</p>
+  <h3>Data sources and credits</h3>
+  <p>All credit for the underlying information belongs to these publishers; inclusion does not imply their endorsement.</p>
+  <ul>
+    <li>Payment method roles by market are <b>indicative</b>, compiled from publicly available scheme information, central bank and regulator publications and public market reports. Markets change quickly.</li>
+    <li><b>Return and reason codes</b>: Pay.UK / Bacs (ARUDD, AUDDIS), European Payments Council SEPA rulebooks and ISO 20022 reason codes, Nacha (ACH return codes), ISO 8583 card response codes, as publicly documented.</li>
+    <li>Domestic scheme rules are summarised from public information by their operators and regulators, including NPCI (UPI), Banco Central do Brasil (Pix), Reserve Bank of India (e-mandates) and the card schemes.</li>
+    <li>Approval rates, fees, settlement times and dispute rates are <b>illustrative assumptions</b>, not data from any provider or merchant.</li>
+  </ul>
+  <p>All payment method, scheme and company names and logos are trade marks of their owners. Usualy Labs is not affiliated with or endorsed by any of them. This explorer is general education, not legal, compliance or commercial advice.</p>
+  <p>Contains public sector information licensed under the Open Government Licence v3.0 where marked. No third-party code libraries are used.</p>
+  <p>Spotted a mistake or out-of-date figure? Please report it through the project&rsquo;s GitHub Issues page.</p>
+</footer>
+</main></div>
+<div class="tip" id="tip"></div><div class="toast hidden" id="toast"></div>
+<script>
+'use strict';
+/* ===== Usualy Labs · shared kit (TEMPV01) ===== */
+const $ = (s, e = document) => e.querySelector(s), $$ = (s, e = document) => [...e.querySelectorAll(s)];
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const fin = n => typeof n === 'number' && isFinite(n);
+const N = v => { const x = parseFloat(v); return isFinite(x) ? x : 0; };
+const gbp = n => fin(n) ? (n < 0 ? '−£' : '£') + Math.abs(Math.round(n)).toLocaleString('en-GB') : '–';
+const gbp2 = n => fin(n) ? (n < 0 ? '−£' : '£') + Math.abs(n).toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '–';
+const pct = (n, d = 1) => fin(n) ? n.toFixed(d) + '%' : '–';
+const num0 = n => fin(n) ? Math.round(n).toLocaleString('en-GB') : '–';
+const kfmt = v => { const a = Math.abs(v), s = v < 0 ? '−' : ''; return a >= 1e6 ? s + '£' + (a / 1e6).toFixed(2) + 'm' : a >= 1e3 ? s + '£' + Math.round(a / 1e3) + 'k' : s + '£' + Math.round(a); };
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+const sum = (arr, f) => arr.reduce((a, x) => a + (+(f ? (typeof f === 'function' ? f(x) : x[f]) : x) || 0), 0);
+const yrsMo = m => { m = Math.round(m); return m < 12 ? `${m} mo` : `${Math.floor(m / 12)} yr${m % 12 ? ' ' + (m % 12) + ' mo' : ''}`; };
+const todayYM = () => new Date().toISOString().slice(0, 7);
+const monthsAdd = (ym, k) => { const [y, m] = ym.split('-').map(Number); return new Date(Date.UTC(y, m - 1 + k, 1)).toISOString().slice(0, 7); };
+const ymLabel = ym => { const [y, m] = ym.split('-').map(Number); return new Date(Date.UTC(y, m - 1, 1)).toLocaleDateString('en-GB', { month: 'short', year: 'numeric', timeZone: 'UTC' }); };
+const debounce = (fn, ms) => { let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), ms); }; };
+function toast(m) { const t = $('#toast'); t.textContent = m; t.classList.remove('hidden'); clearTimeout(toast.t); toast.t = setTimeout(() => t.classList.add('hidden'), 2600); }
+function showTip(e, txt) { const t = $('#tip'); t.textContent = txt; t.style.display = 'block'; t.style.left = Math.min(e.clientX + 14, innerWidth - 300) + 'px'; t.style.top = (e.clientY + 14) + 'px'; }
+function hideTip() { $('#tip').style.display = 'none'; }
+function download(name, text, type) { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([text], { type })); a.download = name; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 2000); }
+
+/* ---------- finance primitives ---------- */
+function pmt(P, r, n) { if (n <= 0) return P; if (Math.abs(r) < 1e-12) return P / n; return P * r / (1 - Math.pow(1 + r, -n)); }
+function nper(P, r, A) { if (P <= 0) return 0; if (Math.abs(r) < 1e-12) return P / A; if (A <= P * r) return Infinity; return -Math.log(1 - P * r / A) / Math.log(1 + r); }
+function pvA(r, n, A) { if (A <= 0) return 0; if (Math.abs(r) < 1e-12) return A * n; return A * (1 - Math.pow(1 + r, -n)) / r; }
+function rng(seed) { return () => { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+function gauss(rand) { let u = 0, v = 0; while (u === 0) u = rand(); while (v === 0) v = rand(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v); }
+const mRate = annualPct => Math.pow(1 + annualPct / 100, 1 / 12) - 1;
+
+/* ---------- UK tax engine (2026/27 defaults; every figure overridable) ---------- */
+const UK = {
+  year: '2026/27', pa: 12570, taper: 100000, basic: 37700, addl: 125140,
+  pt: 12570, uel: 50270, ee: .08, ee2: .02, er: .15, st: 5000, ea: 10500, c4: .06, c4b: .02,
+  divAllow: 500, div: [.1075, .3575, .3935], psa: [1000, 500, 0],
+  sl: { p1: 26065, p2: 28470, p4: 32745, p5: 25000, pg: 21000 },
+  scot: [[2827, .19], [14921, .20], [31092, .21], [62430, .42], [125140, .45], [Infinity, .48]],
+  cb: [27.05, 17.90], hicbc: [60000, 80000], sp: 241.30, lumpCap: 268275, ma: 1260,
+  ct: { small: .19, main: .25, lo: 50000, hi: 250000 }
+};
+/* ns: earnings/pension/rental income; div: dividends; ras: gross relief-at-source pension contributions (extend bands) */
+function ukTax({ ns = 0, div = 0, ras = 0, scot = false, paOverride = null } = {}) {
+  ns = Math.max(0, ns); div = Math.max(0, div);
+  const ani = ns + div - ras;
+  const pa = paOverride != null ? paOverride : Math.max(0, UK.pa - Math.max(0, (ani - UK.taper) / 2));
+  const paNS = Math.min(pa, ns), paD = Math.min(pa - paNS, div), tNS = ns - paNS, tD = div - paD;
+  const ext = Math.max(0, ras), B1 = UK.basic + ext, B2 = UK.addl + ext, bands = [];
+  let taxNS = 0;
+  if (scot) {
+    let prev = 0;
+    UK.scot.forEach(([lim, r], i) => { const L = lim === Infinity ? Infinity : lim + ext, amt = Math.max(0, Math.min(tNS, L) - prev); if (amt > 0) { bands.push({ label: ['Starter', 'Basic', 'Intermediate', 'Higher', 'Advanced', 'Top'][i] + ` ${Math.round(r * 100)}%`, amt, r, tax: amt * r }); taxNS += amt * r; } prev = L; });
+  } else {
+    const b = [[B1, .20, 'Basic 20%'], [B2, .40, 'Higher 40%'], [Infinity, .45, 'Additional 45%']]; let prev = 0;
+    b.forEach(([L, r, l]) => { const amt = Math.max(0, Math.min(tNS, L) - prev); if (amt > 0) { bands.push({ label: l, amt, r, tax: amt * r }); taxNS += amt * r; } prev = L; });
+  }
+  // dividends sit on top of non-savings income, using UK bands
+  let taxDiv = 0, pos = tNS, allow = Math.min(UK.divAllow, tD), left = tD;
+  const db = [[B1, UK.div[0], 'Dividend basic'], [B2, UK.div[1], 'Dividend higher'], [Infinity, UK.div[2], 'Dividend additional']];
+  for (const [L, r, l] of db) {
+    if (left <= 0) break; const room = Math.max(0, L - pos); if (room <= 0) continue;
+    let amt = Math.min(left, room), free = Math.min(allow, amt); allow -= free; const taxed = amt - free;
+    if (free > 0) bands.push({ label: 'Dividend allowance 0%', amt: free, r: 0, tax: 0 });
+    if (taxed > 0) { bands.push({ label: l + ` ${(r * 100).toFixed(2)}%`, amt: taxed, r, tax: taxed * r }); taxDiv += taxed * r; }
+    pos += amt; left -= amt;
+  }
+  return { ani, pa, taxNS, taxDiv, total: taxNS + taxDiv, bands };
+}
+const niEE = pay => UK.ee * Math.max(0, Math.min(pay, UK.uel) - UK.pt) + UK.ee2 * Math.max(0, pay - UK.uel);
+const niER = (pay, ea = 0) => Math.max(0, UK.er * Math.max(0, pay - UK.st) - ea);
+const niC4 = p => UK.c4 * Math.max(0, Math.min(p, UK.uel) - UK.pt) + UK.c4b * Math.max(0, p - UK.uel);
+const slRepay = (plan, inc) => { if (!plan || plan === 'none') return 0; const t = UK.sl[plan]; return t == null ? 0 : (plan === 'pg' ? .06 : .09) * Math.max(0, inc - t); };
+function corpTax(profit) { const c = UK.ct; if (profit <= 0) return 0; if (profit <= c.lo) return profit * c.small; if (profit >= c.hi) return profit * c.main; return profit * c.main - (c.hi - profit) * 3 / 200; }
+function hicbc(ani, kids) { if (!kids) return { cb: 0, charge: 0 }; const cb = (UK.cb[0] + UK.cb[1] * (kids - 1)) * 52; const [lo, hi] = UK.hicbc; const p = clamp((ani - lo) / (hi - lo), 0, 1); return { cb, charge: Math.floor(cb * p) }; }
+function sdlt(price, buyer = 'ftb', nonRes = false) {
+  if (buyer === 'none') return { tax: 0, parts: [] };
+  const std = [[125000, 0], [250000, .02], [925000, .05], [1500000, .10], [Infinity, .12]];
+  let bands = std;
+  if (buyer === 'ftb' && price <= 500000) bands = [[300000, 0], [500000, .05]];
+  else if (buyer === 'add' && price >= 40000) bands = std.map(([t, r]) => [t, r + .05]);
+  if (nonRes) bands = bands.map(([t, r]) => [t, r + .02]);
+  let prev = 0, tax = 0; const parts = [];
+  for (const [t, r] of bands) { if (price <= prev) break; const sl = Math.min(price, t) - prev; parts.push({ from: prev, to: Math.min(price, t), rate: r, tax: sl * r }); tax += sl * r; prev = t; }
+  return { tax: Math.floor(tax), parts };
+}
+
+/* ---------- state ---------- */
+let S = {}, APP = null, CUR = null, LISTS = {};
+function deepMerge(base, add) { for (const k in add) { if (add[k] && typeof add[k] === 'object' && !Array.isArray(add[k]) && base[k] && typeof base[k] === 'object' && !Array.isArray(base[k])) deepMerge(base[k], add[k]); else if (add[k] !== undefined) base[k] = add[k]; } return base; }
+const getP = (o, p) => p.split('.').reduce((a, k) => a == null ? a : a[k], o);
+const setP = (o, p, v) => { const ks = p.split('.'); let a = o; ks.slice(0, -1).forEach(k => a = a[k] = a[k] || {}); a[ks[ks.length - 1]] = v; };
+function loadState() {
+  S = APP.def();
+  try { const h = location.hash; if (h.startsWith('#s=')) { S = deepMerge(APP.def(), JSON.parse(decodeURIComponent(escape(atob(h.slice(3)))))); history.replaceState(null, '', location.pathname); setTimeout(() => toast('Loaded from link'), 300); return; } } catch (e) { console.warn(e); }
+  try { const s = localStorage.getItem(APP.key); if (s) S = deepMerge(APP.def(), JSON.parse(s)); } catch (e) {}
+}
+const saveState = debounce(() => { try { localStorage.setItem(APP.key, JSON.stringify(S)); } catch (e) {} }, 300);
+
+/* ---------- form helpers ---------- */
+function fld(k, label, o = {}) {
+  const t = o.type || 'num', v = getP(S, k), sh = o.show ? ` data-show="${o.show}"` : '', h = o.hint ? `<small>${o.hint}</small>` : '';
+  if (t === 'chk') return `<label class="chk"${sh}><input type="checkbox" data-k="${k}" ${v ? 'checked' : ''}> <span>${label}</span></label>`;
+  if (t === 'sel') return `<label${sh}><span>${label}</span><select data-k="${k}">${o.opts.map(([val, l]) => `<option value="${esc(val)}" ${String(v) === String(val) ? 'selected' : ''}>${esc(l)}</option>`).join('')}</select>${h}</label>`;
+  if (t === 'range') return `<label${sh}><span>${label}: <b class="mono" data-rv="${k}">${esc(v)}${o.unit || ''}</b></span><input type="range" data-k="${k}" min="${o.min}" max="${o.max}" step="${o.step || 1}" value="${esc(v)}" data-unit="${o.unit || ''}">${h}</label>`;
+  const it = t === 'num' ? 'type="number" inputmode="decimal" step="any"' : t === 'month' ? 'type="month"' : t === 'date' ? 'type="date"' : 'type="text"';
+  return `<label${sh}><span>${label}</span><input ${it} data-k="${k}" value="${esc(v ?? '')}"${o.min != null ? ` min="${o.min}"` : ''}${o.ph ? ` placeholder="${esc(o.ph)}"` : ''}>${h}</label>`;
+}
+const fs = (title, inner, show) => `<fieldset${show ? ` data-show="${show}"` : ''}><legend>${title}</legend><div class="fg">${inner}</div></fieldset>`;
+const stat = (l, v, s = '', c = '') => `<div class="stat ${c}"><div class="l">${l}</div><div class="v" title="${esc(String(v).replace(/<[^>]+>/g, ''))}">${v}</div><div class="s">${s}</div></div>`;
+const head = (i, title, sub) => `<div class="tabhead"><div class="eyebrow">Step ${String(i).padStart(2, '0')}</div><h2>${title}</h2><div class="hint" style="margin:0">${sub}</div></div>`;
+function applyShow() {
+  $$('[data-show]').forEach(el => {
+    const ok = el.dataset.show.split('&').every(cond => { const m = cond.match(/^([\w.]+)(!?=|>|<)(.*)$/); if (!m) return true; const raw = getP(S, m[1]), v = String(raw), vals = m[3].split('|'); if (m[2] === '>') return N(raw) > N(m[3]); if (m[2] === '<') return N(raw) < N(m[3]); return m[2] === '=' ? vals.includes(v) : !vals.includes(v); });
+    el.style.display = ok ? '' : 'none';
+  });
+}
+function syncInputs() { $$('[data-k]').forEach(el => { if (el === document.activeElement) return; const v = getP(S, el.dataset.k); if (el.type === 'checkbox') el.checked = !!v; else if (String(el.value) !== String(v ?? '')) el.value = v ?? ''; }); $$('[data-rv]').forEach(b => { const inp = $(`input[type=range][data-k="${b.dataset.rv}"]`); b.textContent = getP(S, b.dataset.rv) + (inp ? inp.dataset.unit : ''); }); }
+function listHTML(name) {
+  const L = LISTS[name], arr = getP(S, name) || [];
+  return `<div class="wrap short"><table class="tbl"><thead><tr>${L.cols.map(c => `<th class="l">${c[1]}</th>`).join('')}<th></th></tr></thead><tbody>${arr.map((r, i) => `<tr>${L.cols.map(([f, , t, opts]) => `<td class="l">${t === 'sel' ? `<select data-l="${name}" data-i="${i}" data-f="${f}">${opts.map(([v, l]) => `<option value="${esc(v)}" ${String(r[f]) === String(v) ? 'selected' : ''}>${esc(l)}</option>`).join('')}</select>` : t === 'chk' ? `<input type="checkbox" data-l="${name}" data-i="${i}" data-f="${f}" ${r[f] ? 'checked' : ''}>` : `<input ${t === 'num' ? 'type="number" step="any"' : t === 'month' ? 'type="month"' : 'type="text"'} data-l="${name}" data-i="${i}" data-f="${f}" value="${esc(r[f] ?? '')}"${t === 'text' ? ' style="min-width:130px"' : ''}>`}</td>`).join('')}<td>${L.min && arr.length <= L.min ? '' : `<button class="btn del" data-del="${name}:${i}" title="Remove">✕</button>`}</td></tr>`).join('') || `<tr><td class="l hint" colspan="${L.cols.length + 1}">Nothing added yet.</td></tr>`}</tbody></table></div>
+  ${!L.max || arr.length < L.max ? `<button class="btn sm" data-add="${name}" style="margin-top:6px">+ Add</button>` : ''}`;
+}
+function renderLists(name) { $$(`[data-list${name ? `="${name}"` : ''}]`).forEach(el => el.innerHTML = listHTML(el.dataset.list)); }
+
+/* ---------- charts ---------- */
+function lineChart(el, o) {
+  if (!el) return;
+  const W = 780, H = o.h || 260, pl = 66, pr = 18, pt = 30, pb = 30, xs = o.xs, n = xs.length;
+  const vals = o.series.flatMap(s => s.ys).filter(fin);
+  if (!vals.length) { el.innerHTML = ''; return; }
+  let mn = Math.min(o.yMin ?? 0, ...vals), mx = Math.max(o.yMax ?? -Infinity, ...vals); if (mx - mn < 1e-9) mx = mn + 1;
+  const pad = (mx - mn) * .06; mx += pad; if (mn < 0) mn -= pad;
+  const X = i => pl + (W - pl - pr) * (n > 1 ? i / (n - 1) : .5), Y = v => pt + (H - pt - pb) * (1 - (v - mn) / (mx - mn));
+  const yf = o.yFmt || kfmt; let g = '';
+  (o.bands || []).forEach(b => { g += `<rect x="${X(b.from)}" y="${pt}" width="${Math.max(0, X(b.to) - X(b.from))}" height="${H - pt - pb}" fill="${b.color}" opacity="${b.op || .08}"/>`; if (b.label) g += `<text x="${X(b.from) + 4}" y="${H - pb - 6}" style="fill:${b.tc || 'var(--muted)'}">${esc(b.label)}</text>`; });
+  for (let k = 0; k <= 4; k++) { const v = mn + (mx - mn) * k / 4; g += `<line class="gl" x1="${pl}" x2="${W - pr}" y1="${Y(v)}" y2="${Y(v)}"/><text x="${pl - 8}" y="${Y(v) + 4}" text-anchor="end">${yf(v)}</text>`; }
+  if (mn < 0) g += `<line x1="${pl}" x2="${W - pr}" y1="${Y(0)}" y2="${Y(0)}" stroke="var(--muted)"/>`;
+  const st = Math.max(1, Math.ceil(n / 8)); for (let i = 0; i < n; i += st) g += `<text x="${X(i)}" y="${H - 9}" text-anchor="middle">${esc(xs[i])}</text>`;
+  (o.markers || []).forEach(m => { if (m.i == null || m.i < 0 || m.i >= n) return; g += `<line x1="${X(m.i)}" x2="${X(m.i)}" y1="${pt}" y2="${H - pb}" stroke="${m.color || 'var(--warn)'}" stroke-dasharray="4 4"/><text x="${X(m.i) + 5}" y="${pt + 12 + (m.dy || 0)}" style="fill:${m.color || 'var(--warn)'}">${esc(m.label)}</text>`; });
+  (o.hlines || []).forEach(m => { g += `<line x1="${pl}" x2="${W - pr}" y1="${Y(m.y)}" y2="${Y(m.y)}" stroke="${m.color || 'var(--warn)'}" stroke-dasharray="4 4"/><text x="${W - pr - 4}" y="${Y(m.y) - 5}" text-anchor="end" style="fill:${m.color || 'var(--warn)'}">${esc(m.label)}</text>`; });
+  o.series.forEach(s => {
+    if (s.band) { const lo = s.band[0], hi = s.band[1]; let d = ''; hi.forEach((v, i) => d += (i ? 'L' : 'M') + X(i).toFixed(1) + ',' + Y(v).toFixed(1)); for (let i = lo.length - 1; i >= 0; i--) d += 'L' + X(i).toFixed(1) + ',' + Y(lo[i]).toFixed(1); g += `<path d="${d}Z" fill="${s.color}" opacity=".14"/>`; }
+    let d = '', pen = false; s.ys.forEach((v, i) => { if (!fin(v)) { pen = false; return; } d += (pen ? 'L' : 'M') + X(i).toFixed(1) + ',' + Y(v).toFixed(1); pen = true; });
+    if (s.area && d) { const f = s.ys.findIndex(fin), l = s.ys.length - 1 - [...s.ys].reverse().findIndex(fin); g += `<path d="${d}L${X(l)},${Y(Math.max(mn, 0))}L${X(f)},${Y(Math.max(mn, 0))}Z" fill="${s.color}" opacity=".12"/>`; }
+    g += `<path d="${d}" fill="none" stroke="${s.color}" stroke-width="${s.w || 2.4}" ${s.dash ? `stroke-dasharray="${s.dash}"` : ''} stroke-linejoin="round" stroke-linecap="round"/>`;
+  });
+  let lx = pl; g += `<g transform="translate(0,${pt - 16})">` + o.series.filter(s => !s.noLegend).map(s => { const t = `<rect x="${lx}" y="0" width="14" height="4" rx="2" fill="${s.color}"/><text x="${lx + 19}" y="6">${esc(s.name)}</text>`; lx += 30 + s.name.length * 6.6; return t; }).join('') + '</g>';
+  el.innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(o.label || 'chart')}">${g}<line class="cur" x1="0" x2="0" y1="${pt}" y2="${H - pb}" stroke="var(--ink)" stroke-opacity=".35" style="opacity:0"/><rect class="hit" x="${pl}" y="${pt}" width="${W - pl - pr}" height="${H - pt - pb}"/></svg>`;
+  const svg = el.querySelector('svg'), hit = svg.querySelector('.hit'), cur = svg.querySelector('.cur');
+  hit.addEventListener('mousemove', e => { const r = hit.getBoundingClientRect(), i = clamp(Math.round((e.clientX - r.left) / r.width * (n - 1)), 0, n - 1); cur.setAttribute('x1', X(i)); cur.setAttribute('x2', X(i)); cur.style.opacity = 1; showTip(e, (o.tipTitle ? o.tipTitle(i) : xs[i]) + '\n' + o.series.filter(s => !s.noTip).map(s => `${s.name}: ${fin(s.ys[i]) ? (s.fmt || o.tipFmt || gbp)(s.ys[i]) : '–'}`).join('\n')); });
+  hit.addEventListener('mouseleave', () => { hideTip(); cur.style.opacity = 0; });
+}
+function barChart(el, o) {
+  if (!el) return;
+  const W = 780, H = o.h || 250, pl = 66, pr = 18, pt = 30, pb = o.pb || 30, n = o.cats.length;
+  const pos = o.cats.map((_, i) => o.stacks.reduce((a, s) => a + Math.max(0, s.vals[i] || 0), 0)), neg = o.cats.map((_, i) => o.stacks.reduce((a, s) => a + Math.min(0, s.vals[i] || 0), 0));
+  const mx = Math.max(...pos, 1) * 1.06, mn = Math.min(...neg, 0) * 1.06;
+  const bw = (W - pl - pr) / Math.max(1, n), Y = v => pt + (H - pt - pb) * (1 - (v - mn) / (mx - mn)), yf = o.yFmt || kfmt;
+  let g = '';
+  for (let k = 0; k <= 4; k++) { const v = mn + (mx - mn) * k / 4; g += `<line class="gl" x1="${pl}" x2="${W - pr}" y1="${Y(v)}" y2="${Y(v)}"/><text x="${pl - 8}" y="${Y(v) + 4}" text-anchor="end">${yf(v)}</text>`; }
+  if (mn < 0) g += `<line x1="${pl}" x2="${W - pr}" y1="${Y(0)}" y2="${Y(0)}" stroke="var(--muted)"/>`;
+  o.cats.forEach((c, i) => {
+    let up = 0, dn = 0; const x0 = pl + i * bw + bw * .14, w = bw * .72;
+    g += `<g class="bg" data-i="${i}">` + o.stacks.map(s => { const v = s.vals[i] || 0; if (!v) return ''; let y1, y2; if (v > 0) { y1 = Y(up + v); y2 = Y(up); up += v; } else { y1 = Y(dn); y2 = Y(dn + v); dn += v; } return `<rect x="${x0}" y="${y1}" width="${w}" height="${Math.max(0, y2 - y1)}" rx="2" fill="${s.color}"/>`; }).join('') + `<rect x="${pl + i * bw}" y="${pt}" width="${bw}" height="${H - pt - pb}" fill="transparent"/></g>`;
+    if (n <= 14 || i % Math.ceil(n / 12) === 0) g += `<text x="${x0 + w / 2}" y="${H - pb + 18}" text-anchor="middle">${esc(c)}</text>`;
+  });
+  let lx = pl; g += `<g transform="translate(0,${pt - 18})">` + o.stacks.map(s => { const t = `<rect x="${lx}" y="0" width="10" height="10" rx="2" fill="${s.color}"/><text x="${lx + 14}" y="9">${esc(s.name)}</text>`; lx += 26 + s.name.length * 6.6; return t; }).join('') + '</g>';
+  el.innerHTML = `<svg viewBox="0 0 ${W} ${H}">${g}</svg>`;
+  $$('.bg', el).forEach(b => { b.addEventListener('mousemove', e => { const i = +b.dataset.i; showTip(e, (o.tipTitle ? o.tipTitle(i) : o.cats[i]) + '\n' + o.stacks.map(s => `${s.name}: ${(o.tipFmt || gbp)(s.vals[i] || 0)}`).join('\n')); }); b.addEventListener('mouseleave', hideTip); });
+}
+const hbars = (items, color = 'var(--acc)', fmt = gbp) => { const mx = Math.max(...items.map(x => Math.abs(x[1])), 1e-9); return items.map(([l, v, c]) => `<div class="hbar"><span>${esc(l)}</span><div class="t"><i style="width:${Math.abs(v) / mx * 100}%;background:${c || color}"></i></div><span class="v">${fmt(v)}</span></div>`).join(''); };
+
+/* ---------- shell ---------- */
+const FAMILY = [['..', 'All tools', '../../'], ['uk-mortgage-planner', 'Mortgage planner'], ['rent-vs-buy-calculator', 'Rent vs buy'], ['uk-take-home-pay-calculator', 'Take-home & contracting'], ['fi-planner-uk', 'Financial independence'], ['debt-payoff-planner', 'Debt payoff'], ['payment-methods-explorer', 'Payment methods explorer']];
+function go(t) { CUR = t; $$('#pipe button').forEach(b => b.classList.toggle('active', b.dataset.t === t)); $$('.tab').forEach(s => s.classList.toggle('active', s.id === 't-' + t)); try { localStorage.setItem(APP.key + '.tab', t); } catch (e) {} render(); scrollTo({ top: 0 }); }
+function render() { APP.reset && APP.reset(); try { const k = APP.kpis ? APP.kpis() : null; const el = $('#kpis'); el.innerHTML = k ? k.map(([l, v, s]) => `<div class="kpi"><div class="l">${l}</div><div class="v">${v}</div><div class="s">${s || ''}</div></div>`).join('') : ''; (APP.render[CUR] || (() => {}))(); } catch (e) { console.error(e); } }
+const renderSoon = debounce(render, 160);
+function changed(now = true) { saveState(); applyShow(); syncInputs(); now ? render() : renderSoon(); }
+function readEl(el) { return el.type === 'checkbox' ? el.checked : (el.type === 'number' || el.type === 'range') ? (el.value === '' ? '' : parseFloat(el.value)) : el.value; }
+function buildShell() {
+  const here = 'payment-methods-explorer';
+  $('#side').innerHTML = `<div class="brand"><div class="logo">${APP.logo || '£'}</div><div><b>${APP.title}</b><span>${APP.sub}</span></div></div><ol class="pipe" id="pipe">${APP.tabs.map(([k, t, d], i) => `<li><button data-t="${k}"><span class="n">${String(i).padStart(2, '0')}</span><span class="t">${t}<span class="d">${d}</span></span></button></li>`).join('')}</ol>
+  <div class="tools"><button class="btn sm" data-tool="share" title="Copy a link that holds all your inputs">Copy share link</button><button class="btn sm" data-tool="export">Export</button><label class="btn sm filebtn">Import<input type="file" id="tImport" accept=".json"></label><button class="btn sm" data-tool="print">Print</button><button class="btn sm del" data-tool="reset">Reset</button></div>
+  <p class="hint" style="margin-top:12px">Inputs save in this browser only. Nothing is sent anywhere.</p>
+  <label class="ul-theme">Theme <select id="themeSel" aria-label="Colour theme"><option value="auto">Auto</option><option value="light">Light</option><option value="dark">Dark</option></select></label>
+  <div class="family"><div class="eyebrow" style="margin-bottom:4px">More from Usualy Labs</div>${FAMILY.filter(([f]) => f !== here).map(([f, l, h]) => `<a href="${h || '../' + f + '/'}">${l} →</a>`).join('')}</div>`;
+  $('#tabs').innerHTML = APP.build();
+  renderLists();
+}
+function wire() {
+  document.addEventListener('input', e => {
+    const el = e.target;
+    if (el.dataset.k) { setP(S, el.dataset.k, readEl(el)); saveState(); applyShow(); const b = $(`[data-rv="${el.dataset.k}"]`); if (b) b.textContent = el.value + (el.dataset.unit || ''); $$(`[data-k="${el.dataset.k}"]`).forEach(o => { if (o !== el && o.type !== 'checkbox') o.value = el.value; }); renderSoon(); }
+    else if (el.dataset.l) { getP(S, el.dataset.l)[+el.dataset.i][el.dataset.f] = readEl(el); saveState(); renderSoon(); }
+  });
+  document.addEventListener('change', e => { const el = e.target; if (el.dataset.k) { setP(S, el.dataset.k, readEl(el)); changed(); } else if (el.dataset.l) { getP(S, el.dataset.l)[+el.dataset.i][el.dataset.f] = readEl(el); changed(); } });
+  document.addEventListener('click', e => {
+    const t = e.target.closest('[data-go],[data-t],[data-add],[data-del],[data-set],[data-tool]'); if (!t) return;
+    if (t.dataset.set && t.dataset.go) { const o = JSON.parse(t.dataset.set); for (const k in o) setP(S, k, o[k]); saveState(); applyShow(); syncInputs(); go(t.dataset.go); }
+    else if (t.dataset.go) go(t.dataset.go);
+    else if (t.dataset.t) go(t.dataset.t);
+    else if (t.dataset.add) { getP(S, t.dataset.add).push(LISTS[t.dataset.add].add()); renderLists(t.dataset.add); changed(); }
+    else if (t.dataset.del) { const [n, i] = t.dataset.del.split(':'); getP(S, n).splice(+i, 1); renderLists(n); changed(); }
+    else if (t.dataset.set) { const o = JSON.parse(t.dataset.set); for (const k in o) setP(S, k, o[k]); if (t.dataset.relist) renderLists(t.dataset.relist); changed(); }
+    else if (t.dataset.tool === 'share') { const url = location.href.split('#')[0] + '#s=' + btoa(unescape(encodeURIComponent(JSON.stringify(S)))); (navigator.clipboard ? navigator.clipboard.writeText(url) : Promise.reject()).then(() => toast('Share link copied'), () => prompt('Copy this link', url)); }
+    else if (t.dataset.tool === 'export') download(APP.file + '-' + new Date().toISOString().slice(0, 10) + '.json', JSON.stringify(S, null, 1), 'application/json');
+    else if (t.dataset.tool === 'print') print();
+    else if (t.dataset.tool === 'reset') { if (!confirm('Reset every input to the defaults?')) return; S = APP.def(); rebuild(); toast('Reset'); }
+  });
+  document.addEventListener('change', async e => { if (e.target.id !== 'tImport') return; const f = e.target.files[0]; if (!f) return; try { S = deepMerge(APP.def(), JSON.parse(await f.text())); rebuild(); toast('Imported'); } catch (err) { toast('Import failed: ' + err.message); } e.target.value = ''; });
+}
+function rebuild() { $('#tabs').innerHTML = APP.build(); renderLists(); APP.afterBuild && APP.afterBuild(); saveState(); applyShow(); go(CUR); }
+function boot(app) {
+  APP = app; LISTS = app.lists || {}; loadState(); buildShell(); wire(); APP.afterBuild && APP.afterBuild(); applyShow();
+  let t0 = app.tabs[0][0]; try { t0 = localStorage.getItem(APP.key + '.tab') || t0; } catch (e) {}
+  go(app.render[t0] ? t0 : app.tabs[0][0]);
+}
+
+</script>
+<script>
+// title: Global Payment Methods Explorer
+// desc: How the world pays online: 33 markets, 90+ payment methods, a checkout planner, decline and return codes, and a failure and settlement simulator.
+
+
+const TYPES = {
+  card: ['Cards', '#5aa2ff'], rtp: ['Real-time / account-to-account', '#3fd18b'], debit: ['Direct debit', '#b48cff'], wallet: ['Digital wallets', '#ff8a4c'],
+  bnpl: ['Buy now, pay later', '#ff7ab6'], cash: ['Cash & vouchers', '#ffc857'], bank: ['Online banking redirect', '#2ec4c4'], transfer: ['Bank transfer / reference', '#9fb7d6'], mobile: ['Mobile money / USSD', '#d4a84b']
+};
+const ROLE = { D: ['Dominant', 4, 'a'], M: ['Major', 3, 'bl'], C: ['Common', 2, 'v'], N: ['Niche / emerging', 1, ''] };
+const m = (n, t, s, rec, ref, dis, auth, d, x = {}) => ({ n, t, s, rec, ref, dis, auth, d, ...x });
+const M = {
+  card: m('Visa / Mastercard', 'card', [1, 3], 'Yes (card on file)', 'Full & partial', 'Chargebacks, typically up to 120 days', '3-D Secure; SCA in UK/EEA', 'International card schemes, credit and debit. Accepted almost everywhere online; many local debit brands are co-badged.'),
+  amex: m('American Express', 'card', [1, 4], 'Yes', 'Full & partial', 'Chargebacks (Amex rules)', 'SafeKey (3-D Secure)', 'Charge and credit cards with higher merchant fees, strong with affluent and corporate spenders.'),
+  jcb: m('JCB', 'card', [1, 3], 'Yes', 'Full & partial', 'Chargebacks', 'J/Secure (3-D Secure)', "Japan's international card scheme, widely held in Japan."),
+  unionpay: m('UnionPay', 'card', [1, 3], 'Limited', 'Full & partial', 'Chargebacks', 'SMS / online auth', "China's card scheme; most cards are debit cards tied to domestic bank accounts."),
+  rupay: m('RuPay', 'card', [1, 2], 'Via e-mandate', 'Full & partial', 'Chargebacks', 'OTP (extra factor required)', "India's domestic card scheme; RuPay credit cards can also be linked to UPI."),
+  cb: m('Cartes Bancaires (CB)', 'card', [1, 2], 'Yes', 'Full & partial', 'Chargebacks', '3-D Secure', "France's domestic scheme. Most French cards are co-badged CB + Visa/Mastercard, and routing via CB is often cheaper."),
+  bancontact: m('Bancontact', 'card', [1, 2], 'No (use SEPA DD)', 'Full & partial', 'Limited dispute rights', 'Card + bank auth or app QR', "Belgium's domestic debit scheme, used by card number or mobile app."),
+  interac_d: m('Interac Debit', 'card', [1, 2], 'No', 'Full & partial', 'Limited', 'PIN in store; bank redirect online', "Canada's debit network: dominant in store, limited online."),
+  eftpos: m('eftpos', 'card', [1, 2], 'Yes (tokenised)', 'Full & partial', 'Scheme dispute rules', 'Card authentication', "Australia's domestic debit network. Dual-network cards let merchants route debit via eftpos for lower fees (least-cost routing)."),
+  mada: m('mada', 'card', [1, 2], 'Limited', 'Full & partial', 'Scheme dispute rules', '3-D Secure', "Saudi Arabia's national debit network, on almost every Saudi debit card."),
+  verve: m('Verve', 'card', [0, 2], 'Limited', 'Full & partial', 'Limited', 'OTP / PIN', "Nigeria's domestic card scheme, mainly debit cards."),
+  troy: m('Troy', 'card', [1, 2], 'Yes', 'Full & partial', 'Chargebacks', '3-D Secure', "Turkey's domestic card scheme. Turkish shoppers expect taksit (instalments) on credit cards."),
+  elo: m('Elo', 'card', [1, 30], 'Yes', 'Full & partial', 'Chargebacks', '3-D Secure', 'Brazilian domestic card brand. Instalment sales settle per instalment unless the merchant anticipates receivables.'),
+  meeza: m('Meeza', 'card', [1, 2], 'Limited', 'Full & partial', 'Limited', 'OTP', "Egypt's national card scheme, also used for government payments."),
+  kr_card: m('Korean domestic cards', 'card', [1, 3], 'Yes', 'Full & partial', 'Card company disputes', 'Issuer app authentication', 'Shinhan, Samsung, KB, Hyundai and others, routed via local payment gateways. Foreign-issued cards often fail on local checkouts.'),
+  apple_pay: m('Apple Pay', 'wallet', [1, 3], 'Yes (merchant tokens)', 'Full & partial', 'Card chargeback rules', 'Face ID / Touch ID (meets SCA)', 'Tokenised cards in Apple Wallet; lifts mobile conversion by removing card entry.', { rev: [.35, 120, 'Chargebacks'] }),
+  google_pay: m('Google Pay', 'wallet', [1, 3], 'Yes', 'Full & partial', 'Card chargeback rules', 'Device unlock / 3-D Secure', 'Tokenised cards in Google Wallet; strong on Android and Chrome.', { rev: [.35, 120, 'Chargebacks'] }),
+  paypal: m('PayPal', 'wallet', [1, 3], 'Yes (billing agreements)', 'Full & partial', 'Buyer Protection, 180 days', 'PayPal login', 'Global wallet funded by card, bank or balance; the top non-card method in Germany and many other markets.', { rev: [.3, 180, 'PayPal disputes'] }),
+  venmo: m('Venmo', 'wallet', [1, 3], 'Limited', 'Full & partial', 'PayPal dispute rules', 'App', 'PayPal-owned P2P app with checkout acceptance; popular with younger US shoppers.'),
+  cashapp: m('Cash App Pay', 'wallet', [1, 2], 'Yes', 'Full & partial', 'Disputes via Block', 'App approval / QR', "Block's wallet, paid by app hand-off or QR at checkout."),
+  alipay: m('Alipay', 'wallet', [0, 2], 'Yes (agreements)', 'Full & partial', 'Platform dispute process', 'App / QR', "Ant Group's super-app. With WeChat Pay it handles the vast majority of Chinese mobile payments."),
+  wechat: m('WeChat Pay', 'wallet', [0, 2], 'Limited', 'Full & partial', 'Platform dispute process', 'App / QR / mini-programs', 'Tencent wallet inside WeChat; dominant for in-app and social commerce.'),
+  paypay: m('PayPay', 'wallet', [1, 3], 'Limited', 'Full & partial', 'Platform dispute process', 'App / QR', "Japan's largest QR code wallet, huge in store and growing online."),
+  kakaopay: m('KakaoPay', 'wallet', [1, 3], 'Yes', 'Full & partial', 'Platform process', 'App', 'Wallet inside the KakaoTalk messenger, used by most Korean adults.'),
+  naverpay: m('Naver Pay', 'wallet', [1, 3], 'Yes', 'Full & partial', 'Platform process', 'App', "Naver's wallet, strong for shopping through Korea's biggest portal."),
+  tosspay: m('Toss Pay', 'wallet', [1, 3], 'Yes', 'Full & partial', 'Platform process', 'App', 'Wallet from the Toss financial super-app.'),
+  satispay: m('Satispay', 'wallet', [1, 2], 'Yes', 'Full & partial', 'Platform process', 'App', 'Italian wallet linked directly to a bank account; low fees for merchants.'),
+  mercadopago: m('Mercado Pago', 'wallet', [0, 14], 'Yes', 'Full & partial', 'Mercado Pago buyer protection', 'App / login', "Mercado Libre's wallet across Latin America: balance, cards and in-house credit. Funds release can be delayed depending on plan."),
+  nequi: m('Nequi', 'wallet', [0, 1], 'No', 'Via transfer', 'Limited', 'App', "Bancolombia's digital wallet with tens of millions of users; Daviplata is the other big wallet."),
+  stcpay: m('stc pay', 'wallet', [0, 1], 'Limited', 'Full & partial', 'Platform process', 'App / OTP', 'Saudi digital wallet (now stc Bank).'),
+  truemoney: m('TrueMoney', 'wallet', [0, 1], 'Limited', 'Full & partial', 'Platform process', 'App', "Thailand's leading e-wallet, also used in other ASEAN markets."),
+  momo: m('MoMo', 'wallet', [0, 1], 'Limited', 'Full & partial', 'Platform process', 'App', "Vietnam's largest e-wallet."),
+  gcash: m('GCash', 'wallet', [0, 1], 'Limited', 'Full & partial', 'Platform process', 'App / QR', "The Philippines' dominant e-wallet."),
+  maya: m('Maya', 'wallet', [0, 1], 'Limited', 'Full & partial', 'Platform process', 'App / QR', 'Philippine wallet and digital bank (formerly PayMaya).'),
+  grabpay: m('GrabPay', 'wallet', [1, 2], 'Limited', 'Full & partial', 'Platform process', 'App', 'Wallet inside the Grab super-app across South-East Asia.'),
+  id_wallet: m('GoPay / OVO / DANA / ShopeePay', 'wallet', [0, 2], 'Limited', 'Full & partial', 'Platform process', 'App / PIN', "Indonesia's big e-wallets, tied to ride-hailing and marketplace ecosystems."),
+  ng_wallet: m('OPay / PalmPay wallets', 'wallet', [0, 1], 'No', 'Via transfer', 'Limited', 'App / PIN', 'Nigerian fintech wallets with tens of millions of users, many outside traditional banking.'),
+  vfcash: m('Vodafone Cash & mobile wallets', 'mobile', [0, 1], 'No', 'Via transfer', 'Limited', 'PIN', "Egypt's mobile-operator wallets, used for P2P and online payments."),
+  mpesa: m('M-Pesa', 'mobile', [0, 1], 'Limited (M-Pesa Ratiba)', 'Via reversal / B2C', 'Reversal requests', 'STK push + M-Pesa PIN', "Safaricom's mobile money: the default way most Kenyans pay. Checkout sends an STK push asking for the PIN."),
+  ussd: m('USSD bank codes', 'mobile', [0, 0], 'No', 'Via transfer', 'None', 'Dial shortcode + PIN', 'Pay from any phone by dialling a bank shortcode; works without mobile data.'),
+  pbb_uk: m('Pay by Bank (Faster Payments)', 'rtp', [0, 1], 'Limited (VRP)', 'Via bank transfer', 'No chargeback; APP fraud reimbursement rules', 'Bank app approval (SCA)', 'Open banking payment initiation over Faster Payments: instant, low cost, no card details.'),
+  sepa_inst: m('SEPA Instant', 'rtp', [0, 0], 'No', 'Via bank transfer', 'None (push payment)', 'Bank app approval', 'Instant euro transfers in under 10 seconds, 24/7. EU rules require banks to offer it at no more than a standard transfer, with payee name checks.'),
+  wero: m('Wero', 'rtp', [0, 0], 'Planned', 'Via bank transfer', 'Buyer protection planned', 'Bank or Wero app', 'European Payments Initiative wallet on SEPA Instant. It replaced Paylib in France, is absorbing iDEAL in the Netherlands, and is rolling into e-commerce.'),
+  blik: m('BLIK', 'rtp', [0, 1], 'Yes (recurring BLIK)', 'Full & partial', 'Bank complaint process', '6-digit code or app confirmation', "Poland's mobile payment standard: a 6-digit code from the bank app, valid for about 2 minutes."),
+  swish: m('Swish', 'rtp', [0, 0], 'Limited', 'Full (Swish refunds)', 'None (push payment)', 'BankID', "Sweden's bank-owned mobile payments; near-universal for P2P and big online."),
+  bizum: m('Bizum', 'rtp', [0, 0], 'No', 'Full & partial', 'Bank process', 'Bank app', "Spanish banks' instant mobile payments; huge for P2P, growing at checkout."),
+  mbway: m('MB WAY', 'rtp', [0, 1], 'Limited', 'Full & partial', 'Bank process', 'App confirmation', "Portugal's SIBS mobile payment app; checkout by phone number with approval in the app."),
+  pix: m('Pix', 'rtp', [0, 0], 'Yes (Pix Automático)', 'Full & partial (devolução)', 'MED special return mechanism for fraud', 'Bank app via QR or Pix key', "Brazil's central bank instant payments; now the country's most-used payment method.", { rev: [.05, 80, 'MED returns'] }),
+  spei: m('SPEI', 'rtp', [0, 0], 'No', 'Via bank transfer', 'None', 'Bank app with CLABE reference', "Mexico's real-time interbank transfers; merchants issue a reference CLABE per order."),
+  breb: m('Bre-B', 'rtp', [0, 0], 'No', 'Via bank transfer', 'None', 'Bank app with key', "Colombia's new central-bank instant payments using keys (phone, ID, email), rolling out from 2025."),
+  rtp_us: m('RTP / FedNow', 'rtp', [0, 0], 'No (Request for Pay)', 'Via bank transfer', 'None', 'Bank app', 'US instant rails: growing for payouts and bill pay, early for checkout.'),
+  interac_et: m('Interac e-Transfer', 'rtp', [0, 0], 'No', 'Via bank transfer', 'None', 'Online banking', "Canada's near-instant bank transfers; common for P2P, rent and some merchants."),
+  upi: m('UPI', 'rtp', [0, 1], 'Yes (UPI AutoPay)', 'Full & partial', 'NPCI dispute system (UDIR)', 'UPI PIN in any UPI app', "India's Unified Payments Interface: instant bank payments via PhonePe, Google Pay, Paytm and others, at billions of transactions a month."),
+  promptpay: m('PromptPay', 'rtp', [0, 0], 'Limited', 'Via bank transfer', 'None', 'Bank app / Thai QR', "Thailand's national instant payments and QR standard."),
+  vietqr: m('VietQR / Napas 247', 'rtp', [0, 0], 'No', 'Via bank transfer', 'None', 'Bank app QR', 'Vietnamese instant transfers with a shared QR standard; ubiquitous in shops and online.'),
+  instapay_ph: m('InstaPay / QR Ph', 'rtp', [0, 0], 'No', 'Via bank transfer', 'None', 'App / QR', 'Philippine instant transfers between banks and e-wallets, with a national QR standard.'),
+  paynow: m('PayNow', 'rtp', [0, 0], 'Limited', 'Via bank transfer', 'None', 'Bank app / SGQR', "Singapore's instant transfers by phone, NRIC or company UEN, with the SGQR code."),
+  qris: m('QRIS', 'rtp', [0, 1], 'No', 'Limited', 'Platform process', 'Any bank or e-wallet app', "Indonesia's national QR standard: one code accepts every bank and e-wallet app."),
+  payid: m('PayID / PayTo (NPP)', 'rtp', [0, 0], 'Yes (PayTo agreements)', 'Via bank transfer', 'PayTo dispute handling', 'Bank app', "Australia's New Payments Platform: PayID for instant transfers, PayTo for authorised pull payments and subscriptions."),
+  fast_tr: m('FAST / Havale-EFT', 'rtp', [0, 1], 'No', 'Via bank transfer', 'None', 'Bank app', "Turkey's instant transfers and traditional bank transfers."),
+  ng_transfer: m('Bank transfer (NIP)', 'rtp', [0, 0], 'No', 'Via bank transfer', 'None', 'Bank app', 'NIBSS Instant Payments. Nigerian checkouts often issue a temporary account number per order.'),
+  pesalink: m('PesaLink', 'rtp', [0, 0], 'No', 'Via bank transfer', 'None', 'Bank app', "Kenya's instant interbank transfers."),
+  instapay_eg: m('InstaPay Egypt', 'rtp', [0, 0], 'No', 'Via bank transfer', 'None', 'App', "Egypt's instant payment network, growing fast since 2022."),
+  bacs: m('Direct Debit (Bacs)', 'debit', [3, 3], 'Yes', 'Full & partial', 'Direct Debit Guarantee: refund on request, no time limit', 'Mandate (AUDDIS)', 'The UK standard for subscriptions and bills, on a 3-working-day cycle.', { rev: [.3, 365, 'DD Guarantee claims'], prof: 'bacs' }),
+  sepa_dd: m('SEPA Direct Debit', 'debit', [1, 3], 'Yes', 'Full & partial', '8-week no-questions refund; 13 months if unauthorised', 'Mandate', 'Euro direct debits across SEPA (Core scheme).', { rev: [.7, 56, 'MD06 refund claims'], prof: 'sepa' }),
+  ach: m('ACH debit', 'debit', [1, 3], 'Yes', 'Full & partial', 'Unauthorised returns up to 60 days', 'Authorisation (online, phone, written)', 'US bank debits, standard and same-day: the backbone of bills and payroll.', { rev: [.15, 60, 'R10/R07 unauthorised returns'], prof: 'ach' }),
+  pad_ca: m('Pre-Authorized Debit (PAD)', 'debit', [1, 3], 'Yes', 'Full & partial', '90-day reimbursement claims', 'PAD agreement', 'Canadian direct debit for recurring payments.', { rev: [.2, 90, 'PAD claims'] }),
+  becs: m('BECS Direct Debit', 'debit', [1, 3], 'Yes', 'Full & partial', 'Bank dispute process', 'DDR service agreement', "Australia's direct debit; PayTo is the modern alternative."),
+  autogiro: m('Autogiro', 'debit', [1, 2], 'Yes', 'Full & partial', 'Bank process', 'Mandate via BankID', "Sweden's direct debit for recurring bills."),
+  nach: m('eNACH / e-mandates', 'debit', [1, 2], 'Yes', 'Full & partial', 'Bank process', 'Net banking or debit card authentication', 'Indian electronic mandates for EMIs, SIPs and subscriptions. Card and UPI mandates follow extra RBI rules.'),
+  za_do: m('Debit order (DebiCheck)', 'debit', [1, 2], 'Yes', 'Full & partial', 'Disputes per DebiCheck rules', 'Customer confirms mandate with bank', "South Africa's debit orders; DebiCheck requires bank-confirmed mandates."),
+  ideal: m('iDEAL', 'bank', [0, 1], 'No (use SEPA DD)', 'Via bank transfer', 'None', 'Bank app redirect', "The Netherlands' bank payment method, used for most Dutch online purchases; migrating into the Wero brand."),
+  p24: m('Przelewy24', 'bank', [0, 1], 'No', 'Full & partial', 'Bank process', 'Bank login', 'Polish pay-by-link covering almost every bank.'),
+  trustly: m('Trustly', 'bank', [0, 1], 'Yes (Trustly mandates)', 'Full & partial', 'None', 'Bank login', 'Open banking payments across the Nordics and Europe; popular in gaming and travel.'),
+  netbanking: m('Net banking', 'bank', [0, 2], 'Via eNACH', 'Full & partial', 'Bank process', 'Bank login + OTP', 'Indian bank redirects; declining as UPI grows but still used for high values.'),
+  pse: m('PSE', 'bank', [0, 1], 'No', 'Via bank transfer', 'None', 'Bank login', "Colombia's online bank debit: the main non-card method for e-commerce and bills."),
+  za_eft: m('Instant EFT', 'bank', [0, 1], 'No', 'Via bank transfer', 'None', 'Bank login via provider (e.g. Ozow)', 'South African pay-by-bank alternative to cards.'),
+  furikomi: m('Bank transfer (furikomi)', 'transfer', [0, 2], 'No', 'Via bank transfer', 'None', 'Bank app / ATM', 'Japanese bank transfers to the merchant account; common for higher values.'),
+  va_id: m('Virtual account transfer', 'transfer', [0, 1], 'No', 'Via bank transfer', 'None', 'Bank app / ATM', 'A unique account number per order at BCA, Mandiri, BRI, BNI and others.'),
+  bpay: m('BPAY', 'transfer', [1, 2], 'No', 'Manual', 'None', 'Online banking with biller code', 'Australian bill payments from online banking.'),
+  sadad: m('SADAD', 'transfer', [0, 1], 'No', 'Manual', 'None', 'Bank app with bill number', 'Saudi national bill payment system.'),
+  multibanco: m('Multibanco reference', 'cash', [1, 3], 'No', 'Manual', 'None', 'ATM or homebanking with entity + reference', 'Portuguese payment references, paid at any ATM or in online banking.', { prof: 'voucher80' }),
+  boleto: m('Boleto Bancário', 'cash', [1, 3], 'No', 'Via bank transfer', 'None', 'Paid at bank, lottery shop or app', 'Brazilian payment slip with a due date; reaches the unbanked, but many are never paid.', { prof: 'voucher60' }),
+  oxxo: m('OXXO', 'cash', [1, 3], 'No', 'Via bank transfer', 'None', 'Pay in store with a reference', "Cash at Mexico's 20,000+ OXXO stores; the voucher expires after a set number of days.", { prof: 'voucher65' }),
+  konbini: m('Konbini', 'cash', [1, 3], 'No', 'Manual', 'None', 'Pay at counter or kiosk', 'Pay at 7-Eleven, Lawson, FamilyMart and other Japanese convenience stores before the voucher expires.', { prof: 'voucher75' }),
+  efecty: m('Efecty / Baloto', 'cash', [1, 3], 'No', 'Manual', 'None', 'Pay at agent with reference', 'Colombian cash networks with thousands of agents.', { prof: 'voucher65' }),
+  rapipago: m('Rapipago / Pago Fácil', 'cash', [1, 3], 'No', 'Manual', 'None', 'Pay at agent with barcode', 'Argentine cash payment networks.', { prof: 'voucher65' }),
+  fawry: m('Fawry', 'cash', [1, 2], 'No', 'Manual', 'None', 'Pay at outlet or in app with reference', "Egypt's bill and e-commerce payment network, with a vast agent footprint.", { prof: 'voucher75' }),
+  indomaret: m('Indomaret / Alfamart', 'cash', [1, 3], 'No', 'Manual', 'None', 'Pay at store with code', 'Cash payments at Indonesian convenience chains.', { prof: 'voucher65' }),
+  ph_otc: m('7-Eleven / Cebuana (OTC)', 'cash', [1, 3], 'No', 'Manual', 'None', 'Pay at counter with reference', 'Over-the-counter cash payments in the Philippines.', { prof: 'voucher65' }),
+  cod: m('Cash on delivery', 'cash', [3, 14], 'No', 'Manual', 'None', 'Pay the courier', 'Still significant in parts of the Middle East, South and South-East Asia, with high refusal and return rates.', { prof: 'cod' }),
+  klarna: m('Klarna', 'bnpl', [1, 7], 'Limited', 'Full & partial', 'Klarna dispute process', 'Klarna credit check', 'Pay in 3, pay in 30 days or financing. Very strong in Sweden, Germany, the UK and the US. UK deferred-payment BNPL comes under FCA regulation from July 2026.', { rev: [.3, 120, 'Provider disputes'] }),
+  clearpay: m('Afterpay / Clearpay', 'bnpl', [1, 3], 'No', 'Full & partial', 'Provider disputes', 'Afterpay credit check', 'Pay in 4 instalments; born in Australia, big in the US and UK (as Clearpay).', { rev: [.3, 120, 'Provider disputes'] }),
+  affirm: m('Affirm', 'bnpl', [1, 3], 'No', 'Full & partial', 'Provider disputes', 'Soft credit check', 'US pay-over-time leader for larger baskets, also in Canada and the UK.'),
+  tabby: m('Tabby / Tamara', 'bnpl', [1, 7], 'No', 'Full & partial', 'Provider disputes', 'Provider check', 'Gulf BNPL leaders in Saudi Arabia and the UAE, including Sharia-compliant options.'),
+  scalapay: m('Scalapay', 'bnpl', [1, 3], 'No', 'Full & partial', 'Provider disputes', 'Provider check', 'Italian pay-in-3 leader, popular in fashion and beauty.'),
+  paypo: m('PayPo', 'bnpl', [1, 3], 'No', 'Full & partial', 'Provider disputes', 'Provider check', 'Polish buy now, pay later (pay in 30 days or instalments).'),
+  atome: m('Atome', 'bnpl', [1, 3], 'No', 'Full & partial', 'Provider disputes', 'Provider check', 'South-East Asian pay-in-3 provider.')
+};
+const C = (name, reg, cur, grid, notes, methods) => ({ name, reg, cur, grid, notes, methods });
+const CT = {
+  CA: C('Canada', 'Americas', 'CAD', [2, 1], 'Credit cards lead online; Interac dominates debit in store. PAD for subscriptions.', [['card', 'D'], ['interac_d', 'C'], ['interac_et', 'C'], ['paypal', 'M'], ['apple_pay', 'C'], ['pad_ca', 'M'], ['affirm', 'N']]),
+  US: C('United States', 'Americas', 'USD', [2, 2], 'Credit cards and rewards drive behaviour. No SCA mandate, so fraud screening carries more weight. ACH dominates bills and payroll.', [['card', 'D'], ['amex', 'M'], ['apple_pay', 'M'], ['paypal', 'M'], ['google_pay', 'C'], ['venmo', 'C'], ['cashapp', 'C'], ['affirm', 'C'], ['klarna', 'C'], ['clearpay', 'C'], ['ach', 'M'], ['rtp_us', 'N']]),
+  MX: C('Mexico', 'Americas', 'MXN', [2, 3], 'Meses sin intereses (interest-free instalments) are expected on credit cards. OXXO cash still matters for the unbanked.', [['card', 'D'], ['oxxo', 'M'], ['spei', 'M'], ['mercadopago', 'C'], ['paypal', 'C']]),
+  CO: C('Colombia', 'Americas', 'COP', [3, 5], 'PSE is the go-to non-card method; Nequi is huge; Bre-B instant payments rolling out.', [['card', 'M'], ['pse', 'M'], ['nequi', 'C'], ['efecty', 'C'], ['breb', 'N'], ['mercadopago', 'N']]),
+  BR: C('Brazil', 'Americas', 'BRL', [4, 6], 'Pix overtook cards. Credit-card instalments (parcelado) are standard, and the CPF tax ID is usually required at checkout.', [['pix', 'D'], ['card', 'M'], ['elo', 'C'], ['boleto', 'C'], ['mercadopago', 'C'], ['paypal', 'N']]),
+  AR: C('Argentina', 'Americas', 'ARS', [4, 8], 'Instalments (cuotas) are common. High inflation makes fast settlement and pricing rules important.', [['card', 'D'], ['mercadopago', 'M'], ['rapipago', 'C']]),
+  GB: C('United Kingdom', 'Europe', 'GBP', [8, 1], 'Debit cards dominate. Pay by Bank is growing through open banking, and Direct Debit is the default for recurring bills. SCA applies to most online card payments.', [['card', 'D'], ['apple_pay', 'M'], ['google_pay', 'C'], ['paypal', 'M'], ['bacs', 'M'], ['pbb_uk', 'C'], ['klarna', 'C'], ['clearpay', 'C'], ['amex', 'N']]),
+  NL: C('Netherlands', 'Europe', 'EUR', [9, 1], 'iDEAL handles most online payments, with the move to Wero under way. Cards matter less than in most of Europe.', [['ideal', 'D'], ['card', 'C'], ['paypal', 'M'], ['klarna', 'C'], ['sepa_dd', 'M'], ['apple_pay', 'C'], ['wero', 'N']]),
+  SE: C('Sweden', 'Europe', 'SEK', [10, 0], 'Home of Swish and Klarna. BankID underpins authentication, and cash use is very low.', [['swish', 'D'], ['card', 'M'], ['klarna', 'M'], ['trustly', 'C'], ['apple_pay', 'C'], ['autogiro', 'M']]),
+  PL: C('Poland', 'Europe', 'PLN', [11, 1], 'BLIK leads online, with pay-by-link (Przelewy24, PayU) a close second.', [['blik', 'D'], ['p24', 'M'], ['card', 'M'], ['paypo', 'C'], ['google_pay', 'C']]),
+  BE: C('Belgium', 'Europe', 'EUR', [8, 2], 'Bancontact is on nearly every Belgian debit card and leads online.', [['bancontact', 'D'], ['card', 'M'], ['paypal', 'C'], ['sepa_dd', 'C'], ['apple_pay', 'C']]),
+  DE: C('Germany', 'Europe', 'EUR', [9, 2], 'Germans favour PayPal, invoice (Rechnung) and direct debit over cards. giropay closed in 2024.', [['paypal', 'D'], ['klarna', 'M'], ['sepa_dd', 'M'], ['card', 'M'], ['apple_pay', 'C'], ['wero', 'N']]),
+  FR: C('France', 'Europe', 'EUR', [7, 2], 'CB co-badged cards dominate. Wero replaced Paylib in 2024, and pay in 3 or 4 instalments is popular.', [['cb', 'D'], ['card', 'D'], ['paypal', 'M'], ['apple_pay', 'C'], ['sepa_dd', 'C'], ['klarna', 'C'], ['wero', 'N']]),
+  PT: C('Portugal', 'Europe', 'EUR', [6, 3], 'MB WAY and Multibanco references sit alongside cards.', [['mbway', 'M'], ['multibanco', 'M'], ['card', 'M'], ['paypal', 'C'], ['sepa_dd', 'C']]),
+  ES: C('Spain', 'Europe', 'EUR', [7, 3], 'Cards lead; Bizum is near-universal for P2P and growing at checkout.', [['card', 'D'], ['bizum', 'M'], ['paypal', 'M'], ['apple_pay', 'C'], ['sepa_dd', 'C']]),
+  IT: C('Italy', 'Europe', 'EUR', [9, 3], 'Cards (including prepaid) and PayPal lead; Satispay and Scalapay are local favourites.', [['card', 'D'], ['paypal', 'M'], ['satispay', 'C'], ['scalapay', 'C'], ['apple_pay', 'C'], ['sepa_dd', 'C']]),
+  TR: C('Türkiye', 'Europe', 'TRY', [11, 3], 'Credit-card instalments (taksit) are central; Troy is the domestic scheme.', [['card', 'D'], ['troy', 'C'], ['fast_tr', 'C']]),
+  EG: C('Egypt', 'Middle East & Africa', 'EGP', [11, 4], 'Cash on delivery and Fawry remain big; InstaPay and wallets are growing fast.', [['cod', 'D'], ['card', 'M'], ['meeza', 'C'], ['fawry', 'M'], ['instapay_eg', 'C'], ['vfcash', 'C']]),
+  SA: C('Saudi Arabia', 'Middle East & Africa', 'SAR', [12, 5], 'mada debit dominates, Apple Pay is huge, and BNPL (Tabby, Tamara) is widely used.', [['mada', 'D'], ['apple_pay', 'M'], ['card', 'M'], ['tabby', 'M'], ['stcpay', 'C'], ['sadad', 'C'], ['cod', 'C']]),
+  AE: C('UAE', 'Middle East & Africa', 'AED', [13, 5], 'Cards and Apple Pay dominate; BNPL is popular; cash on delivery persists.', [['card', 'D'], ['apple_pay', 'M'], ['tabby', 'M'], ['cod', 'C'], ['paypal', 'N']]),
+  NG: C('Nigeria', 'Middle East & Africa', 'NGN', [9, 6], 'Bank transfers and cards via local PSPs (Paystack, Flutterwave); USSD for feature phones.', [['ng_transfer', 'D'], ['card', 'M'], ['verve', 'M'], ['ussd', 'C'], ['ng_wallet', 'C']]),
+  KE: C('Kenya', 'Middle East & Africa', 'KES', [12, 7], 'M-Pesa is the default for almost everyone; cards are secondary.', [['mpesa', 'D'], ['card', 'C'], ['pesalink', 'N']]),
+  ZA: C('South Africa', 'Middle East & Africa', 'ZAR', [10, 9], 'Cards lead; instant EFT and debit orders (DebiCheck) for recurring.', [['card', 'D'], ['za_eft', 'M'], ['za_do', 'M'], ['apple_pay', 'C']]),
+  IN: C('India', 'Asia-Pacific', 'INR', [15, 5], 'UPI dominates. Recurring card payments need e-mandates under RBI rules, and cash on delivery is still used.', [['upi', 'D'], ['card', 'M'], ['rupay', 'C'], ['netbanking', 'C'], ['nach', 'M'], ['cod', 'C']]),
+  CN: C('China', 'Asia-Pacific', 'CNY', [17, 3], 'Alipay and WeChat Pay dominate; foreign merchants usually need a cross-border acquirer.', [['alipay', 'D'], ['wechat', 'D'], ['unionpay', 'M']]),
+  KR: C('South Korea', 'Asia-Pacific', 'KRW', [19, 3], 'Local cards via local gateways plus Kakao, Naver and Toss wallets; foreign cards often fail on local checkouts.', [['kr_card', 'D'], ['kakaopay', 'M'], ['naverpay', 'M'], ['tosspay', 'C'], ['card', 'N']]),
+  JP: C('Japan', 'Asia-Pacific', 'JPY', [20, 3], 'Cards (including JCB) lead online; konbini and bank transfer serve cash-preferring buyers; PayPay is huge in store.', [['card', 'D'], ['jcb', 'M'], ['konbini', 'M'], ['paypay', 'M'], ['furikomi', 'C'], ['apple_pay', 'C']]),
+  TH: C('Thailand', 'Asia-Pacific', 'THB', [17, 6], 'PromptPay QR is everywhere; cards and TrueMoney follow.', [['promptpay', 'D'], ['card', 'M'], ['truemoney', 'C']]),
+  VN: C('Vietnam', 'Asia-Pacific', 'VND', [18, 6], 'VietQR bank transfers and MoMo lead; cash on delivery is still notable.', [['vietqr', 'D'], ['momo', 'M'], ['card', 'C'], ['cod', 'C']]),
+  PH: C('Philippines', 'Asia-Pacific', 'PHP', [19, 6], 'GCash and Maya dominate; over-the-counter cash serves the unbanked.', [['gcash', 'D'], ['maya', 'M'], ['card', 'C'], ['instapay_ph', 'C'], ['ph_otc', 'C']]),
+  SG: C('Singapore', 'Asia-Pacific', 'SGD', [17, 7], 'Cards lead, with PayNow, GrabPay and BNPL such as Atome alongside.', [['card', 'D'], ['paynow', 'M'], ['grabpay', 'C'], ['apple_pay', 'C'], ['atome', 'C']]),
+  ID: C('Indonesia', 'Asia-Pacific', 'IDR', [18, 8], 'QRIS, e-wallets and virtual accounts lead; card penetration is low.', [['qris', 'D'], ['id_wallet', 'M'], ['va_id', 'M'], ['card', 'C'], ['indomaret', 'C']]),
+  AU: C('Australia', 'Asia-Pacific', 'AUD', [20, 9], 'Cards via eftpos, Visa and Mastercard with least-cost routing; Afterpay was born here; PayTo is replacing direct debit over time.', [['card', 'D'], ['eftpos', 'M'], ['apple_pay', 'M'], ['clearpay', 'M'], ['payid', 'C'], ['bpay', 'C'], ['becs', 'M'], ['paypal', 'C']])
+};
+const REGIONS = ['Americas', 'Europe', 'Middle East & Africa', 'Asia-Pacific'];
+const P = (...rows) => rows.map(([c, l, p, k]) => ({ c, l, p, k }));
+const PROF = {
+  card: P(['ok', 'Approved', 86], ['51', '51 Insufficient funds', 4.5, 'soft'], ['05', '05 Do not honour', 3.5, 'soft'], ['3ds', '3DS / SCA abandoned or failed', 3, 'abandon'], ['fraud', 'Blocked by fraud rules', 1.2, 'hard'], ['54', '54 Expired / 14 invalid card', 1, 'hard'], ['91', '91 Issuer unavailable', .8, 'soft']),
+  wallet: P(['ok', 'Approved', 92], ['cancel', 'User cancelled in wallet', 4, 'abandon'], ['funds', 'Insufficient balance / card declined', 2, 'soft'], ['risk', 'Wallet risk decline', 1, 'hard'], ['timeout', 'Timeout', 1, 'soft']),
+  rtp: P(['ok', 'Paid', 94], ['aband', 'Abandoned in bank app', 3, 'abandon'], ['limit', 'Over bank daily limit', 1, 'hard'], ['pend', 'Pending / timeout', 1, 'soft'], ['bene', 'Wrong key or beneficiary', .5, 'hard'], ['bank', 'Bank unavailable', .5, 'soft']),
+  debit: P(['ok', 'Collected', 96.5], ['funds', 'Insufficient funds', 2, 'soft'], ['closed', 'Account closed', .6, 'hard'], ['mandate', 'No mandate / cancelled', .5, 'hard'], ['other', 'Other / not specified', .4, 'soft']),
+  sepa: P(['ok', 'Collected', 96.4], ['AM04', 'AM04 Insufficient funds', 2, 'soft'], ['AC04', 'AC04 Account closed', .5, 'hard'], ['MD01', 'MD01 No valid mandate', .3, 'hard'], ['AC06', 'AC06 Account blocked', .2, 'hard'], ['MS02', 'MS02 Refused by debtor', .4, 'hard'], ['MS03', 'MS03 Reason not specified', .2, 'soft']),
+  bacs: P(['ok', 'Collected', 96.8], ['0', 'ARUDD 0 Refer to payer', 2, 'soft'], ['1', 'ARUDD 1 Instruction cancelled', .6, 'hard'], ['B', 'ARUDD B Account closed', .4, 'hard'], ['5', 'ARUDD 5 No account', .1, 'hard'], ['6', 'ARUDD 6 No instruction', .1, 'hard']),
+  ach: P(['ok', 'Settled', 96.9], ['R01', 'R01 Insufficient funds', 2, 'soft'], ['R02', 'R02 Account closed', .5, 'hard'], ['R03', 'R03 No account / unable to locate', .2, 'hard'], ['R04', 'R04 Invalid account number', .1, 'hard'], ['R08', 'R08 Payment stopped', .2, 'hard'], ['R09', 'R09 Uncollected funds', .1, 'soft']),
+  bnpl: P(['ok', 'Approved', 80], ['decl', 'Declined by provider', 14, 'hard'], ['aband', 'Abandoned at sign-up', 6, 'abandon']),
+  bank: P(['ok', 'Paid', 88], ['aband', 'Abandoned at bank login', 9, 'abandon'], ['decl', 'Declined / expired', 3, 'hard']),
+  transfer: P(['ok', 'Paid', 85], ['unpaid', 'Not paid before expiry', 12, 'abandon'], ['mismatch', 'Wrong amount or reference', 3, 'soft']),
+  mobile: P(['ok', 'Paid', 86], ['timeout', 'PIN prompt timed out', 8, 'abandon'], ['funds', 'Insufficient balance', 4, 'soft'], ['cancel', 'Wrong PIN / cancelled', 2, 'abandon']),
+  cash: P(['ok', 'Paid', 70], ['unpaid', 'Voucher expired unpaid', 30, 'abandon']),
+  voucher60: P(['ok', 'Paid', 60], ['unpaid', 'Expired unpaid', 40, 'abandon']), voucher65: P(['ok', 'Paid', 65], ['unpaid', 'Expired unpaid', 35, 'abandon']),
+  voucher75: P(['ok', 'Paid', 75], ['unpaid', 'Expired unpaid', 25, 'abandon']), voucher80: P(['ok', 'Paid', 80], ['unpaid', 'Expired unpaid', 20, 'abandon']),
+  cod: P(['ok', 'Paid on delivery', 82], ['refused', 'Refused / not home', 18, 'abandon'])
+};
+PROF.upi = P(['ok', 'Paid', 92], ['aband', 'Collect request expired / abandoned', 3.5, 'abandon'], ['pend', 'Pending / deemed status', 2, 'soft'], ['limit', 'Over UPI limit', 1, 'hard'], ['pin', 'Wrong UPI PIN', .8, 'abandon'], ['bank', 'Remitter bank down', .7, 'soft']);
+M.upi.prof = 'upi'; M.mpesa.prof = 'mobile';
+const REV = { card: [.5, 120, 'Chargebacks'], bnpl: [.3, 120, 'Provider disputes'] };
+const profOf = k => PROF[M[k].prof] || PROF[M[k].t] || PROF.card;
+const revOf = k => M[k].rev || REV[M[k].t] || [0, 0, ''];
+const usedIn = k => Object.entries(CT).filter(([, c]) => c.methods.some(([mk]) => mk === k)).map(([cc]) => cc);
+const realtime = k => M[k].t === 'rtp' || (M[k].s[1] === 0);
+const recurringOK = k => /^yes/i.test(M[k].rec);
+
+const APPDEF = () => ({
+  sel: 'GB', lens: 'dom', q: '', regF: 'all',
+  cmp: ['GB', 'DE', 'BR'], typeF: 'all', capF: 'all', mq: '',
+  markets: ['GB', 'DE', 'NL', 'FR', 'US'], model: 'oneoff',
+  simC: 'BR', simN: 10000, aov: 50, retry: true, retryRate: 30, fallback: true, fbRate: 25, fbSucc: 90, horizon: 14, shares: {},
+  fees: { card: 1.6, wallet: 2.4, rtp: .6, debit: .5, bnpl: 4.5, cash: 2.5, bank: 1, transfer: .5, mobile: 1.5 }
+});
+
+const LENS = {
+  dom: ['Leading method type', c => { const top = [...c.methods].sort((a, b) => ROLE[b[1]][1] - ROLE[a[1]][1])[0]; return { color: TYPES[M[top[0]].t][1], label: M[top[0]].n }; }, () => Object.entries(TYPES).map(([, [l, c]]) => [c, l])],
+  rtp: ['Real-time payments at checkout', c => { const r = Math.max(0, ...c.methods.filter(([k]) => realtime(k)).map(([, ro]) => ROLE[ro][1])); return { color: ['#3a4660', '#6b7a94', '#ffb648', '#7fdc9f', '#3fd18b'][r], label: ['none', 'niche', 'common', 'major', 'dominant'][r] }; }, () => [['#3fd18b', 'Dominant'], ['#7fdc9f', 'Major'], ['#ffb648', 'Common'], ['#6b7a94', 'Niche'], ['#3a4660', 'None listed']]],
+  cards: ['How central cards are', c => { const r = Math.max(0, ...c.methods.filter(([k]) => M[k].t === 'card').map(([, ro]) => ROLE[ro][1])); return { color: ['#3a4660', '#6b7a94', '#8fb3e8', '#5aa2ff', '#2f6fd6'][r], label: ['none', 'niche', 'common', 'major', 'dominant'][r] }; }, () => [['#2f6fd6', 'Dominant'], ['#5aa2ff', 'Major'], ['#8fb3e8', 'Common'], ['#6b7a94', 'Niche']]],
+  cash: ['Cash & voucher relevance', c => { const r = Math.max(0, ...c.methods.filter(([k]) => M[k].t === 'cash').map(([, ro]) => ROLE[ro][1])); return { color: ['#2b3650', '#6b7a94', '#ffd98a', '#ffc857', '#ff9f1c'][r], label: ['none', 'niche', 'common', 'major', 'dominant'][r] }; }, () => [['#ff9f1c', 'Dominant'], ['#ffc857', 'Major'], ['#ffd98a', 'Common'], ['#2b3650', 'Not significant']]],
+  bnpl: ['Buy now, pay later presence', c => { const r = Math.max(0, ...c.methods.filter(([k]) => M[k].t === 'bnpl').map(([, ro]) => ROLE[ro][1])); return { color: ['#2b3650', '#8a5a7a', '#ffa9cf', '#ff7ab6', '#e0458b'][r], label: ['none', 'niche', 'common', 'major', 'dominant'][r] }; }, () => [['#ff7ab6', 'Major'], ['#ffa9cf', 'Common'], ['#8a5a7a', 'Niche'], ['#2b3650', 'None listed']]],
+  rec: ['Best recurring option', c => { const r = [...c.methods].filter(([k]) => recurringOK(k)).sort((a, b) => ROLE[b[1]][1] - ROLE[a[1]][1]); const t = r.find(([k]) => M[k].t === 'debit') || r[0]; return t ? { color: TYPES[M[t[0]].t][1], label: M[t[0]].n } : { color: '#3a4660', label: 'cards only' }; }, () => [['#b48cff', 'Direct debit'], ['#5aa2ff', 'Card on file'], ['#3fd18b', 'Real-time mandate'], ['#ff8a4c', 'Wallet agreement']]]
+};
+
+function methodCard(k, role, open) {
+  const x = M[k], [tl, tc] = TYPES[x.t], rv = revOf(k);
+  return `<div class="meth"><div class="top"><span><span class="tdot" style="background:${tc}"></span><b>${esc(x.n)}</b></span><span class="row">${role ? `<span class="pill ${ROLE[role][2]}">${ROLE[role][0]}</span>` : ''}<span class="pill">${esc(tl)}</span></span></div>
+  <p>${esc(x.d)}</p>${open ? `<div class="caps"><span class="pill">${x.s[1] === 0 ? 'Settles same day' : `Settles T+${x.s[0]}${x.s[1] !== x.s[0] ? '–' + x.s[1] : ''} days`}</span><span class="pill ${recurringOK(k) ? 'g' : ''}">Recurring: ${esc(x.rec)}</span><span class="pill">Refunds: ${esc(x.ref)}</span><span class="pill">${esc(x.auth)}</span><span class="pill ${/none/i.test(x.dis) ? 'g' : 'w'}">Disputes: ${esc(x.dis)}</span>${rv[0] ? `<span class="pill w">≈${rv[0]}% later reversed</span>` : ''}</div>` : ''}</div>`;
+}
+
+const APPX = {
+  key: 'payments-explorer.v1', file: 'payments-explorer', title: 'Payment Methods Explorer', sub: 'GLOBAL · 33 MARKETS · v1.0', logo: '⇄',
+  def: APPDEF,
+  tabs: [['home', 'Start here', 'What this is & how to use it'], ['map', 'World map', 'Pick a lens, click a market'], ['compare', 'Country compare', 'Up to three side by side'], ['methods', 'Method catalogue', 'Every method, filterable'], ['plan', 'Checkout planner', 'Which methods for my markets?'], ['sim', 'Failure simulator', 'Declines, retries, settlement'], ['codes', 'Decline & return codes', 'Cards, SEPA, ACH, Bacs'], ['glossary', 'Glossary', 'Payments jargon, decoded']],
+  lists: {},
+  build() {
+    const opts = Object.entries(CT).sort((a, b) => a[1].name.localeCompare(b[1].name)).map(([k, c]) => [k, c.name]);
+    return `
+<section class="tab" id="t-home">
+  <div class="hero"><div class="eyebrow">33 markets · ${Object.keys(M).length} payment methods · runs in your browser</div>
+    <h1>The world doesn't pay <em>the way you do.</em></h1>
+    <p>A Dutch shopper expects iDEAL, a Brazilian expects Pix, a Kenyan expects M-Pesa and a German may well prefer an invoice. Offer only cards and you lose sales before checkout even starts. Explore how each market pays, plan the methods your checkout needs, and simulate what really happens after a customer clicks "pay".</p>
+    <div class="row" style="margin-top:14px"><button class="btn pri" data-go="map">Open the world map →</button><button class="btn" data-go="plan">Plan my checkout</button><button class="btn" data-go="sim">Run the failure simulator</button></div></div>
+  <h3>What's inside</h3>
+  <div class="steps">${[['map', 'World map', 'A tile map of 33 markets. Switch the lens (leading method, real-time payments, cash, cards, BNPL, recurring) and click any market for its full payment mix.'], ['compare', 'Country compare', 'Put up to three markets side by side: methods by importance, instant rails, recurring options, cash and BNPL.'], ['methods', 'Method catalogue', 'Every method with settlement time, recurring support, refunds, disputes and authentication. Filter by type or capability.'], ['plan', 'Checkout planner', 'Pick your markets and business model. Get the shortlist of methods to integrate, ranked by reach, with gaps flagged.'], ['sim', 'Failure simulator', 'Send 10,000 payments through a market. See declines by real reason code, what retries and fallbacks recover, fees, later reversals and when the money lands.'], ['codes', 'Codes reference', 'Card decline codes, SEPA R-transactions, ACH returns and Bacs ARUDD codes, with what to do about each.']].map(([k, t, d], i) => `<div class="step" data-go="${k}"><div class="n">${String(i + 1).padStart(2, '0')}</div><b>${t}</b><p>${d}</p></div>`).join('')}</div>
+  <div class="cols3" style="margin-top:18px">
+    <div class="panel"><h3 style="margin-top:0">How to read it</h3><ul><li><b>Dominant</b>: most shoppers expect it; leaving it out costs real sales.</li><li><b>Major</b>: a large minority uses it; strongly recommended.</li><li><b>Common</b>: worth adding once the basics are in place.</li><li><b>Niche / emerging</b>: small today, or new and growing.</li></ul></div>
+    <div class="panel"><h3 style="margin-top:0">Who it's for</h3><ul><li>Founders and product teams expanding abroad.</li><li>Payments and checkout engineers designing retry and fallback logic.</li><li>Finance teams forecasting settlement timing and reversals.</li><li>Anyone curious why paying online feels so different around the world.</li></ul></div>
+    <div class="panel"><h3 style="margin-top:0">Limits</h3><ul><li>Roles are indicative, drawn from public market reports and scheme information, and markets change fast.</li><li>Simulator rates are illustrative assumptions, not any provider's data. Edit them to match your own.</li><li>Always confirm availability, pricing and rules with your payment provider before you build.</li></ul></div>
+  </div>
+</section>
+
+<section class="tab" id="t-map">
+  ${head(1, 'World map', 'Each tile is a market, placed roughly where it sits on the globe. Change the lens to colour the map by a different question.')}
+  <div class="panel"><div class="between"><div class="row">${Object.entries(LENS).map(([k, [l]]) => `<button class="chip" data-set='{"lens":"${k}"}' data-lens="${k}">${l}</button>`).join('')}</div>
+    <div class="row"><input data-k="q" placeholder="Find a country or method…" style="width:220px" type="text"><select data-k="regF" style="width:auto"><option value="all">All regions</option>${REGIONS.map(r => `<option>${r}</option>`).join('')}</select></div></div>
+    <div id="mapGrid"></div><div class="legendrow" id="mapLegend"></div></div>
+  <div class="panel" id="mapDetail"></div>
+</section>
+
+<section class="tab" id="t-compare">
+  ${head(2, 'Country compare', 'Choose up to three markets to see their payment mix side by side.')}
+  <div class="panel"><div class="fg">${[0, 1, 2].map(i => fld(`cmp.${i}`, 'Market ' + (i + 1), { type: 'sel', opts: [['', '—'], ...opts] })).join('')}</div></div>
+  <div id="cmpOut" style="margin-top:16px"></div>
+</section>
+
+<section class="tab" id="t-methods">
+  ${head(3, 'Method catalogue', 'Every payment method in the explorer. Filter by type or by what it can do.')}
+  <div class="panel"><div class="row" style="margin-bottom:8px"><button class="chip" data-set='{"typeF":"all"}' data-tf="all">All types</button>${Object.entries(TYPES).map(([k, [l, c]]) => `<button class="chip" data-set='{"typeF":"${k}"}' data-tf="${k}"><span class="tdot" style="background:${c}"></span>${l}</button>`).join('')}</div>
+    <div class="row"><button class="chip" data-set='{"capF":"all"}' data-cf="all">Any capability</button><button class="chip" data-set='{"capF":"rt"}' data-cf="rt">Settles same day</button><button class="chip" data-set='{"capF":"rec"}' data-cf="rec">Supports recurring</button><button class="chip" data-set='{"capF":"nodis"}' data-cf="nodis">No chargebacks</button><button class="chip" data-set='{"capF":"global"}' data-cf="global">Used in 5+ markets</button><input type="text" data-k="mq" placeholder="Search…" style="width:200px;margin-left:auto"></div>
+    <div id="methOut" style="margin-top:10px"></div></div>
+</section>
+
+<section class="tab" id="t-plan">
+  ${head(4, 'Checkout planner', 'Pick the markets you sell into. The planner ranks the methods worth integrating and shows what each market still lacks.')}
+  <div class="panel"><div class="fg">${fld('model', 'Business model', { type: 'sel', opts: [['oneoff', 'One-off purchases (e-commerce)'], ['subs', 'Subscriptions / recurring billing']] })}</div>
+    <h3>Your markets</h3><div class="chips" id="mkChips"></div>
+    <div class="row" style="margin-top:8px"><button class="btn sm" data-set='{"markets":["GB","DE","NL","FR","ES","IT","BE","PL","SE","PT"]}'>Europe pack</button><button class="btn sm" data-set='{"markets":["US","CA","MX","BR","CO","AR"]}'>Americas pack</button><button class="btn sm" data-set='{"markets":["IN","CN","JP","KR","SG","ID","TH","VN","PH","AU"]}'>Asia-Pacific pack</button><button class="btn sm" data-set='{"markets":["SA","AE","EG","NG","KE","ZA"]}'>MEA pack</button><button class="btn sm" data-set='{"markets":[]}'>Clear</button></div></div>
+  <div id="planOut" style="margin-top:16px"></div>
+</section>
+
+<section class="tab" id="t-sim">
+  ${head(5, 'Failure & settlement simulator', 'What happens to 10,000 payments in one market: approvals, declines by reason, what retries and fallbacks recover, fees, reversals and when the cash lands.')}
+  <div class="grid2"><div>
+    ${fs('Scenario', fld('simC', 'Market', { type: 'sel', opts }) + fld('simN', 'Payments attempted') + fld('aov', 'Average order (£ equivalent)') + fld('horizon', 'Cash-flow view (days)'))}
+    ${fs('Recovery strategy', fld('retry', 'Retry soft declines', { type: 'chk' }) + fld('retryRate', 'Retries that succeed %', { show: 'retry=true' }) + fld('fallback', 'Offer another method after a failure', { type: 'chk' }) + fld('fbRate', 'Shoppers who try another method %', { show: 'fallback=true' }) + fld('fbSucc', 'Success rate of that second try %', { show: 'fallback=true' }))}
+    ${fs('Indicative fees by method type (% of order)', Object.keys(TYPES).map(k => fld('fees.' + k, TYPES[k][0])).join(''))}
+    <fieldset><legend>Method mix in this market</legend><div id="simMix"></div><p class="hint">Default shares come from each method's role (dominant, major, common, niche). Type your own percentages; they're rescaled to 100%.</p><button class="btn sm" id="simReset">Reset mix to defaults</button></fieldset>
+  </div><div id="simOut"></div></div>
+</section>
+
+<section class="tab" id="t-codes">
+  ${head(6, 'Decline & return codes', 'The reasons behind failed payments on the main rails, and what a well-built checkout or billing system does about each.')}
+  <div id="codesOut"></div>
+</section>
+
+<section class="tab" id="t-glossary">
+  ${head(7, 'Glossary', 'Payments jargon in plain English.')}
+  <div class="panel" id="glossOut"></div>
+</section>`;
+  },
+  render: {}
+};
+
+/* ---------- map ---------- */
+APPX.render.map = () => {
+  const L = LENS[S.lens] || LENS.dom, q = (S.q || '').toLowerCase().trim();
+  $$('[data-lens]').forEach(b => b.classList.toggle('on', b.dataset.lens === S.lens));
+  let cells = '';
+  const pos = {}; Object.entries(CT).forEach(([k, c]) => pos[c.grid[0] + ',' + c.grid[1]] = k);
+  const labels = { '0,0': 'AMERICAS', '6,0': 'EUROPE', '9,5': 'AFRICA', '12,4': '', '14,2': 'ASIA-PACIFIC', '11,6': 'MIDDLE EAST' };
+  for (let r = 0; r < 10; r++) for (let c = 0; c < 23; c++) {
+    const k = pos[c + ',' + r];
+    if (!k) { cells += `<div class="reg">${labels[c + ',' + r] || ''}</div>`; continue; }
+    const ct = CT[k], v = L[1](ct);
+    const hit = (!q || ct.name.toLowerCase().includes(q) || k.toLowerCase() === q || ct.methods.some(([mk]) => M[mk].n.toLowerCase().includes(q))) && (S.regF === 'all' || ct.reg === S.regF);
+    cells += `<div class="tile ${k === S.sel ? 'sel' : ''} ${hit ? '' : 'dim'}" style="background:${v.color}" data-set='{"sel":"${k}"}' title="${esc(ct.name)}: ${esc(v.label)}">${k}<small>${esc(v.label)}</small></div>`;
+  }
+  $('#mapGrid').innerHTML = `<div class="cart">${cells}</div>`;
+  $('#mapLegend').innerHTML = L[2]().map(([c, l]) => `<span><i style="background:${c}"></i>${esc(l)}</span>`).join('');
+  const ct = CT[S.sel] || CT.GB, ms = [...ct.methods].sort((a, b) => ROLE[b[1]][1] - ROLE[a[1]][1]);
+  const rt = ms.filter(([k]) => realtime(k)), rec = ms.filter(([k]) => recurringOK(k));
+  $('#mapDetail').innerHTML = `<div class="between"><div><div class="eyebrow">${esc(ct.reg)} · ${ct.cur}</div><h2>${esc(ct.name)}</h2></div><div class="row"><button class="btn sm" data-set='{"simC":"${S.sel}"}' data-go="sim">Simulate this market</button><button class="btn sm" id="addCmp">Add to compare</button><button class="btn sm" id="addPlan">${S.markets.includes(S.sel) ? 'In your plan ✓' : 'Add to checkout plan'}</button></div></div>
+    <p>${esc(ct.notes)}</p>
+    <div class="cards">${stat('Methods listed', ms.length, `${ms.filter(x => x[1] === 'D' || x[1] === 'M').length} dominant or major`)}${stat('Instant payment rail', rt.length ? esc(M[rt[0][0]].n) : '–', rt.length ? ROLE[rt[0][1]][0] : 'none listed', rt.length ? 'good' : '')}${stat('Recurring billing', rec.length ? esc(M[(rec.find(([k]) => M[k].t === 'debit') || rec[0])[0]].n) : 'Cards only', 'best option')}${stat('Card role', ROLE[(ms.find(([k]) => M[k].t === 'card') || [0, 'N'])[1]][0], 'how central cards are')}</div>
+    ${ms.map(([k, r]) => methodCard(k, r, true)).join('')}`;
+  $('#addCmp').onclick = () => { if (!S.cmp.includes(S.sel)) { S.cmp = [S.sel, ...S.cmp].slice(0, 3); changed(); toast('Added to compare'); } };
+  $('#addPlan').onclick = () => { if (!S.markets.includes(S.sel)) { S.markets.push(S.sel); changed(); toast('Added to checkout plan'); } };
+};
+
+/* ---------- compare ---------- */
+APPX.render.compare = () => {
+  const cs = S.cmp.filter(k => CT[k]);
+  if (!cs.length) { $('#cmpOut').innerHTML = '<div class="panel"><p class="hint">Pick at least one market.</p></div>'; return; }
+  const rows = [
+    ['Currency', c => c.cur],
+    ['Leading method', c => M[[...c.methods].sort((a, b) => ROLE[b[1]][1] - ROLE[a[1]][1])[0][0]].n],
+    ['Card role', c => ROLE[(c.methods.find(([k]) => M[k].t === 'card') || [0, 'N'])[1]][0]],
+    ['Instant rail', c => { const r = c.methods.filter(([k]) => realtime(k)); return r.length ? r.map(([k, ro]) => `${M[k].n} (${ROLE[ro][0].toLowerCase()})`).join(', ') : '–'; }],
+    ['Recurring options', c => c.methods.filter(([k]) => recurringOK(k)).map(([k]) => M[k].n).join(', ') || '–'],
+    ['Cash & vouchers', c => c.methods.filter(([k]) => M[k].t === 'cash').map(([k]) => M[k].n).join(', ') || 'Not significant'],
+    ['Buy now, pay later', c => c.methods.filter(([k]) => M[k].t === 'bnpl').map(([k]) => M[k].n).join(', ') || 'None listed'],
+    ['Wallets', c => c.methods.filter(([k]) => M[k].t === 'wallet' || M[k].t === 'mobile').map(([k]) => M[k].n).join(', ') || '–']
+  ];
+  $('#cmpOut').innerHTML = `<div class="panel"><div class="wrap short"><table class="tbl"><thead><tr><th></th>${cs.map(k => `<th class="l">${esc(CT[k].name)}</th>`).join('')}</tr></thead><tbody>${rows.map(([l, f]) => `<tr><td class="l"><b>${l}</b></td>${cs.map(k => `<td class="t">${esc(f(CT[k]))}</td>`).join('')}</tr>`).join('')}</tbody></table></div></div>
+  <div class="cmpgrid" style="margin-top:16px">${cs.map(k => { const c = CT[k]; return `<div class="panel" style="margin:0"><div class="eyebrow">${esc(c.reg)}</div><h3 style="margin:2px 0 4px">${esc(c.name)}</h3><p class="hint">${esc(c.notes)}</p>${['D', 'M', 'C', 'N'].map(r => { const ms = c.methods.filter(x => x[1] === r); return ms.length ? `<div class="eyebrow" style="margin-top:8px">${ROLE[r][0]}</div>` + ms.map(([mk]) => methodCard(mk, null, false)).join('') : ''; }).join('')}</div>`; }).join('')}</div>`;
+};
+
+/* ---------- methods ---------- */
+APPX.render.methods = () => {
+  $$('[data-tf]').forEach(b => b.classList.toggle('on', b.dataset.tf === S.typeF)); $$('[data-cf]').forEach(b => b.classList.toggle('on', b.dataset.cf === S.capF));
+  const q = (S.mq || '').toLowerCase();
+  const list = Object.keys(M).filter(k => (S.typeF === 'all' || M[k].t === S.typeF) && (S.capF === 'all' || (S.capF === 'rt' && realtime(k)) || (S.capF === 'rec' && recurringOK(k)) || (S.capF === 'nodis' && /^none/i.test(M[k].dis)) || (S.capF === 'global' && usedIn(k).length >= 5)) && (!q || (M[k].n + ' ' + M[k].d).toLowerCase().includes(q)))
+    .sort((a, b) => usedIn(b).length - usedIn(a).length || M[a].n.localeCompare(M[b].n));
+  $('#methOut').innerHTML = `<p class="hint">${list.length} of ${Object.keys(M).length} methods.</p><div class="wrap"><table class="tbl"><thead><tr><th>Method</th><th class="l">Type</th><th class="l">Markets</th><th class="l">Settlement</th><th class="l">Recurring</th><th class="l">Refunds</th><th class="l">Disputes</th><th class="l">Authentication</th><th class="l">About</th></tr></thead><tbody>
+  ${list.map(k => { const x = M[k]; return `<tr><td class="l"><span class="tdot" style="background:${TYPES[x.t][1]}"></span><b>${esc(x.n)}</b></td><td class="l">${esc(TYPES[x.t][0])}</td><td class="t">${usedIn(k).map(c => `<span class="pill" style="cursor:pointer" data-set='{"sel":"${c}"}' data-go="map">${c}</span>`).join(' ')}</td><td class="l">${x.s[1] === 0 ? 'Same day' : `T+${x.s[0]}${x.s[1] !== x.s[0] ? '–' + x.s[1] : ''}`}</td><td class="t">${esc(x.rec)}</td><td class="t">${esc(x.ref)}</td><td class="t">${esc(x.dis)}</td><td class="t">${esc(x.auth)}</td><td class="t" style="min-width:320px">${esc(x.d)}</td></tr>`; }).join('')}</tbody></table></div>`;
+};
+
+/* ---------- planner ---------- */
+APPX.render.plan = () => {
+  $('#mkChips').innerHTML = Object.entries(CT).sort((a, b) => a[1].name.localeCompare(b[1].name)).map(([k, c]) => `<button class="chip ${S.markets.includes(k) ? 'on' : ''}" data-mk="${k}">${esc(c.name)}</button>`).join('');
+  $$('#mkChips [data-mk]').forEach(b => b.onclick = () => { const k = b.dataset.mk; S.markets = S.markets.includes(k) ? S.markets.filter(x => x !== k) : [...S.markets, k]; changed(); });
+  const mk = S.markets.filter(k => CT[k]);
+  if (!mk.length) { $('#planOut').innerHTML = '<div class="panel"><p class="hint">Choose at least one market.</p></div>'; return; }
+  const subs = S.model === 'subs';
+  const score = {};
+  mk.forEach(c => CT[c].methods.forEach(([k, r]) => { if (subs && !recurringOK(k)) return; (score[k] = score[k] || { s: 0, where: [] }).s += ROLE[r][1] ** 2; score[k].where.push([c, r]); }));
+  const ranked = Object.entries(score).sort((a, b) => b[1].s - a[1].s);
+  const tier = ([k, v]) => v.where.some(([, r]) => r === 'D' || r === 'M') ? 1 : 2;
+  const t1 = ranked.filter(x => tier(x) === 1), t2 = ranked.filter(x => tier(x) === 2);
+  // coverage: share of each market's weighted demand covered by tier 1
+  const cover = mk.map(c => { const tot = sum(CT[c].methods.filter(([k]) => !subs || recurringOK(k)), ([, r]) => ROLE[r][1] ** 2) || 1, got = sum(CT[c].methods.filter(([k]) => t1.some(([tk]) => tk === k) && (!subs || recurringOK(k))), ([, r]) => ROLE[r][1] ** 2); const gaps = CT[c].methods.filter(([k, r]) => (r === 'D' || r === 'M') && subs && !recurringOK(k)).map(([k]) => M[k].n); return { c, pct: got / tot * 100, gaps }; });
+  $('#planOut').innerHTML = `<div class="panel"><div class="reco"><div class="eyebrow">Integrate first · ${mk.length} market${mk.length > 1 ? 's' : ''}${subs ? ' · recurring-capable only' : ''}</div><div class="big">${t1.length} method${t1.length === 1 ? '' : 's'}</div><p>${t1.slice(0, 12).map(([k]) => esc(M[k].n)).join(' · ')}</p><p class="hint" style="margin:0">Every method here is dominant or major in at least one of your markets. A global payment provider usually covers cards, Apple Pay, Google Pay and PayPal in one integration; local methods often need a provider with local acquiring.</p></div>
+    <div class="wrap"><table class="tbl"><thead><tr><th>Method</th><th class="l">Type</th>${mk.map(c => `<th>${c}</th>`).join('')}<th>Reach score</th></tr></thead><tbody>
+    ${ranked.map(([k, v]) => `<tr class="${tier([k, v]) === 1 ? 'hl' : ''}"><td class="l"><span class="tdot" style="background:${TYPES[M[k].t][1]}"></span>${esc(M[k].n)}</td><td class="l">${esc(TYPES[M[k].t][0])}</td>${mk.map(c => { const r = (v.where.find(([cc]) => cc === c) || [])[1]; return `<td>${r ? `<span class="pill ${ROLE[r][2]}">${r === 'D' ? '●●●' : r === 'M' ? '●●' : r === 'C' ? '●' : '·'}</span>` : ''}</td>`; }).join('')}<td>${v.s}</td></tr>`).join('')}</tbody></table></div>
+    <p class="hint">●●● dominant · ●● major · ● common · · niche. Highlighted rows are first-wave integrations. Reach score weights each market equally.</p></div>
+  <div class="panel"><h3 style="margin-top:0">Coverage by market with the first wave</h3>${hbars(cover.map(x => [CT[x.c].name, x.pct, x.pct >= 90 ? 'var(--good)' : x.pct >= 70 ? 'var(--warn)' : 'var(--bad)']), 'var(--acc)', v => v.toFixed(0) + '%')}
+  ${subs ? (() => { const g = cover.filter(x => x.gaps.length); return g.length ? `<div class="warnbox"><b>Subscription gaps:</b> ${g.map(x => `${esc(CT[x.c].name)} relies on ${esc(x.gaps.join(', '))}, which can't easily bill repeatedly. Plan a card-on-file, direct debit or mandate alternative and an easy "pay this invoice" link.`).join(' ')}</div>` : '<div class="okbox">Every major method in your markets supports recurring billing in some form.</div>'; })() : ''}
+  ${t2.length ? `<h3>Second wave</h3><p>${t2.map(([k, v]) => `${esc(M[k].n)} <span class="hint">(${v.where.map(([c]) => c).join(', ')})</span>`).join(' · ')}</p>` : ''}
+  <h3>Checklist for these markets</h3><ul>${[mk.some(c => ['GB', 'NL', 'DE', 'FR', 'BE', 'ES', 'IT', 'PT', 'PL', 'SE'].includes(c)) ? '<li>Strong Customer Authentication applies to most European card payments: support 3-D Secure 2 and exemptions (low value, recurring, transaction risk analysis).</li>' : '', mk.includes('BR') ? '<li>Brazil: collect the CPF tax ID, offer instalments (parcelado) on cards, and show the Pix QR with a countdown.</li>' : '', mk.includes('IN') ? '<li>India: card recurring payments need e-mandates with pre-debit notifications; UPI AutoPay has its own limits.</li>' : '', mk.some(c => ['MX', 'JP', 'BR', 'CO', 'AR', 'ID', 'PH', 'EG'].includes(c)) ? '<li>Cash vouchers: hold stock until payment, send reminders before expiry, and expect a share never to be paid.</li>' : '', mk.includes('CN') ? '<li>China: Alipay and WeChat Pay usually need a cross-border acquirer and Chinese-language checkout.</li>' : '', mk.includes('US') ? '<li>US: no SCA mandate, so invest in fraud screening and AVS/CVV checks; ACH suits high-value or B2B.</li>' : '', '<li>Show local currency and local method logos up front; checkout drop-off rises when shoppers only see unfamiliar options.</li>', '<li>Design refunds per method: push methods (Pix, iDEAL, UPI, SPEI) may need bank details or a provider refund flow.</li>'].join('')}</ul></div>`;
+};
+
+/* ---------- simulator ---------- */
+function simShares(c) { const ct = CT[c], own = (S.shares || {})[c] || {}; const w = ct.methods.map(([k, r]) => [k, own[k] != null && own[k] !== '' ? N(own[k]) : { D: 40, M: 18, C: 7, N: 2 }[r]]); const t = sum(w, x => x[1]) || 1; return w.map(([k, v]) => [k, v / t]); }
+function simulate() {
+  const c = S.simC in CT ? S.simC : 'BR', N0 = Math.max(0, N(S.simN)), aov = N(S.aov), sh = simShares(c);
+  const okRates = sh.map(([k]) => (profOf(k).find(o => o.k == null) || { p: 0 }).p / 100);
+  const rows = sh.map(([k, s]) => {
+    const pr = profOf(k), A = N0 * s, ok = (pr.find(o => o.k == null) || { p: 0 }).p / 100 * A;
+    const fails = pr.filter(o => o.k).map(o => ({ ...o, n: A * o.p / 100 }));
+    const soft = sum(fails.filter(f => f.k === 'soft'), 'n');
+    const retried = S.retry ? soft * N(S.retryRate) / 100 : 0;
+    const stillFailed = sum(fails, 'n') - retried;
+    const fb = S.fallback ? stillFailed * N(S.fbRate) / 100 * N(S.fbSucc) / 100 : 0;
+    const success = ok + retried, rv = revOf(k), rev = success * rv[0] / 100, fee = success * aov * N(S.fees[M[k].t]) / 100;
+    return { k, s, A, ok, fails, soft, retried, stillFailed, fb, success, rev, revInfo: rv, fee, gross: success * aov };
+  });
+  const tot = { A: sum(rows, 'A'), ok: sum(rows, 'ok'), retried: sum(rows, 'retried'), fb: sum(rows, 'fb'), success: sum(rows, 'success'), rev: sum(rows, 'rev'), fee: sum(rows, 'fee') };
+  tot.final = tot.success + tot.fb; tot.lost = tot.A - tot.final;
+  const avgFee = tot.success ? tot.fee / tot.success : 0; tot.fbFee = tot.fb * avgFee;
+  tot.net = (tot.final - tot.rev) * aov - tot.fee - tot.fbFee;
+  return { c, rows, tot, aov };
+}
+APPX.render.sim = () => {
+  const c = S.simC in CT ? S.simC : 'BR', sh = simShares(c), own = (S.shares || {})[c] || {};
+  if (!$('#simMix').dataset.c || $('#simMix').dataset.c !== c || !$('#simMix').innerHTML) {
+    $('#simMix').dataset.c = c;
+    $('#simMix').innerHTML = `<div class="wrap short"><table class="tbl"><thead><tr><th>Method</th><th>Role</th><th>Share %</th></tr></thead><tbody>${CT[c].methods.map(([k, r]) => `<tr><td class="l">${esc(M[k].n)}</td><td>${ROLE[r][0]}</td><td><input type="number" step="any" data-k="shares.${c}.${k}" value="${own[k] ?? ''}" placeholder="${(sh.find(x => x[0] === k)[1] * 100).toFixed(1)}" style="width:90px"></td></tr>`).join('')}</tbody></table></div>`;
+  }
+  $('#simReset').onclick = () => { if (S.shares) delete S.shares[c]; $('#simMix').innerHTML = ''; changed(); };
+  const R = simulate(), T = R.tot, conv = T.A ? T.final / T.A * 100 : 0, first = T.A ? T.ok / T.A * 100 : 0;
+  const reasons = {}; R.rows.forEach(r => r.fails.forEach(f => { const key = f.l; (reasons[key] = reasons[key] || { n: 0, k: f.k, m: new Set() }).n += f.n; reasons[key].m.add(M[r.k].n); }));
+  const rlist = Object.entries(reasons).sort((a, b) => b[1].n - a[1].n);
+  // cash-flow timeline
+  const H = Math.max(3, Math.min(60, N(S.horizon) || 14)), days = [...Array(H + 1).keys()];
+  const flows = R.rows.map(r => { const x = M[r.k], ys = days.map(() => 0), net = (r.success - r.rev) * R.aov - r.fee, lag = x.t === 'cash' && !/cod/.test(r.k) ? 2 : 0, a = x.s[0] + lag, b = Math.min(x.s[1] + lag, H), span = Math.max(1, b - a + 1); if (a <= H) for (let d = a; d <= b; d++) ys[d] += net / span; return { k: r.k, ys }; });
+  const COLS = ['#5aa2ff', '#3fd18b', '#ff8a4c', '#b48cff', '#ff7ab6', '#ffc857', '#2ec4c4', '#9fb7d6', '#d4a84b', '#ff6161'];
+  $('#simOut').innerHTML = `<div class="panel"><div class="reco"><div class="eyebrow">${esc(CT[c].name)} · ${num0(T.A)} payments</div><div class="big">${pct(conv)} paid in the end</div><p>${pct(first)} succeed first time. Retries recover ${num0(T.retried)} and fallbacks another ${num0(T.fb)}. Fees and later reversals leave <b>${gbp(T.net)}</b> net from ${gbp(T.A * R.aov)} of orders.</p></div>
+    <div class="cards">${stat('First-try success', pct(first), num0(T.ok) + ' payments')}${stat('Recovered by retry', num0(T.retried), S.retry ? `${N(S.retryRate)}% of soft declines` : 'retries off', 'good')}${stat('Recovered by fallback', num0(T.fb), S.fallback ? 'switched method' : 'fallback off', 'good')}${stat('Lost', num0(T.lost), gbp(T.lost * R.aov) + ' of orders', 'bad')}${stat('Fees', gbp(T.fee + T.fbFee), pct((T.fee + T.fbFee) / Math.max(1, T.final * R.aov) * 100, 2) + ' of paid value')}${stat('Later reversals', num0(T.rev), gbp(T.rev * R.aov) + ' clawed back', 'warn')}</div>
+    <h3>By method</h3><div class="wrap short"><table class="tbl"><thead><tr><th>Method</th><th>Share</th><th>Attempts</th><th>First try</th><th>Soft fails</th><th>Retried OK</th><th>Final paid</th><th>Fees</th><th>Reversals</th><th>Settles</th></tr></thead><tbody>${R.rows.map(r => `<tr><td class="l">${esc(M[r.k].n)}</td><td>${pct(r.s * 100, 0)}</td><td>${num0(r.A)}</td><td>${pct(r.A ? r.ok / r.A * 100 : 0)}</td><td>${num0(r.soft)}</td><td>${num0(r.retried)}</td><td>${num0(r.success)}</td><td>${gbp(r.fee)}</td><td>${r.revInfo[0] ? `${num0(r.rev)} <span class="hint">${esc(r.revInfo[2])}${r.revInfo[1] ? ', ≤' + r.revInfo[1] + 'd' : ''}</span>` : '–'}</td><td>${M[r.k].s[1] === 0 ? 'same day' : 'T+' + M[r.k].s[0] + (M[r.k].s[1] !== M[r.k].s[0] ? '–' + M[r.k].s[1] : '')}</td></tr>`).join('')}</tbody></table></div>
+    <h3>Why payments fail</h3>${hbars(rlist.slice(0, 12).map(([l, v]) => [l, v.n, v.k === 'soft' ? 'var(--warn)' : v.k === 'hard' ? 'var(--bad)' : 'var(--violet)']), 'var(--acc)', v => num0(v))}
+    <div class="legendrow"><span><i style="background:var(--warn)"></i>Soft: worth retrying</span><span><i style="background:var(--bad)"></i>Hard: don't retry, ask for another method</span><span><i style="background:var(--violet)"></i>Abandoned or expired: nudge or remind</span></div>
+    <h3>When the money lands (net of fees and reversals)</h3><div class="chart" id="chFlow"></div>
+    <p class="hint">Settlement days are typical ranges to the merchant; your provider's payout schedule may add a day or more. Cash vouchers include ~2 days for the shopper to pay. Rates are illustrative assumptions for modelling, not any provider's data.</p></div>`;
+  barChart($('#chFlow'), { cats: days.map(d => 'D+' + d), stacks: flows.map((f, i) => ({ name: M[f.k].n.slice(0, 22), color: COLS[i % COLS.length], vals: f.ys })), h: 260 });
+};
+
+/* ---------- codes ---------- */
+APPX.render.codes = () => {
+  if ($('#codesOut').innerHTML) return;
+  const tbl = (title, intro, rows, cols = ['Code', 'Meaning', 'Type', 'What to do']) => `<div class="panel"><h3 style="margin-top:0">${title}</h3><p class="hint">${intro}</p><div class="wrap short"><table class="tbl"><thead><tr>${cols.map(c => `<th class="l">${c}</th>`).join('')}</tr></thead><tbody>${rows.map(r => `<tr>${r.map((x, i) => `<td class="${i === 0 ? 'l' : 't'}">${i === 2 ? `<span class="pill ${/soft|retry/i.test(x) ? 'w' : /hard/i.test(x) ? 'b' : 'v'}">${esc(x)}</span>` : i === 0 ? `<b class="mono">${esc(x)}</b>` : esc(x)}</td>`).join('')}</tr>`).join('')}</tbody></table></div></div>`;
+  $('#codesOut').innerHTML =
+    tbl('Card authorisation responses (ISO 8583 style)', 'Issuers return these when a card payment is declined. Exact codes vary by scheme and processor; these are the common ones.', [
+      ['05', 'Do not honour: generic decline by the issuer', 'Soft', 'Retry once later; if it repeats, ask for another card.'],
+      ['51', 'Insufficient funds', 'Soft', 'Retry after payday (for subscriptions), or offer another method.'],
+      ['54', 'Expired card', 'Hard', 'Ask for updated details; card updater services refresh stored cards.'],
+      ['14', 'Invalid card number', 'Hard', 'Ask the customer to re-enter or use another card.'],
+      ['41 / 43', 'Lost / stolen card', 'Hard', 'Never retry; flag for fraud review.'],
+      ['57', 'Transaction not permitted to cardholder', 'Hard', 'Card is blocked for this type of purchase; ask for another method.'],
+      ['61', 'Exceeds withdrawal amount limit', 'Soft', 'Retry with a smaller amount or later; suggest another card.'],
+      ['65', 'Exceeds activity limit (also used for SCA soft declines in Europe)', 'Soft', 'In the EEA/UK, retry with 3-D Secure authentication.'],
+      ['1A', 'Additional authentication required (Visa SCA)', 'Soft', 'Retry the payment through 3-D Secure.'],
+      ['91', 'Issuer or switch unavailable', 'Soft', 'Retry shortly; consider routing via another acquirer.'],
+      ['N7', 'CVV2 mismatch', 'Hard', 'Ask the customer to re-enter the security code.'],
+      ['59 / 63', 'Suspected fraud / security violation', 'Hard', "Don't retry; review the order."]
+    ]) +
+    tbl('SEPA Direct Debit R-transactions', 'Reasons on returns, refusals and refunds in the SEPA Core scheme. Returns usually arrive within 2–5 business days; MD06 refunds can arrive up to 8 weeks later.', [
+      ['AM04', 'Insufficient funds', 'Soft', 'Re-present after a few days or near payday; notify the customer.'],
+      ['AC04', 'Account closed', 'Hard', 'Stop collecting; ask for new bank details and a new mandate.'],
+      ['AC01', 'Incorrect account number (IBAN)', 'Hard', 'Ask for correct details; validate IBANs at sign-up.'],
+      ['AC06', 'Account blocked', 'Hard', 'Contact the customer for another method.'],
+      ['MD01', 'No valid mandate', 'Hard', 'Collect a new mandate before trying again.'],
+      ['MD06', 'Refund requested by customer (within 8 weeks)', 'Dispute', 'Contact the customer; you cannot contest an in-time MD06 refund.'],
+      ['MD07', 'Debtor deceased', 'Hard', 'Stop collections and handle sensitively.'],
+      ['MS02', 'Refused by debtor', 'Hard', 'Speak to the customer before re-presenting.'],
+      ['MS03', 'Reason not specified by bank', 'Soft', 'Re-present once; then contact the customer.'],
+      ['SL01', 'Specific service offered by debtor bank (e.g. blocking)', 'Hard', 'Customer has blocked your collections; ask them to whitelist you.']
+    ]) +
+    tbl('US ACH return codes', 'NACHA return codes. Most returns arrive within 2 banking days; consumer unauthorised returns (R05, R07, R10, R11, R29 for business) can come up to 60 days later.', [
+      ['R01', 'Insufficient funds', 'Soft', 'You can re-present up to two more times within 180 days.'],
+      ['R02', 'Account closed', 'Hard', 'Get new details; do not retry.'],
+      ['R03', 'No account / unable to locate account', 'Hard', 'Verify the account (micro-deposits or instant verification).'],
+      ['R04', 'Invalid account number structure', 'Hard', 'Fix the details before retrying.'],
+      ['R07', 'Authorisation revoked by customer', 'Dispute', 'Stop debits until a new authorisation is obtained.'],
+      ['R08', 'Payment stopped', 'Hard', 'Contact the customer before trying again.'],
+      ['R09', 'Uncollected funds', 'Soft', 'Re-present later.'],
+      ['R10', 'Customer advises not authorised', 'Dispute', 'Stop debits; review your authorisation records. High R10 rates draw NACHA scrutiny.'],
+      ['R16', 'Account frozen', 'Hard', 'Ask for another payment method.'],
+      ['R29', 'Corporate customer advises not authorised', 'Dispute', 'Confirm the business has authorised your debits (ACH debit block filters).']
+    ]) +
+    tbl('UK Direct Debit (Bacs) ARUDD and AUDDIS codes', 'ARUDD reports unpaid Direct Debits; AUDDIS reports mandate set-up problems. Unpaid reports arrive on day 5 of the cycle.', [
+      ['ARUDD 0', 'Refer to payer (usually insufficient funds)', 'Soft', 'Re-present once (with notice), or contact the customer.'],
+      ['ARUDD 1', 'Instruction cancelled by payer', 'Hard', 'Contact the customer; you need a new instruction.'],
+      ['ARUDD 2', 'Payer deceased', 'Hard', 'Stop collections and handle sensitively.'],
+      ['ARUDD 3', 'Account transferred to another bank', 'Hard', 'The mandate may move automatically; otherwise get new details.'],
+      ['ARUDD 5', 'No account', 'Hard', 'Ask for correct details.'],
+      ['ARUDD 6', 'No instruction', 'Hard', 'Set the mandate up again (AUDDIS).'],
+      ['ARUDD B', 'Account closed', 'Hard', 'Ask for new details or another method.'],
+      ['AUDDIS 1', 'Instruction cancelled', 'Hard', 'Mandate set-up failed; contact the customer.'],
+      ['AUDDIS F', 'Invalid account type (e.g. savings)', 'Hard', 'Ask for a current account.']
+    ]) +
+    tbl('Real-time and wallet failures', 'Push payments (Pix, UPI, SPEI, Faster Payments, iDEAL, BLIK, M-Pesa) mostly fail before money moves. The main problems are abandonment and unclear status.', [
+      ['Abandoned', 'Customer never approves in the bank or wallet app', 'Abandon', 'Keep the session alive, show a countdown, send a reminder with a fresh link or QR.'],
+      ['Expired', 'QR code, BLIK code (~2 min) or collect request timed out', 'Abandon', 'Generate a new code in one tap.'],
+      ['Pending', 'Status unknown (common with UPI and bank outages)', 'Soft', "Don't ask the customer to pay again; poll status and reconcile via webhook."],
+      ['Limit', 'Over the per-transaction or daily limit', 'Hard', 'Offer cards, instalments or splitting the payment.'],
+      ['Timeout', 'STK push or app approval not completed (M-Pesa, MB WAY)', 'Abandon', 'Resend the prompt; show phone-number confirmation clearly.'],
+      ['Fraud return', 'Funds returned after a fraud claim (Pix MED, UK APP reimbursement)', 'Dispute', 'Keep strong customer verification and delivery evidence.']
+    ]);
+};
+
+/* ---------- glossary ---------- */
+APPX.render.glossary = () => {
+  if ($('#glossOut').innerHTML) return;
+  const G = [['3-D Secure (3DS)', 'The card authentication step where the bank checks it is really you, often in the banking app. Version 2 uses device data to skip the challenge for low-risk payments.'], ['SCA', 'Strong Customer Authentication: UK and EU rules requiring two factors for most online payments, with exemptions for low value, recurring and low-risk payments.'], ['Acquirer', "The merchant's bank or processor that accepts card payments and pays out to the merchant."], ['Issuer', "The customer's bank that issued the card and approves or declines the payment."], ['PSP', 'Payment service provider: a company like Stripe, Adyen or a local gateway that connects merchants to many methods.'], ['APM', 'Alternative payment method: anything other than the international card schemes, such as iDEAL, Pix or Alipay.'], ['A2A / account-to-account', 'Money moving directly between bank accounts, without a card network in the middle.'], ['Real-time payments (RTP)', 'Bank transfers that settle in seconds, 24/7, such as Pix, UPI, Faster Payments and SEPA Instant.'], ['Push vs pull', 'A push payment is sent by the customer (bank transfer, Pix); a pull payment is collected by the merchant (cards, direct debit).'], ['Mandate', "The customer's permission for a merchant to collect future payments from their account."], ['Chargeback', 'A card payment reversed by the issuer after a dispute, with the merchant able to contest it with evidence.'], ['Soft decline', 'A temporary failure (insufficient funds, issuer unavailable, authentication needed) that may succeed on retry.'], ['Hard decline', "A failure that won't succeed on retry (closed account, stolen card, invalid number)."], ['Settlement', "When the merchant actually receives the money, which can be days after the customer pays."], ['MIT / CIT', 'Merchant-initiated vs customer-initiated transactions. Subscriptions are MITs and are usually exempt from SCA after the first payment.'], ['Network tokens', 'Card-scheme tokens that replace the card number and update automatically when a card is reissued, lifting approval rates.'], ['Card updater', 'A service that refreshes stored card details when cards expire or are replaced.'], ['Least-cost routing', 'Sending a dual-network debit card through the cheaper network, common in Australia (eftpos) and with co-badged cards in Europe.'], ['Interchange', 'The fee the acquirer pays the issuer on each card payment; capped for consumer cards in the UK and EU.'], ['VRP', 'Variable Recurring Payments: open banking mandates in the UK that let a payee pull payments within agreed limits.'], ['APP fraud', 'Authorised push payment fraud, where a victim is tricked into sending money. UK rules require most of it to be reimbursed.'], ['Instalments', 'Splitting a card payment into monthly parts, standard in Brazil (parcelado), Mexico (MSI) and Türkiye (taksit).'], ['BNPL', 'Buy now, pay later: a provider pays the merchant upfront and the customer repays in instalments.'], ['Cash voucher', 'A reference or barcode the customer pays in cash at a shop or agent, such as OXXO, Boleto or Konbini.']];
+  $('#glossOut').innerHTML = `<div class="wrap short"><table class="tbl"><tbody>${G.map(([t, d]) => `<tr><td class="l" style="width:220px"><b>${esc(t)}</b></td><td class="t">${esc(d)}</td></tr>`).join('')}</tbody></table></div>`;
+};
+APPX.render.home = () => {};
+boot(APPX);
+
+</script>
+</body>
+</html>

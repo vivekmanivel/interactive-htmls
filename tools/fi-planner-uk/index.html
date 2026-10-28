@@ -1,0 +1,592 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Financial Independence Planner (UK)</title>
+<meta name="description" content="When can you stop working? A UK financial independence planner with ISA, pension, LISA, GIA and cash pots, the age-57 bridge, state pension, drawdown tax, tax-free cash and a market simulation.">
+<style>
+:root{
+  --bg:#0a1120;--bg2:#0d1628;--panel:#111b30;--panel2:#16233d;--ink:#f3eee4;--muted:#93a0b7;--line:#22314d;
+  --acc:#ff6a2b;--acc2:#ffa063;--blue:#5aa2ff;--good:#3fd18b;--bad:#ff6161;--warn:#ffb648;--violet:#b48cff;--teal:#2ec4c4;--pink:#ff7ab6;
+  --serif:Georgia,serif;--sans:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;--mono:ui-monospace,Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.5 var(--sans)}
+a{color:var(--acc2)}
+h1,h2,h3{font-family:var(--serif);font-weight:600;letter-spacing:-.01em}
+h2{font-size:22px;margin:0 0 4px}
+h3{font-size:16px;margin:22px 0 8px}
+.mono{font-family:var(--mono)}
+small,.hint{color:var(--muted);font-size:12.5px}
+.hint{margin:6px 0 10px}
+.app{display:grid;grid-template-columns:268px minmax(0,1fr);min-height:100vh}
+nav.side{position:sticky;top:0;height:100vh;overflow:auto;background:linear-gradient(180deg,var(--bg2),var(--bg));border-right:1px solid var(--line);padding:20px 16px}
+.brand{display:flex;gap:10px;align-items:center;margin-bottom:18px}
+.logo{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,var(--acc),#ff3d6e);display:grid;place-items:center;font-family:var(--serif);font-weight:700;font-size:19px;color:#fff;flex:none}
+.brand b{font-family:var(--serif);font-size:17px;display:block;line-height:1.15}
+.brand span{font:10.5px var(--mono);color:var(--muted);letter-spacing:.06em}
+ol.pipe{list-style:none;margin:0;padding:0;position:relative}
+ol.pipe::before{content:"";position:absolute;left:15px;top:14px;bottom:14px;width:2px;background:linear-gradient(180deg,var(--acc),var(--violet),var(--blue));opacity:.55;border-radius:2px}
+ol.pipe li{position:relative;margin:2px 0}
+ol.pipe button{all:unset;cursor:pointer;display:grid;grid-template-columns:32px 1fr;gap:10px;align-items:center;width:100%;padding:7px 6px;border-radius:10px;box-sizing:border-box}
+ol.pipe button:hover{background:rgba(255,255,255,.04)}
+ol.pipe .n{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;background:var(--panel);border:1px solid var(--line);font:600 12px var(--mono);color:var(--muted);position:relative;z-index:1}
+ol.pipe .t{font-weight:600;font-size:13.5px;line-height:1.2}
+ol.pipe .d{display:block;font-size:11.5px;color:var(--muted);font-weight:400}
+ol.pipe button.active .n{background:var(--acc);border-color:var(--acc);color:#fff;box-shadow:0 0 0 4px rgba(255,106,43,.18)}
+ol.pipe button.active .t{color:var(--acc2)}
+.tools{margin-top:18px;border-top:1px solid var(--line);padding-top:14px;display:flex;flex-wrap:wrap;gap:6px}
+.family{margin-top:14px;font-size:12px;color:var(--muted)}
+.family a{display:block;margin:3px 0;text-decoration:none}
+main{min-width:0;padding:0 26px 60px}
+.kpis{position:sticky;top:0;z-index:20;background:rgba(10,17,32,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);margin:0 -26px 18px;padding:10px 26px;display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px}
+.kpis:empty{display:none}
+.kpis.nok{padding:0;border:0;margin-bottom:18px}
+.kpi .l{font:11px var(--mono);color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.kpi .v{font:600 17px var(--mono);white-space:nowrap}
+.kpi .s{font-size:11.5px;color:var(--muted)}
+.tab{display:none;padding-top:4px}.tab.active{display:block;animation:fade .25s ease}
+@keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+.tabhead{margin:6px 0 14px}
+.eyebrow{font:11.5px var(--mono);color:var(--acc2);letter-spacing:.12em;text-transform:uppercase}
+.grid2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.3fr);gap:16px;align-items:start}
+.grid2.even{grid-template-columns:1fr 1fr}
+.grid2.wideL{grid-template-columns:minmax(0,1.5fr) minmax(0,1fr)}
+@media (max-width:1150px){.grid2,.grid2.even,.grid2.wideL{grid-template-columns:1fr}}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px 18px;min-width:0}
+.panel+.panel{margin-top:16px}
+fieldset{border:1px solid var(--line);border-radius:12px;padding:10px 12px 12px;margin:0 0 12px;min-width:0}
+legend{font:600 11.5px var(--mono);color:var(--acc2);text-transform:uppercase;letter-spacing:.08em;padding:0 6px}
+.fg{display:grid;grid-template-columns:repeat(auto-fill,minmax(165px,1fr));gap:10px}
+label{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--muted);font-weight:500}
+label>small{font-size:11px;line-height:1.3}
+input,select,textarea{font:13px var(--mono);color:var(--ink);background:var(--bg2);border:1px solid var(--line);border-radius:8px;padding:7px 9px;width:100%;min-width:0}
+select{font-family:var(--sans)}
+input:focus,select:focus,textarea:focus{outline:2px solid var(--acc);outline-offset:-1px}
+input[type=range]{padding:0;accent-color:var(--acc)}
+label.chk{flex-direction:row;align-items:center;gap:8px;color:var(--ink);font-size:13px}
+label.chk input{width:auto;accent-color:var(--acc)}
+.btn{font:600 12.5px var(--sans);border:1px solid var(--line);background:var(--panel2);color:var(--ink);padding:7px 12px;border-radius:8px;cursor:pointer;text-decoration:none;display:inline-block}
+.btn:hover{border-color:var(--acc)}
+.btn.pri{background:var(--acc);border-color:var(--acc);color:#fff}
+.btn.sm{padding:4px 9px;font-size:12px}
+.btn.on{background:rgba(255,106,43,.18);border-color:var(--acc);color:var(--acc2)}
+.btn.del{color:var(--bad);padding:3px 8px}
+.filebtn{position:relative;overflow:hidden}.filebtn input{position:absolute;inset:0;opacity:0;cursor:pointer}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;margin:10px 0}
+.stat{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:10px 12px;min-width:0}
+.stat .l{font-size:11.5px;color:var(--muted);font-weight:600}
+.stat .v{font:600 19px var(--mono);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.stat .s{font-size:11.5px;color:var(--muted)}
+.stat.good .v{color:var(--good)}.stat.bad .v{color:var(--bad)}.stat.warn .v{color:var(--warn)}.stat.acc .v{color:var(--acc2)}
+.stat.hero{background:linear-gradient(135deg,rgba(255,106,43,.16),rgba(90,162,255,.08));border-color:rgba(255,106,43,.45)}
+.note,.warnbox,.badbox,.okbox{padding:8px 12px;border-radius:8px;margin:8px 0;font-size:13px}
+.note{border-left:3px solid var(--blue);background:rgba(90,162,255,.08)}
+.warnbox{border-left:3px solid var(--warn);background:rgba(255,182,72,.08)}
+.badbox{border-left:3px solid var(--bad);background:rgba(255,97,97,.08)}
+.okbox{border-left:3px solid var(--good);background:rgba(63,209,139,.08)}
+.reco{border:1px solid rgba(255,106,43,.5);background:linear-gradient(135deg,rgba(255,106,43,.14),rgba(180,140,255,.06));border-radius:14px;padding:14px 16px;margin:10px 0}
+.reco .big{font:600 26px var(--mono);color:var(--acc2);line-height:1.2}
+.reco p{margin:6px 0}
+table{border-collapse:collapse;width:100%}
+.tbl th,.tbl td{padding:6px 8px;border-bottom:1px solid var(--line);font-size:12.5px;text-align:right;white-space:nowrap}
+.tbl th{color:var(--muted);font-weight:600;position:sticky;top:0;background:var(--panel);z-index:1}
+.tbl td:first-child,.tbl th:first-child,.tbl td.l,.tbl th.l{text-align:left}
+.tbl td{font-family:var(--mono)}
+.tbl td.l,.tbl td.t{font-family:var(--sans)}
+.tbl td.t{white-space:normal;text-align:left;min-width:180px}
+.tbl tr.tot td{font-weight:700;border-top:2px solid var(--line)}
+.tbl tr.hl td{background:rgba(255,106,43,.1)}
+.tbl tr.yr{cursor:pointer}.tbl tr.yr:hover td{background:rgba(255,255,255,.03)}
+.tbl tr.mo td{color:var(--muted);background:var(--bg2)}
+.tbl input,.tbl select{padding:4px 6px;font-size:12px}
+.wrap{overflow:auto;max-height:70vh;border:1px solid var(--line);border-radius:10px}
+.wrap.short{max-height:none}
+.chart svg{width:100%;height:auto;display:block}
+.chart text{fill:var(--muted);font:11px var(--mono)}
+.chart .gl{stroke:var(--line)}
+.chart .hit{fill:transparent;cursor:crosshair}
+.tip{position:fixed;pointer-events:none;background:#030712;border:1px solid var(--line);color:var(--ink);padding:7px 10px;border-radius:8px;font:12px var(--mono);z-index:999;display:none;white-space:pre;box-shadow:0 8px 24px rgba(0,0,0,.4);max-width:420px}
+.toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:var(--acc);color:#fff;padding:9px 16px;border-radius:10px;z-index:999;font-weight:600}
+.toast.hidden{display:none}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.between{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.hbar{display:grid;grid-template-columns:200px 1fr 96px;gap:8px;align-items:center;font-size:12.5px;margin:3px 0}
+.hbar .t{height:10px;background:var(--bg2);border-radius:6px;overflow:hidden}
+.hbar .t i{display:block;height:100%}
+.hbar .v{text-align:right;font-family:var(--mono)}
+.pill{display:inline-block;padding:1px 8px;border-radius:99px;background:var(--panel2);border:1px solid var(--line);font:11px var(--mono);color:var(--muted);white-space:nowrap}
+.pill.g{color:var(--good);border-color:rgba(63,209,139,.4)}.pill.b{color:var(--bad);border-color:rgba(255,97,97,.4)}.pill.w{color:var(--warn);border-color:rgba(255,182,72,.4)}.pill.a{color:var(--acc2);border-color:rgba(255,106,43,.5)}.pill.v{color:var(--violet);border-color:rgba(180,140,255,.45)}.pill.bl{color:var(--blue);border-color:rgba(90,162,255,.45)}
+details.more{border:1px dashed var(--line);border-radius:10px;padding:6px 12px;margin:10px 0}
+details.more summary{cursor:pointer;font-weight:600;color:var(--muted)}
+.hero{position:relative;overflow:hidden;border-radius:18px;padding:34px 30px;border:1px solid var(--line);background:radial-gradient(900px 300px at 0% 0%,rgba(255,106,43,.22),transparent 60%),radial-gradient(700px 300px at 100% 100%,rgba(90,162,255,.18),transparent 60%),var(--panel)}
+.hero h1{font-size:clamp(28px,4.2vw,46px);line-height:1.05;margin:8px 0 12px;max-width:860px}
+.hero h1 em{font-style:italic;color:var(--acc2)}
+.hero p{color:#cdd5e3;max-width:780px;font-size:15px}
+.steps{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px;margin-top:16px}
+.step{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px;cursor:pointer;transition:border-color .15s,transform .15s}
+.step:hover{border-color:var(--acc);transform:translateY(-2px)}
+.step .n{font:600 12px var(--mono);color:var(--acc2)}
+.step b{display:block;font-family:var(--serif);font-size:17px;margin:4px 0}
+.step p{margin:0;color:var(--muted);font-size:13px}
+.cols3{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px}
+.cols3 ul{padding-left:18px;margin:6px 0}.cols3 li{margin:3px 0;font-size:13px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font:12px var(--sans);border:1px solid var(--line);background:var(--panel2);color:var(--muted);border-radius:99px;padding:3px 10px;cursor:pointer}
+.chip.on{background:var(--acc);border-color:var(--acc);color:#fff}
+@media (max-width:900px){
+  .app{grid-template-columns:1fr}
+  nav.side{position:static;height:auto;padding:12px}
+  ol.pipe{display:flex;overflow-x:auto;gap:4px}
+  ol.pipe::before{display:none}
+  ol.pipe button{grid-template-columns:28px auto;white-space:nowrap}
+  ol.pipe .d,.family{display:none}
+  main{padding:0 14px 50px}
+  .kpis{margin:0 -14px 14px;padding:8px 14px;position:static}
+  .hbar{grid-template-columns:120px 1fr 80px}
+}
+@media print{nav.side,.kpis,.tools,.btn{display:none!important}.app{display:block}.tab{display:block!important;page-break-after:always}}
+
+
+</style>
+<meta name="author" content="Usualy Labs">
+<meta name="color-scheme" content="light dark">
+<script>/* Usualy Labs theme switcher: auto | light | dark, remembered in this browser only */
+(function(){var K='usualy.theme',d=document.documentElement,m=window.matchMedia?matchMedia('(prefers-color-scheme: dark)'):null;
+function p(){try{return localStorage.getItem(K)||'auto'}catch(e){return 'auto'}}
+function a(){var v=p();d.setAttribute('data-theme',v==='auto'?(m&&m.matches?'dark':'light'):v);var s=document.getElementById('themeSel');if(s)s.value=v}
+a();if(m&&m.addEventListener)m.addEventListener('change',a);
+window.setTheme=function(v){try{localStorage.setItem(K,v)}catch(e){}a()};
+document.addEventListener('change',function(e){if(e.target&&e.target.id==='themeSel')setTheme(e.target.value)});
+document.addEventListener('DOMContentLoaded',a);})();
+</script>
+<style>
+.ul-theme{display:flex;gap:8px;align-items:center;margin-top:10px;font-size:12.5px;color:var(--muted)}
+.ul-theme select{background:var(--panel);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:4px 8px;font:inherit}
+:root[data-theme=light]{--bg:#f7f5f0;--bg2:#efece4;--panel:#ffffff;--panel2:#f3f1ec;--ink:#1b2333;--muted:#5d6678;--line:#dcd7cc;--acc:#d9531a;--acc2:#b8460f;--blue:#2f6fd6;--good:#1d8f5a;--bad:#cc3333;--warn:#a86d12;--violet:#7650d0}
+[data-theme=light] .kpis{background:rgba(247,245,240,.94)}
+[data-theme=light] ol.pipe button:hover{background:rgba(0,0,0,.04)}
+.ul-about{margin:28px 0 8px;padding:18px 20px;border:1px solid var(--line);border-radius:14px;background:var(--panel);font-size:13px;line-height:1.6}
+.ul-about h2{font-size:18px}.ul-about h3{font-size:14px;margin:14px 0 4px}.ul-about ul{margin:4px 0;padding-left:20px}
+@media print{.ul-theme{display:none}}
+[data-theme=light] .family a{color:var(--acc2)}
+</style>
+</head>
+<body>
+<div class="app"><nav class="side" id="side"></nav><main><header class="kpis" id="kpis"></header><div id="tabs"></div>
+<footer class="ul-about" id="about">
+  <h2>About, data sources &amp; disclaimer</h2>
+  <p><b>Financial Independence Planner (UK)</b> &middot; published by <b>Usualy Labs</b> &middot; version 1.0.0 &middot; figures last checked October 2026.</p>
+  <h3>Not advice</h3>
+  <p>For general information and personal research only. It is <b>not</b> financial, investment, tax, legal or debt advice, and Usualy Labs is not authorised or regulated by the Financial Conduct Authority. It does not recommend any product or provider. Results are illustrations based on your inputs and on assumptions that may be wrong; investment returns are not guaranteed and can fall as well as rise; tax rules change and depend on your circumstances. Check with the official sources and a qualified, regulated adviser before acting.</p>
+  <p>Provided &ldquo;as is&rdquo; without warranty of any kind. To the fullest extent permitted by law, Usualy Labs and contributors accept no responsibility or liability for any loss or decision arising from its use. Nothing here limits any liability that cannot be limited by law.</p>
+  <h3>Your privacy</h3>
+  <p>Usualy Labs collects nothing. This page makes no network requests: no accounts, analytics, cookies, trackers or web fonts. Inputs are saved only in <b>your browser&rsquo;s local storage</b> on this device. &ldquo;Copy share link&rdquo; puts your inputs into the link itself; it is only shared if you send it, so treat it like a private document. Export and Import use a file on your own device.</p>
+  <h3>Data sources and credits</h3>
+  <p>All credit for the underlying information belongs to these publishers; inclusion does not imply their endorsement.</p>
+  <ul>
+    <li><b>HM Revenue &amp; Customs / GOV.UK</b> &ndash; 2026/27 Income Tax bands and allowances, National Insurance, dividend and savings rates (OGL v3.0).</li>
+    <li><b>GOV.UK</b> &ndash; ISA and Lifetime ISA allowances and rules; pension tax relief, tax-free lump sum and normal minimum pension age (OGL v3.0).</li>
+    <li><b>Department for Work and Pensions / GOV.UK</b> &ndash; State Pension amount and State Pension age (OGL v3.0).</li>
+    <li>Investment returns, fees, volatility, inflation and the safe-withdrawal rate are <b>editable assumptions</b>. Monte Carlo results are simulations, not forecasts.</li>
+  </ul>
+  <p>For free, impartial pension guidance (age 50+), see <b>Pension Wise</b> from MoneyHelper.</p>
+  <p>Contains public sector information licensed under the Open Government Licence v3.0 where marked. No third-party code libraries are used.</p>
+  <p>Spotted a mistake or out-of-date figure? Please report it through the project&rsquo;s GitHub Issues page.</p>
+</footer>
+</main></div>
+<div class="tip" id="tip"></div><div class="toast hidden" id="toast"></div>
+<script>
+'use strict';
+/* ===== Usualy Labs · shared kit (TEMPV01) ===== */
+const $ = (s, e = document) => e.querySelector(s), $$ = (s, e = document) => [...e.querySelectorAll(s)];
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const fin = n => typeof n === 'number' && isFinite(n);
+const N = v => { const x = parseFloat(v); return isFinite(x) ? x : 0; };
+const gbp = n => fin(n) ? (n < 0 ? '−£' : '£') + Math.abs(Math.round(n)).toLocaleString('en-GB') : '–';
+const gbp2 = n => fin(n) ? (n < 0 ? '−£' : '£') + Math.abs(n).toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '–';
+const pct = (n, d = 1) => fin(n) ? n.toFixed(d) + '%' : '–';
+const num0 = n => fin(n) ? Math.round(n).toLocaleString('en-GB') : '–';
+const kfmt = v => { const a = Math.abs(v), s = v < 0 ? '−' : ''; return a >= 1e6 ? s + '£' + (a / 1e6).toFixed(2) + 'm' : a >= 1e3 ? s + '£' + Math.round(a / 1e3) + 'k' : s + '£' + Math.round(a); };
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+const sum = (arr, f) => arr.reduce((a, x) => a + (+(f ? (typeof f === 'function' ? f(x) : x[f]) : x) || 0), 0);
+const yrsMo = m => { m = Math.round(m); return m < 12 ? `${m} mo` : `${Math.floor(m / 12)} yr${m % 12 ? ' ' + (m % 12) + ' mo' : ''}`; };
+const todayYM = () => new Date().toISOString().slice(0, 7);
+const monthsAdd = (ym, k) => { const [y, m] = ym.split('-').map(Number); return new Date(Date.UTC(y, m - 1 + k, 1)).toISOString().slice(0, 7); };
+const ymLabel = ym => { const [y, m] = ym.split('-').map(Number); return new Date(Date.UTC(y, m - 1, 1)).toLocaleDateString('en-GB', { month: 'short', year: 'numeric', timeZone: 'UTC' }); };
+const debounce = (fn, ms) => { let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), ms); }; };
+function toast(m) { const t = $('#toast'); t.textContent = m; t.classList.remove('hidden'); clearTimeout(toast.t); toast.t = setTimeout(() => t.classList.add('hidden'), 2600); }
+function showTip(e, txt) { const t = $('#tip'); t.textContent = txt; t.style.display = 'block'; t.style.left = Math.min(e.clientX + 14, innerWidth - 300) + 'px'; t.style.top = (e.clientY + 14) + 'px'; }
+function hideTip() { $('#tip').style.display = 'none'; }
+function download(name, text, type) { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([text], { type })); a.download = name; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 2000); }
+
+/* ---------- finance primitives ---------- */
+function pmt(P, r, n) { if (n <= 0) return P; if (Math.abs(r) < 1e-12) return P / n; return P * r / (1 - Math.pow(1 + r, -n)); }
+function nper(P, r, A) { if (P <= 0) return 0; if (Math.abs(r) < 1e-12) return P / A; if (A <= P * r) return Infinity; return -Math.log(1 - P * r / A) / Math.log(1 + r); }
+function pvA(r, n, A) { if (A <= 0) return 0; if (Math.abs(r) < 1e-12) return A * n; return A * (1 - Math.pow(1 + r, -n)) / r; }
+function rng(seed) { return () => { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+function gauss(rand) { let u = 0, v = 0; while (u === 0) u = rand(); while (v === 0) v = rand(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v); }
+const mRate = annualPct => Math.pow(1 + annualPct / 100, 1 / 12) - 1;
+
+/* ---------- UK tax engine (2026/27 defaults; every figure overridable) ---------- */
+const UK = {
+  year: '2026/27', pa: 12570, taper: 100000, basic: 37700, addl: 125140,
+  pt: 12570, uel: 50270, ee: .08, ee2: .02, er: .15, st: 5000, ea: 10500, c4: .06, c4b: .02,
+  divAllow: 500, div: [.1075, .3575, .3935], psa: [1000, 500, 0],
+  sl: { p1: 26065, p2: 28470, p4: 32745, p5: 25000, pg: 21000 },
+  scot: [[2827, .19], [14921, .20], [31092, .21], [62430, .42], [125140, .45], [Infinity, .48]],
+  cb: [27.05, 17.90], hicbc: [60000, 80000], sp: 241.30, lumpCap: 268275, ma: 1260,
+  ct: { small: .19, main: .25, lo: 50000, hi: 250000 }
+};
+/* ns: earnings/pension/rental income; div: dividends; ras: gross relief-at-source pension contributions (extend bands) */
+function ukTax({ ns = 0, div = 0, ras = 0, scot = false, paOverride = null } = {}) {
+  ns = Math.max(0, ns); div = Math.max(0, div);
+  const ani = ns + div - ras;
+  const pa = paOverride != null ? paOverride : Math.max(0, UK.pa - Math.max(0, (ani - UK.taper) / 2));
+  const paNS = Math.min(pa, ns), paD = Math.min(pa - paNS, div), tNS = ns - paNS, tD = div - paD;
+  const ext = Math.max(0, ras), B1 = UK.basic + ext, B2 = UK.addl + ext, bands = [];
+  let taxNS = 0;
+  if (scot) {
+    let prev = 0;
+    UK.scot.forEach(([lim, r], i) => { const L = lim === Infinity ? Infinity : lim + ext, amt = Math.max(0, Math.min(tNS, L) - prev); if (amt > 0) { bands.push({ label: ['Starter', 'Basic', 'Intermediate', 'Higher', 'Advanced', 'Top'][i] + ` ${Math.round(r * 100)}%`, amt, r, tax: amt * r }); taxNS += amt * r; } prev = L; });
+  } else {
+    const b = [[B1, .20, 'Basic 20%'], [B2, .40, 'Higher 40%'], [Infinity, .45, 'Additional 45%']]; let prev = 0;
+    b.forEach(([L, r, l]) => { const amt = Math.max(0, Math.min(tNS, L) - prev); if (amt > 0) { bands.push({ label: l, amt, r, tax: amt * r }); taxNS += amt * r; } prev = L; });
+  }
+  // dividends sit on top of non-savings income, using UK bands
+  let taxDiv = 0, pos = tNS, allow = Math.min(UK.divAllow, tD), left = tD;
+  const db = [[B1, UK.div[0], 'Dividend basic'], [B2, UK.div[1], 'Dividend higher'], [Infinity, UK.div[2], 'Dividend additional']];
+  for (const [L, r, l] of db) {
+    if (left <= 0) break; const room = Math.max(0, L - pos); if (room <= 0) continue;
+    let amt = Math.min(left, room), free = Math.min(allow, amt); allow -= free; const taxed = amt - free;
+    if (free > 0) bands.push({ label: 'Dividend allowance 0%', amt: free, r: 0, tax: 0 });
+    if (taxed > 0) { bands.push({ label: l + ` ${(r * 100).toFixed(2)}%`, amt: taxed, r, tax: taxed * r }); taxDiv += taxed * r; }
+    pos += amt; left -= amt;
+  }
+  return { ani, pa, taxNS, taxDiv, total: taxNS + taxDiv, bands };
+}
+const niEE = pay => UK.ee * Math.max(0, Math.min(pay, UK.uel) - UK.pt) + UK.ee2 * Math.max(0, pay - UK.uel);
+const niER = (pay, ea = 0) => Math.max(0, UK.er * Math.max(0, pay - UK.st) - ea);
+const niC4 = p => UK.c4 * Math.max(0, Math.min(p, UK.uel) - UK.pt) + UK.c4b * Math.max(0, p - UK.uel);
+const slRepay = (plan, inc) => { if (!plan || plan === 'none') return 0; const t = UK.sl[plan]; return t == null ? 0 : (plan === 'pg' ? .06 : .09) * Math.max(0, inc - t); };
+function corpTax(profit) { const c = UK.ct; if (profit <= 0) return 0; if (profit <= c.lo) return profit * c.small; if (profit >= c.hi) return profit * c.main; return profit * c.main - (c.hi - profit) * 3 / 200; }
+function hicbc(ani, kids) { if (!kids) return { cb: 0, charge: 0 }; const cb = (UK.cb[0] + UK.cb[1] * (kids - 1)) * 52; const [lo, hi] = UK.hicbc; const p = clamp((ani - lo) / (hi - lo), 0, 1); return { cb, charge: Math.floor(cb * p) }; }
+function sdlt(price, buyer = 'ftb', nonRes = false) {
+  if (buyer === 'none') return { tax: 0, parts: [] };
+  const std = [[125000, 0], [250000, .02], [925000, .05], [1500000, .10], [Infinity, .12]];
+  let bands = std;
+  if (buyer === 'ftb' && price <= 500000) bands = [[300000, 0], [500000, .05]];
+  else if (buyer === 'add' && price >= 40000) bands = std.map(([t, r]) => [t, r + .05]);
+  if (nonRes) bands = bands.map(([t, r]) => [t, r + .02]);
+  let prev = 0, tax = 0; const parts = [];
+  for (const [t, r] of bands) { if (price <= prev) break; const sl = Math.min(price, t) - prev; parts.push({ from: prev, to: Math.min(price, t), rate: r, tax: sl * r }); tax += sl * r; prev = t; }
+  return { tax: Math.floor(tax), parts };
+}
+
+/* ---------- state ---------- */
+let S = {}, APP = null, CUR = null, LISTS = {};
+function deepMerge(base, add) { for (const k in add) { if (add[k] && typeof add[k] === 'object' && !Array.isArray(add[k]) && base[k] && typeof base[k] === 'object' && !Array.isArray(base[k])) deepMerge(base[k], add[k]); else if (add[k] !== undefined) base[k] = add[k]; } return base; }
+const getP = (o, p) => p.split('.').reduce((a, k) => a == null ? a : a[k], o);
+const setP = (o, p, v) => { const ks = p.split('.'); let a = o; ks.slice(0, -1).forEach(k => a = a[k] = a[k] || {}); a[ks[ks.length - 1]] = v; };
+function loadState() {
+  S = APP.def();
+  try { const h = location.hash; if (h.startsWith('#s=')) { S = deepMerge(APP.def(), JSON.parse(decodeURIComponent(escape(atob(h.slice(3)))))); history.replaceState(null, '', location.pathname); setTimeout(() => toast('Loaded from link'), 300); return; } } catch (e) { console.warn(e); }
+  try { const s = localStorage.getItem(APP.key); if (s) S = deepMerge(APP.def(), JSON.parse(s)); } catch (e) {}
+}
+const saveState = debounce(() => { try { localStorage.setItem(APP.key, JSON.stringify(S)); } catch (e) {} }, 300);
+
+/* ---------- form helpers ---------- */
+function fld(k, label, o = {}) {
+  const t = o.type || 'num', v = getP(S, k), sh = o.show ? ` data-show="${o.show}"` : '', h = o.hint ? `<small>${o.hint}</small>` : '';
+  if (t === 'chk') return `<label class="chk"${sh}><input type="checkbox" data-k="${k}" ${v ? 'checked' : ''}> <span>${label}</span></label>`;
+  if (t === 'sel') return `<label${sh}><span>${label}</span><select data-k="${k}">${o.opts.map(([val, l]) => `<option value="${esc(val)}" ${String(v) === String(val) ? 'selected' : ''}>${esc(l)}</option>`).join('')}</select>${h}</label>`;
+  if (t === 'range') return `<label${sh}><span>${label}: <b class="mono" data-rv="${k}">${esc(v)}${o.unit || ''}</b></span><input type="range" data-k="${k}" min="${o.min}" max="${o.max}" step="${o.step || 1}" value="${esc(v)}" data-unit="${o.unit || ''}">${h}</label>`;
+  const it = t === 'num' ? 'type="number" inputmode="decimal" step="any"' : t === 'month' ? 'type="month"' : t === 'date' ? 'type="date"' : 'type="text"';
+  return `<label${sh}><span>${label}</span><input ${it} data-k="${k}" value="${esc(v ?? '')}"${o.min != null ? ` min="${o.min}"` : ''}${o.ph ? ` placeholder="${esc(o.ph)}"` : ''}>${h}</label>`;
+}
+const fs = (title, inner, show) => `<fieldset${show ? ` data-show="${show}"` : ''}><legend>${title}</legend><div class="fg">${inner}</div></fieldset>`;
+const stat = (l, v, s = '', c = '') => `<div class="stat ${c}"><div class="l">${l}</div><div class="v" title="${esc(String(v).replace(/<[^>]+>/g, ''))}">${v}</div><div class="s">${s}</div></div>`;
+const head = (i, title, sub) => `<div class="tabhead"><div class="eyebrow">Step ${String(i).padStart(2, '0')}</div><h2>${title}</h2><div class="hint" style="margin:0">${sub}</div></div>`;
+function applyShow() {
+  $$('[data-show]').forEach(el => {
+    const ok = el.dataset.show.split('&').every(cond => { const m = cond.match(/^([\w.]+)(!?=|>|<)(.*)$/); if (!m) return true; const raw = getP(S, m[1]), v = String(raw), vals = m[3].split('|'); if (m[2] === '>') return N(raw) > N(m[3]); if (m[2] === '<') return N(raw) < N(m[3]); return m[2] === '=' ? vals.includes(v) : !vals.includes(v); });
+    el.style.display = ok ? '' : 'none';
+  });
+}
+function syncInputs() { $$('[data-k]').forEach(el => { if (el === document.activeElement) return; const v = getP(S, el.dataset.k); if (el.type === 'checkbox') el.checked = !!v; else if (String(el.value) !== String(v ?? '')) el.value = v ?? ''; }); $$('[data-rv]').forEach(b => { const inp = $(`input[type=range][data-k="${b.dataset.rv}"]`); b.textContent = getP(S, b.dataset.rv) + (inp ? inp.dataset.unit : ''); }); }
+function listHTML(name) {
+  const L = LISTS[name], arr = getP(S, name) || [];
+  return `<div class="wrap short"><table class="tbl"><thead><tr>${L.cols.map(c => `<th class="l">${c[1]}</th>`).join('')}<th></th></tr></thead><tbody>${arr.map((r, i) => `<tr>${L.cols.map(([f, , t, opts]) => `<td class="l">${t === 'sel' ? `<select data-l="${name}" data-i="${i}" data-f="${f}">${opts.map(([v, l]) => `<option value="${esc(v)}" ${String(r[f]) === String(v) ? 'selected' : ''}>${esc(l)}</option>`).join('')}</select>` : t === 'chk' ? `<input type="checkbox" data-l="${name}" data-i="${i}" data-f="${f}" ${r[f] ? 'checked' : ''}>` : `<input ${t === 'num' ? 'type="number" step="any"' : t === 'month' ? 'type="month"' : 'type="text"'} data-l="${name}" data-i="${i}" data-f="${f}" value="${esc(r[f] ?? '')}"${t === 'text' ? ' style="min-width:130px"' : ''}>`}</td>`).join('')}<td>${L.min && arr.length <= L.min ? '' : `<button class="btn del" data-del="${name}:${i}" title="Remove">✕</button>`}</td></tr>`).join('') || `<tr><td class="l hint" colspan="${L.cols.length + 1}">Nothing added yet.</td></tr>`}</tbody></table></div>
+  ${!L.max || arr.length < L.max ? `<button class="btn sm" data-add="${name}" style="margin-top:6px">+ Add</button>` : ''}`;
+}
+function renderLists(name) { $$(`[data-list${name ? `="${name}"` : ''}]`).forEach(el => el.innerHTML = listHTML(el.dataset.list)); }
+
+/* ---------- charts ---------- */
+function lineChart(el, o) {
+  if (!el) return;
+  const W = 780, H = o.h || 260, pl = 66, pr = 18, pt = 30, pb = 30, xs = o.xs, n = xs.length;
+  const vals = o.series.flatMap(s => s.ys).filter(fin);
+  if (!vals.length) { el.innerHTML = ''; return; }
+  let mn = Math.min(o.yMin ?? 0, ...vals), mx = Math.max(o.yMax ?? -Infinity, ...vals); if (mx - mn < 1e-9) mx = mn + 1;
+  const pad = (mx - mn) * .06; mx += pad; if (mn < 0) mn -= pad;
+  const X = i => pl + (W - pl - pr) * (n > 1 ? i / (n - 1) : .5), Y = v => pt + (H - pt - pb) * (1 - (v - mn) / (mx - mn));
+  const yf = o.yFmt || kfmt; let g = '';
+  (o.bands || []).forEach(b => { g += `<rect x="${X(b.from)}" y="${pt}" width="${Math.max(0, X(b.to) - X(b.from))}" height="${H - pt - pb}" fill="${b.color}" opacity="${b.op || .08}"/>`; if (b.label) g += `<text x="${X(b.from) + 4}" y="${H - pb - 6}" style="fill:${b.tc || 'var(--muted)'}">${esc(b.label)}</text>`; });
+  for (let k = 0; k <= 4; k++) { const v = mn + (mx - mn) * k / 4; g += `<line class="gl" x1="${pl}" x2="${W - pr}" y1="${Y(v)}" y2="${Y(v)}"/><text x="${pl - 8}" y="${Y(v) + 4}" text-anchor="end">${yf(v)}</text>`; }
+  if (mn < 0) g += `<line x1="${pl}" x2="${W - pr}" y1="${Y(0)}" y2="${Y(0)}" stroke="var(--muted)"/>`;
+  const st = Math.max(1, Math.ceil(n / 8)); for (let i = 0; i < n; i += st) g += `<text x="${X(i)}" y="${H - 9}" text-anchor="middle">${esc(xs[i])}</text>`;
+  (o.markers || []).forEach(m => { if (m.i == null || m.i < 0 || m.i >= n) return; g += `<line x1="${X(m.i)}" x2="${X(m.i)}" y1="${pt}" y2="${H - pb}" stroke="${m.color || 'var(--warn)'}" stroke-dasharray="4 4"/><text x="${X(m.i) + 5}" y="${pt + 12 + (m.dy || 0)}" style="fill:${m.color || 'var(--warn)'}">${esc(m.label)}</text>`; });
+  (o.hlines || []).forEach(m => { g += `<line x1="${pl}" x2="${W - pr}" y1="${Y(m.y)}" y2="${Y(m.y)}" stroke="${m.color || 'var(--warn)'}" stroke-dasharray="4 4"/><text x="${W - pr - 4}" y="${Y(m.y) - 5}" text-anchor="end" style="fill:${m.color || 'var(--warn)'}">${esc(m.label)}</text>`; });
+  o.series.forEach(s => {
+    if (s.band) { const lo = s.band[0], hi = s.band[1]; let d = ''; hi.forEach((v, i) => d += (i ? 'L' : 'M') + X(i).toFixed(1) + ',' + Y(v).toFixed(1)); for (let i = lo.length - 1; i >= 0; i--) d += 'L' + X(i).toFixed(1) + ',' + Y(lo[i]).toFixed(1); g += `<path d="${d}Z" fill="${s.color}" opacity=".14"/>`; }
+    let d = '', pen = false; s.ys.forEach((v, i) => { if (!fin(v)) { pen = false; return; } d += (pen ? 'L' : 'M') + X(i).toFixed(1) + ',' + Y(v).toFixed(1); pen = true; });
+    if (s.area && d) { const f = s.ys.findIndex(fin), l = s.ys.length - 1 - [...s.ys].reverse().findIndex(fin); g += `<path d="${d}L${X(l)},${Y(Math.max(mn, 0))}L${X(f)},${Y(Math.max(mn, 0))}Z" fill="${s.color}" opacity=".12"/>`; }
+    g += `<path d="${d}" fill="none" stroke="${s.color}" stroke-width="${s.w || 2.4}" ${s.dash ? `stroke-dasharray="${s.dash}"` : ''} stroke-linejoin="round" stroke-linecap="round"/>`;
+  });
+  let lx = pl; g += `<g transform="translate(0,${pt - 16})">` + o.series.filter(s => !s.noLegend).map(s => { const t = `<rect x="${lx}" y="0" width="14" height="4" rx="2" fill="${s.color}"/><text x="${lx + 19}" y="6">${esc(s.name)}</text>`; lx += 30 + s.name.length * 6.6; return t; }).join('') + '</g>';
+  el.innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(o.label || 'chart')}">${g}<line class="cur" x1="0" x2="0" y1="${pt}" y2="${H - pb}" stroke="var(--ink)" stroke-opacity=".35" style="opacity:0"/><rect class="hit" x="${pl}" y="${pt}" width="${W - pl - pr}" height="${H - pt - pb}"/></svg>`;
+  const svg = el.querySelector('svg'), hit = svg.querySelector('.hit'), cur = svg.querySelector('.cur');
+  hit.addEventListener('mousemove', e => { const r = hit.getBoundingClientRect(), i = clamp(Math.round((e.clientX - r.left) / r.width * (n - 1)), 0, n - 1); cur.setAttribute('x1', X(i)); cur.setAttribute('x2', X(i)); cur.style.opacity = 1; showTip(e, (o.tipTitle ? o.tipTitle(i) : xs[i]) + '\n' + o.series.filter(s => !s.noTip).map(s => `${s.name}: ${fin(s.ys[i]) ? (s.fmt || o.tipFmt || gbp)(s.ys[i]) : '–'}`).join('\n')); });
+  hit.addEventListener('mouseleave', () => { hideTip(); cur.style.opacity = 0; });
+}
+function barChart(el, o) {
+  if (!el) return;
+  const W = 780, H = o.h || 250, pl = 66, pr = 18, pt = 30, pb = o.pb || 30, n = o.cats.length;
+  const pos = o.cats.map((_, i) => o.stacks.reduce((a, s) => a + Math.max(0, s.vals[i] || 0), 0)), neg = o.cats.map((_, i) => o.stacks.reduce((a, s) => a + Math.min(0, s.vals[i] || 0), 0));
+  const mx = Math.max(...pos, 1) * 1.06, mn = Math.min(...neg, 0) * 1.06;
+  const bw = (W - pl - pr) / Math.max(1, n), Y = v => pt + (H - pt - pb) * (1 - (v - mn) / (mx - mn)), yf = o.yFmt || kfmt;
+  let g = '';
+  for (let k = 0; k <= 4; k++) { const v = mn + (mx - mn) * k / 4; g += `<line class="gl" x1="${pl}" x2="${W - pr}" y1="${Y(v)}" y2="${Y(v)}"/><text x="${pl - 8}" y="${Y(v) + 4}" text-anchor="end">${yf(v)}</text>`; }
+  if (mn < 0) g += `<line x1="${pl}" x2="${W - pr}" y1="${Y(0)}" y2="${Y(0)}" stroke="var(--muted)"/>`;
+  o.cats.forEach((c, i) => {
+    let up = 0, dn = 0; const x0 = pl + i * bw + bw * .14, w = bw * .72;
+    g += `<g class="bg" data-i="${i}">` + o.stacks.map(s => { const v = s.vals[i] || 0; if (!v) return ''; let y1, y2; if (v > 0) { y1 = Y(up + v); y2 = Y(up); up += v; } else { y1 = Y(dn); y2 = Y(dn + v); dn += v; } return `<rect x="${x0}" y="${y1}" width="${w}" height="${Math.max(0, y2 - y1)}" rx="2" fill="${s.color}"/>`; }).join('') + `<rect x="${pl + i * bw}" y="${pt}" width="${bw}" height="${H - pt - pb}" fill="transparent"/></g>`;
+    if (n <= 14 || i % Math.ceil(n / 12) === 0) g += `<text x="${x0 + w / 2}" y="${H - pb + 18}" text-anchor="middle">${esc(c)}</text>`;
+  });
+  let lx = pl; g += `<g transform="translate(0,${pt - 18})">` + o.stacks.map(s => { const t = `<rect x="${lx}" y="0" width="10" height="10" rx="2" fill="${s.color}"/><text x="${lx + 14}" y="9">${esc(s.name)}</text>`; lx += 26 + s.name.length * 6.6; return t; }).join('') + '</g>';
+  el.innerHTML = `<svg viewBox="0 0 ${W} ${H}">${g}</svg>`;
+  $$('.bg', el).forEach(b => { b.addEventListener('mousemove', e => { const i = +b.dataset.i; showTip(e, (o.tipTitle ? o.tipTitle(i) : o.cats[i]) + '\n' + o.stacks.map(s => `${s.name}: ${(o.tipFmt || gbp)(s.vals[i] || 0)}`).join('\n')); }); b.addEventListener('mouseleave', hideTip); });
+}
+const hbars = (items, color = 'var(--acc)', fmt = gbp) => { const mx = Math.max(...items.map(x => Math.abs(x[1])), 1e-9); return items.map(([l, v, c]) => `<div class="hbar"><span>${esc(l)}</span><div class="t"><i style="width:${Math.abs(v) / mx * 100}%;background:${c || color}"></i></div><span class="v">${fmt(v)}</span></div>`).join(''); };
+
+/* ---------- shell ---------- */
+const FAMILY = [['..', 'All tools', '../../'], ['uk-mortgage-planner', 'Mortgage planner'], ['rent-vs-buy-calculator', 'Rent vs buy'], ['uk-take-home-pay-calculator', 'Take-home & contracting'], ['fi-planner-uk', 'Financial independence'], ['debt-payoff-planner', 'Debt payoff'], ['payment-methods-explorer', 'Payment methods explorer']];
+function go(t) { CUR = t; $$('#pipe button').forEach(b => b.classList.toggle('active', b.dataset.t === t)); $$('.tab').forEach(s => s.classList.toggle('active', s.id === 't-' + t)); try { localStorage.setItem(APP.key + '.tab', t); } catch (e) {} render(); scrollTo({ top: 0 }); }
+function render() { APP.reset && APP.reset(); try { const k = APP.kpis ? APP.kpis() : null; const el = $('#kpis'); el.innerHTML = k ? k.map(([l, v, s]) => `<div class="kpi"><div class="l">${l}</div><div class="v">${v}</div><div class="s">${s || ''}</div></div>`).join('') : ''; (APP.render[CUR] || (() => {}))(); } catch (e) { console.error(e); } }
+const renderSoon = debounce(render, 160);
+function changed(now = true) { saveState(); applyShow(); syncInputs(); now ? render() : renderSoon(); }
+function readEl(el) { return el.type === 'checkbox' ? el.checked : (el.type === 'number' || el.type === 'range') ? (el.value === '' ? '' : parseFloat(el.value)) : el.value; }
+function buildShell() {
+  const here = 'fi-planner-uk';
+  $('#side').innerHTML = `<div class="brand"><div class="logo">${APP.logo || '£'}</div><div><b>${APP.title}</b><span>${APP.sub}</span></div></div><ol class="pipe" id="pipe">${APP.tabs.map(([k, t, d], i) => `<li><button data-t="${k}"><span class="n">${String(i).padStart(2, '0')}</span><span class="t">${t}<span class="d">${d}</span></span></button></li>`).join('')}</ol>
+  <div class="tools"><button class="btn sm" data-tool="share" title="Copy a link that holds all your inputs">Copy share link</button><button class="btn sm" data-tool="export">Export</button><label class="btn sm filebtn">Import<input type="file" id="tImport" accept=".json"></label><button class="btn sm" data-tool="print">Print</button><button class="btn sm del" data-tool="reset">Reset</button></div>
+  <p class="hint" style="margin-top:12px">Inputs save in this browser only. Nothing is sent anywhere.</p>
+  <label class="ul-theme">Theme <select id="themeSel" aria-label="Colour theme"><option value="auto">Auto</option><option value="light">Light</option><option value="dark">Dark</option></select></label>
+  <div class="family"><div class="eyebrow" style="margin-bottom:4px">More from Usualy Labs</div>${FAMILY.filter(([f]) => f !== here).map(([f, l, h]) => `<a href="${h || '../' + f + '/'}">${l} →</a>`).join('')}</div>`;
+  $('#tabs').innerHTML = APP.build();
+  renderLists();
+}
+function wire() {
+  document.addEventListener('input', e => {
+    const el = e.target;
+    if (el.dataset.k) { setP(S, el.dataset.k, readEl(el)); saveState(); applyShow(); const b = $(`[data-rv="${el.dataset.k}"]`); if (b) b.textContent = el.value + (el.dataset.unit || ''); $$(`[data-k="${el.dataset.k}"]`).forEach(o => { if (o !== el && o.type !== 'checkbox') o.value = el.value; }); renderSoon(); }
+    else if (el.dataset.l) { getP(S, el.dataset.l)[+el.dataset.i][el.dataset.f] = readEl(el); saveState(); renderSoon(); }
+  });
+  document.addEventListener('change', e => { const el = e.target; if (el.dataset.k) { setP(S, el.dataset.k, readEl(el)); changed(); } else if (el.dataset.l) { getP(S, el.dataset.l)[+el.dataset.i][el.dataset.f] = readEl(el); changed(); } });
+  document.addEventListener('click', e => {
+    const t = e.target.closest('[data-go],[data-t],[data-add],[data-del],[data-set],[data-tool]'); if (!t) return;
+    if (t.dataset.set && t.dataset.go) { const o = JSON.parse(t.dataset.set); for (const k in o) setP(S, k, o[k]); saveState(); applyShow(); syncInputs(); go(t.dataset.go); }
+    else if (t.dataset.go) go(t.dataset.go);
+    else if (t.dataset.t) go(t.dataset.t);
+    else if (t.dataset.add) { getP(S, t.dataset.add).push(LISTS[t.dataset.add].add()); renderLists(t.dataset.add); changed(); }
+    else if (t.dataset.del) { const [n, i] = t.dataset.del.split(':'); getP(S, n).splice(+i, 1); renderLists(n); changed(); }
+    else if (t.dataset.set) { const o = JSON.parse(t.dataset.set); for (const k in o) setP(S, k, o[k]); if (t.dataset.relist) renderLists(t.dataset.relist); changed(); }
+    else if (t.dataset.tool === 'share') { const url = location.href.split('#')[0] + '#s=' + btoa(unescape(encodeURIComponent(JSON.stringify(S)))); (navigator.clipboard ? navigator.clipboard.writeText(url) : Promise.reject()).then(() => toast('Share link copied'), () => prompt('Copy this link', url)); }
+    else if (t.dataset.tool === 'export') download(APP.file + '-' + new Date().toISOString().slice(0, 10) + '.json', JSON.stringify(S, null, 1), 'application/json');
+    else if (t.dataset.tool === 'print') print();
+    else if (t.dataset.tool === 'reset') { if (!confirm('Reset every input to the defaults?')) return; S = APP.def(); rebuild(); toast('Reset'); }
+  });
+  document.addEventListener('change', async e => { if (e.target.id !== 'tImport') return; const f = e.target.files[0]; if (!f) return; try { S = deepMerge(APP.def(), JSON.parse(await f.text())); rebuild(); toast('Imported'); } catch (err) { toast('Import failed: ' + err.message); } e.target.value = ''; });
+}
+function rebuild() { $('#tabs').innerHTML = APP.build(); renderLists(); APP.afterBuild && APP.afterBuild(); saveState(); applyShow(); go(CUR); }
+function boot(app) {
+  APP = app; LISTS = app.lists || {}; loadState(); buildShell(); wire(); APP.afterBuild && APP.afterBuild(); applyShow();
+  let t0 = app.tabs[0][0]; try { t0 = localStorage.getItem(APP.key + '.tab') || t0; } catch (e) {}
+  go(app.render[t0] ? t0 : app.tabs[0][0]);
+}
+
+</script>
+<script>
+// title: Financial Independence Planner (UK)
+// desc: When can you stop working? A UK financial independence planner with ISA, pension, LISA, GIA and cash pots, the age-57 bridge, state pension, drawdown tax, tax-free cash and a market simulation.
+const DEF = () => ({
+  age: 35, partner: true, lifeExp: 95, target: 50, display: 'real',
+  cash: 20000, gia: 10000, giaBasis: 8000, isa: 30000, lisa: 0, pen: 60000,
+  cashC: 0, giaC: 0, isaC: 800, lisaC: 0, penC: 1000, cg: 3, takeHome: 4500,
+  ret: 7, fee: .3, vol: 15, cashRate: 3.5, infl: 2.5,
+  spend: 35000, slowAge: 75, slowPct: 20, mortM: 0, mortEnd: 60, oneOffs: [],
+  spa: 67, spPct: 100, spReal: .5, db: 0, dbAge: 65,
+  access: 57, smooth: true, taxIndex: true, order: 'cash,gia,isa,lisa,pen', swr: 4,
+  mcRuns: 400
+});
+const LISTS0 = { oneOffs: { cols: [['label', 'What', 'text'], ['age', 'At age', 'num'], ['amt', 'Amount £ (today)', 'num']], add: () => ({ label: 'New car', age: 60, amt: 20000 }) } };
+let TT = null, TTkey = '';
+function taxTable() { const key = JSON.stringify(UK.pa); if (TT && TTkey === key) return TT; TT = new Float64Array(2401); for (let i = 0; i <= 2400; i++) TT[i] = ukTax({ ns: i * 250 }).total; TTkey = key; return TT; }
+function taxOn(x) { const t = taxTable(); if (x <= 0) return 0; const f = x / 250, i = Math.floor(f); if (i >= 2400) return t[2400] + (x - 600000) * .45; return t[i] + (t[i + 1] - t[i]) * (f - i); }
+function sim(p, retireAge, rets) {
+  const people = p.partner ? 2 : 1, a0 = Math.round(N(p.age)), end = Math.round(N(p.lifeExp)), infl = N(p.infl) / 100;
+  let cash = N(p.cash), gia = N(p.gia), basis = Math.min(N(p.giaBasis), N(p.gia)), isa = N(p.isa), lisa = N(p.lisa), pen = N(p.pen), lsaUsed = 0;
+  const LSA = UK.lumpCap * people, rows = []; let depleted = null;
+  const extra = N(p.extraISA || 0);
+  for (let y = 0; a0 + y <= end; y++) {
+    const a = a0 + y, I = Math.pow(1 + infl, y), r = (rets ? rets[y] : N(p.ret)) - N(p.fee), rc = N(p.cashRate);
+    const taxF = v => p.taxIndex ? taxOn(v / I) * I : taxOn(v);
+    const row = { a, y, I, contrib: 0, need: 0, sp: 0, db: 0, fromCash: 0, fromGia: 0, fromIsa: 0, fromLisa: 0, fromPen: 0, tax: 0, short: 0 };
+    if (a < retireAge) {
+      const g = Math.pow(1 + N(p.cg) / 100, y);
+      const ci = (N(p.isaC) + extra) * 12 * g, cp = N(p.penC) * 12 * g, cgv = N(p.giaC) * 12 * g, cc = N(p.cashC) * 12 * g;
+      const cl = a < 50 ? Math.min(N(p.lisaC) * 12 * g, 4000 * people) : 0;
+      isa += ci; pen += cp; gia += cgv; basis += cgv; cash += cc; lisa += cl * 1.25; row.contrib = ci + cp + cgv + cc + cl * 1.25;
+    } else {
+      let need = N(p.spend) * I * (a >= N(p.slowAge) ? 1 - N(p.slowPct) / 100 : 1) + (a < N(p.mortEnd) ? N(p.mortM) * 12 : 0);
+      (p.oneOffs || []).forEach(o => { if (Math.round(N(o.age)) === a) need += N(o.amt) * I; });
+      row.need = need;
+      const sp = a >= N(p.spa) ? UK.sp * 52 * N(p.spPct) / 100 * people * I * Math.pow(1 + N(p.spReal) / 100, y) : 0, db = a >= N(p.dbAge) ? N(p.db) * I : 0;
+      const base = (sp + db) / people, tax0 = taxF(base) * people; row.sp = sp; row.db = db;
+      let rem = need - (sp + db - tax0), taxTot = tax0, penTaxable = 0;
+      const canPen = a >= N(p.access);
+      const drawPen = (netWanted, maxGross) => { // returns gross drawn
+        const tfShare = () => lsaUsed < LSA ? .25 : 0;
+        const netOf = W => { const tf = Math.min(W * tfShare(), LSA - lsaUsed), tx = W - tf; return W - (taxF(base + (penTaxable + tx) / people) * people - taxTot); };
+        let lo = 0, hi = maxGross; if (netOf(hi) <= netWanted) { lo = hi; } else { for (let k = 0; k < 22; k++) { const m = (lo + hi) / 2; if (netOf(m) < netWanted) lo = m; else hi = m; } lo = hi; }
+        const W = lo, tf = Math.min(W * tfShare(), LSA - lsaUsed), tx = W - tf, newTax = taxF(base + (penTaxable + tx) / people) * people;
+        lsaUsed += tf; penTaxable += tx; const net = W - (newTax - taxTot); taxTot = newTax; pen -= W; row.fromPen += W; return net;
+      };
+      if (canPen && p.smooth && pen > 0) { // fill unused personal allowance with pension
+        const room = Math.max(0, UK.pa * (p.taxIndex ? I : 1) - base) * people, W = Math.min(pen, room / .75, Math.max(0, rem) / 1 + room);
+        if (W > 0 && rem > 0) { const n = drawPen(Math.min(rem, W), Math.min(pen, room / .75)); rem -= n; }
+      }
+      for (const src of String(p.order).split(',')) {
+        if (rem <= 0.5) break;
+        if (src === 'cash') { const t = Math.min(cash, rem); cash -= t; rem -= t; row.fromCash += t; }
+        else if (src === 'gia' && gia > 0) { const frac = Math.max(0, 1 - basis / gia), gross = Math.min(gia, rem / (1 - frac * .18)), gain = gross * frac, cgt = Math.max(0, gain - 3000 * people) * .18; basis -= basis * gross / gia; gia -= gross; rem -= gross - cgt; taxTot += cgt; row.fromGia += gross; }
+        else if (src === 'isa') { const t = Math.min(isa, rem); isa -= t; rem -= t; row.fromIsa += t; }
+        else if (src === 'lisa' && a >= 60) { const t = Math.min(lisa, rem); lisa -= t; rem -= t; row.fromLisa += t; }
+        else if (src === 'pen' && canPen && pen > 0) { rem -= drawPen(rem, pen); }
+      }
+      row.tax = taxTot;
+      if (rem > 1) { row.short = rem; if (depleted == null) depleted = a; }
+    }
+    cash *= 1 + rc / 100; const g = 1 + r / 100; gia *= g; isa *= g; lisa *= g; pen *= g;
+    Object.assign(row, { cash, gia, isa, lisa, pen, total: cash + gia + isa + lisa + pen });
+    rows.push(row);
+  }
+  return { rows, depleted, ok: depleted == null };
+}
+function fiAge(p) { for (let ra = Math.round(N(p.age)); ra <= 80; ra++) if (sim(p, ra).ok) return ra; return null; }
+let D = null;
+const real = (v, I) => S.display === 'real' ? v / I : v;
+const money = (v, I) => gbp(real(v, I));
+function mc(retireAges) {
+  const runs = clamp(Math.round(N(S.mcRuns)), 100, 2000), Y = Math.round(N(S.lifeExp)) - Math.round(N(S.age)) + 1, rand = rng(11), paths = [];
+  for (let k = 0; k < runs; k++) { const r = []; for (let y = 0; y < Y; y++) r.push(Math.max(-60, N(S.ret) + N(S.vol) * gauss(rand))); paths.push(r); }
+  return retireAges.map(ra => { let ok = 0; const tot = []; for (const pth of paths) { const s = sim(S, ra, pth); if (s.ok) ok++; tot.push(s.rows.map(r => real(r.total, r.I))); } return { ra, p: ok / runs, tot }; });
+}
+let MCC = null, MCkey = '';
+function mcCached() { const key = JSON.stringify(S); if (MCC && MCkey === key) return MCC; const t = Math.round(N(S.target)), ages = []; for (let a = Math.max(Math.round(N(S.age)), t - 4); a <= t + 8; a++) ages.push(a); MCC = mc(ages); MCkey = key; return MCC; }
+
+const APPX = {
+  key: 'fi-planner.v1', file: 'fi-planner', title: 'Financial Independence', sub: 'UK · ISA · SIPP · STATE PENSION · v1.0', logo: '∞',
+  def: DEF, lists: LISTS0,
+  reset() { D = { fi: fiAge(S), plan: sim(S, Math.round(N(S.target))) }; },
+  kpis() { const r = D.plan.rows.find(x => x.a === Math.round(N(S.target))) || D.plan.rows[0]; return [['Earliest FI age', D.fi ?? '80+', 'money lasts to ' + N(S.lifeExp)], ['At age ' + N(S.target), D.plan.ok ? 'Works' : 'Runs out at ' + D.plan.depleted, 'deterministic'], ['Pot at ' + N(S.target), money(r.total, r.I), S.display === 'real' ? "today's money" : 'future money'], ['FI number', gbp(N(S.spend) / (N(S.swr) / 100)), `${N(S.swr)}% rule`], ['Saving now', gbp(N(S.isaC) + N(S.penC) + N(S.giaC) + N(S.cashC) + N(S.lisaC)) + '/mo', N(S.takeHome) ? pct((N(S.isaC) + N(S.giaC) + N(S.cashC) + N(S.lisaC)) / N(S.takeHome) * 100, 0) + ' of take-home (excl. pension)' : '']]; },
+  tabs: [['home', 'Start here', 'How the plan works'], ['you', 'Your money', 'Pots, saving, spending, pensions'], ['plan', 'The plan', 'FI age, pots over time'], ['draw', 'Drawdown', 'Where income comes from, with tax'], ['mc', 'Market simulation', 'Chance it lasts, by age'], ['levers', 'Levers', 'What brings FI forward'], ['guide', 'UK rules', 'ISA, pension, LISA, state pension']],
+  build() {
+    return `
+<section class="tab" id="t-home"><div class="hero"><div class="eyebrow">UK financial independence · runs in your browser</div><h1>When could work become <em>optional?</em></h1>
+<p>Tell it what you have, what you save and what you'd spend. It works out the earliest age your money lasts for life, bridging the years before you can touch your pension, paying the right tax on drawdown, and stress-testing the plan against hundreds of possible markets.</p>
+<div class="row" style="margin-top:14px"><button class="btn pri" data-go="you">Enter your numbers →</button><button class="btn" data-go="plan">See the plan</button><button class="btn" data-go="levers">What would bring it forward?</button></div></div>
+<div class="steps">${[['you', 'Your money', 'ISA, pension, Lifetime ISA, general investments and cash, with monthly saving into each. Retirement spending in today\'s money, mortgage end, big one-offs.'], ['plan', 'The plan', 'Your earliest financial independence age, the plan at your target age, pots year by year, and the bridge you need before pension access at 57.'], ['draw', 'Drawdown', 'Year by year: state pension, DB pension, tax-free cash, taxed drawdown, ISA and cash withdrawals, and the tax paid.'], ['mc', 'Market simulation', 'Hundreds of random market paths: the chance the money lasts at each retirement age, and the range of outcomes.'], ['levers', 'Levers', 'How much earlier each extra £100 a month gets you there, what spending less does, and the saving needed to hit your target.'], ['guide', 'UK rules', 'The rules the model uses, in plain English.']].map(([k, t, d], i) => `<div class="step" data-go="${k}"><div class="n">${String(i + 1).padStart(2, '0')}</div><b>${t}</b><p>${d}</p></div>`).join('')}</div>
+<div class="note" style="margin-top:16px">All figures are shown in today's money by default, so £40,000 means what £40,000 buys now. Returns, inflation and rules are assumptions: change them and see how much they matter. Not financial advice.</div></section>
+
+<section class="tab" id="t-you">${head(1, 'Your money', 'Everything the plan needs. Amounts today; saving per month.')}
+<div class="grid2 even"><div>
+${fs('You', fld('age', 'Your age') + fld('target', 'Target age to stop work') + fld('lifeExp', 'Plan to age') + fld('partner', 'Plan for a couple (two state pensions, two tax allowances)', { type: 'chk' }) + fld('display', 'Show amounts in', { type: 'sel', opts: [['real', "Today's money"], ['nominal', 'Future money']] }))}
+${fs('Pots today (£, household)', fld('isa', 'Stocks & shares ISA') + fld('pen', 'Pensions (DC / SIPP / workplace)') + fld('lisa', 'Lifetime ISA') + fld('gia', 'General investment account') + fld('giaBasis', 'GIA amount you paid in') + fld('cash', 'Cash savings'))}
+${fs('Saving each month (£)', fld('isaC', 'Into ISA') + fld('penC', 'Into pensions', { hint: 'Gross: yours + employer + tax relief' }) + fld('lisaC', 'Into Lifetime ISA', { hint: 'Max £4,000/yr each; 25% bonus; usable from 60' }) + fld('giaC', 'Into GIA') + fld('cashC', 'Into cash') + fld('cg', 'Saving grows % a year') + fld('takeHome', 'Household take-home £/month', { hint: 'For your savings rate' }))}
+</div><div>
+${fs('Retirement spending', fld('spend', "Spending £/yr (today's money, after tax)") + fld('slowAge', 'Spending falls from age') + fld('slowPct', 'By %') + fld('mortM', 'Mortgage £/month (if still paying)') + fld('mortEnd', 'Mortgage ends at age'))}
+<fieldset><legend>Big one-offs</legend><div data-list="oneOffs"></div></fieldset>
+${fs('Guaranteed income', fld('spa', 'State pension age') + fld('spPct', 'Your % of the full state pension', { hint: '35 qualifying years = 100%' }) + fld('spReal', 'State pension rises above inflation %', { hint: 'Triple lock' }) + fld('db', 'Defined benefit pension £/yr (today)') + fld('dbAge', 'DB pension from age'))}
+${fs('Markets', fld('ret', 'Investment return % a year') + fld('fee', 'Fees %') + fld('vol', 'Volatility %') + fld('cashRate', 'Cash interest %') + fld('infl', 'Inflation %'))}
+${fs('Drawdown', fld('access', 'Pension access age', { hint: 'Rising from 55 to 57 in April 2028' }) + fld('smooth', 'Use pension to fill the tax-free personal allowance each year', { type: 'chk' }) + fld('taxIndex', 'Tax thresholds rise with inflation (off = frozen forever)', { type: 'chk' }) + fld('order', 'Then draw from', { type: 'sel', opts: [['cash,gia,isa,lisa,pen', 'Cash → GIA → ISA → LISA → pension'], ['cash,gia,pen,isa,lisa', 'Cash → GIA → pension → ISA → LISA'], ['cash,isa,gia,lisa,pen', 'Cash → ISA → GIA → LISA → pension']] }) + fld('swr', 'Rule-of-thumb withdrawal rate %'))}
+</div></div></section>
+
+<section class="tab" id="t-plan">${head(2, 'The plan', 'Your earliest financial independence age, the plan at your target, and your pots over time.')}<div id="planOut"></div></section>
+<section class="tab" id="t-draw">${head(3, 'Drawdown', 'Each retirement year: what you need, where it comes from and the tax you pay.')}<div id="drawOut"></div></section>
+<section class="tab" id="t-mc">${head(4, 'Market simulation', 'Returns come in a random order. A crash in your first years of retirement does far more damage than one later (sequence risk).')}
+<div class="grid2"><div>${fs('Simulation', fld('mcRuns', 'Paths per age') + fld('vol', 'Volatility %'))}<div class="note">Each path draws a random return every year around your average. The same paths are used for every retirement age, so the ages compare fairly.</div></div><div id="mcOut"></div></div></section>
+<section class="tab" id="t-levers">${head(5, 'Levers', 'What actually moves your financial independence age.')}<div id="levOut"></div></section>
+<section class="tab" id="t-guide">${head(6, 'UK rules the plan uses', 'Plain-English versions of the rules behind the numbers.')}
+<div class="cols3">
+<div class="panel"><h3 style="margin-top:0">ISAs</h3><ul><li>£20,000 a year allowance per person across all ISAs.</li><li>No tax on growth or withdrawals, and you can access it any time: ideal for bridging to pension age.</li><li>Lifetime ISA: up to £4,000 a year (part of the £20,000), 25% government bonus, usable for a first home or from 60. Withdraw for anything else and you pay a 25% charge.</li></ul></div>
+<div class="panel"><h3 style="margin-top:0">Pensions</h3><ul><li>Contributions get tax relief at your marginal rate; salary sacrifice also saves NI.</li><li>Annual allowance £60,000 (lower for very high earners or after flexible access).</li><li>Normal minimum pension age rises from 55 to 57 in April 2028.</li><li>25% can be taken tax-free, up to £268,275 in total (the lump sum allowance); the rest is taxed as income.</li><li>From April 2027, unused pensions are due to fall into inheritance tax.</li></ul></div>
+<div class="panel"><h3 style="margin-top:0">State pension & withdrawals</h3><ul><li>Full new state pension: £${UK.sp.toFixed(2)} a week (${UK.year}), needing 35 qualifying years; 10 years minimum for any.</li><li>State pension age is 67, rising to 68 later; check yours on GOV.UK.</li><li>The "4% rule" comes from US data over 30 years; for 40–50 year retirements, 3–3.5% is a more cautious starting point.</li><li>General accounts: capital gains tax on gains above £3,000 a year (18% / 24%).</li></ul></div></div></section>`;
+  },
+  render: {}
+};
+APPX.render.home = () => {};
+APPX.render.you = () => {};
+APPX.render.plan = () => {
+  const p = D.plan, t = Math.round(N(S.target)), at = p.rows.find(r => r.a === t) || p.rows[0];
+  const fiNum = N(S.spend) / (N(S.swr) / 100), yrsTo = t - Math.round(N(S.age));
+  const coast = fiNum / Math.pow(1 + (N(S.ret) - N(S.fee) - N(S.infl)) / 100, Math.max(0, yrsTo));
+  const bridgeYrs = Math.max(0, Math.min(N(S.access), N(S.spa)) - t), bridgeNeed = sum(p.rows.filter(r => r.a >= t && r.a < N(S.access)), r => real(r.need, r.I));
+  const bridgeHave = real(at.isa + at.gia + at.cash, at.I);
+  const totNow = N(S.isa) + N(S.pen) + N(S.lisa) + N(S.gia) + N(S.cash);
+  $('#planOut').innerHTML = `<div class="panel"><div class="reco"><div class="eyebrow">Earliest age your money lasts to ${N(S.lifeExp)}</div><div class="big">${D.fi != null ? 'Age ' + D.fi : 'Not before 80'}</div><p>${D.fi != null ? (D.fi <= t ? `That's ${t - D.fi === 0 ? 'exactly your target' : (t - D.fi) + (t - D.fi === 1 ? ' year' : ' years') + ' before your target of ' + t}.` : `That's ${D.fi - t} year${D.fi - t === 1 ? '' : 's'} after your target of ${t}. See Levers for what would close the gap.`) : 'At these assumptions the money runs out whatever the retirement age. Saving more or spending less are the main levers.'} ${p.ok ? `Stopping at ${t}, the plan lasts to ${N(S.lifeExp)}.` : `Stopping at ${t}, the money runs out at <b>${p.depleted}</b>.`}</p></div>
+  <div class="cards">${stat('Total pots today', gbp(totNow), '')}${stat('Pots at ' + t, money(at.total, at.I), S.display === 'real' ? "today's money" : '')}${stat('FI number', gbp(fiNum), `spending ÷ ${N(S.swr)}%`)}${stat('Coast FI number', gbp(coast), `enough today to stop saving and still reach FI by ${t}`, totNow >= coast ? 'good' : '')}${stat('Bridge to pension age', bridgeYrs ? gbp(bridgeNeed) : 'none needed', bridgeYrs ? `${bridgeYrs} yrs from ISA, GIA & cash; you'll have ${gbp(bridgeHave)}` : '', bridgeYrs ? (bridgeHave >= bridgeNeed ? 'good' : 'bad') : '')}${stat('Withdrawal rate at ' + t, pct(at.total ? N(S.spend) * at.I / at.total * 100 : 0), 'first-year spending ÷ pots')}</div>
+  ${bridgeYrs && bridgeHave < bridgeNeed ? `<div class="warnbox">Pensions can't be touched until ${N(S.access)}. Your accessible pots (ISA, GIA, cash) at ${t} cover about ${gbp(bridgeHave)} of the ${gbp(bridgeNeed)} needed for those ${bridgeYrs} years. Shift some saving from pension to ISA, or plan part-time income for the gap.</div>` : ''}
+  <h3>Pots over time ${S.display === 'real' ? "(today's money)" : ''}</h3><div class="chart" id="chPots"></div></div>
+  <div class="panel"><h3 style="margin-top:0">Year by year</h3><div class="wrap"><table class="tbl"><thead><tr><th>Age</th><th>Saved</th><th>Spending</th><th>State + DB</th><th>Tax</th><th>ISA</th><th>Pension</th><th>LISA</th><th>GIA</th><th>Cash</th><th>Total</th></tr></thead><tbody>${p.rows.map(r => `<tr class="${r.a === t ? 'hl' : ''}${r.short ? ' bad' : ''}"><td>${r.a}</td><td>${r.contrib ? money(r.contrib, r.I) : ''}</td><td>${r.need ? money(r.need, r.I) : ''}</td><td>${r.sp + r.db ? money(r.sp + r.db, r.I) : ''}</td><td>${r.tax ? money(r.tax, r.I) : ''}</td><td>${money(r.isa, r.I)}</td><td>${money(r.pen, r.I)}</td><td>${money(r.lisa, r.I)}</td><td>${money(r.gia, r.I)}</td><td>${money(r.cash, r.I)}</td><td style="color:var(--${r.short ? 'bad' : 'ink'})">${money(r.total, r.I)}</td></tr>`).join('')}</tbody></table></div></div>`;
+  const xs = p.rows.map(r => String(r.a));
+  lineChart($('#chPots'), { xs, label: 'Pots', series: [{ name: 'Total', color: 'var(--acc)', ys: p.rows.map(r => real(r.total, r.I)), area: true }, { name: 'Pension', color: 'var(--blue)', ys: p.rows.map(r => real(r.pen, r.I)) }, { name: 'ISA', color: 'var(--good)', ys: p.rows.map(r => real(r.isa, r.I)) }, { name: 'GIA + cash + LISA', color: 'var(--violet)', ys: p.rows.map(r => real(r.gia + r.cash + r.lisa, r.I)) }], markers: [{ i: xs.indexOf(String(t)), label: 'stop work' }, { i: xs.indexOf(String(Math.round(N(S.access)))), label: 'pension access', color: 'var(--blue)', dy: 14 }, { i: xs.indexOf(String(Math.round(N(S.spa)))), label: 'state pension', color: 'var(--good)', dy: 28 }], tipTitle: i => 'Age ' + xs[i] });
+};
+APPX.render.draw = () => {
+  const p = D.plan, t = Math.round(N(S.target)), rr = p.rows.filter(r => r.a >= t);
+  $('#drawOut').innerHTML = `<div class="panel"><h3 style="margin-top:0">Where retirement income comes from ${S.display === 'real' ? "(today's money)" : ''}</h3><div class="chart" id="chDraw"></div>
+  <p class="hint">Bars show gross amounts drawn from each source. Pension withdrawals are 25% tax-free (until the lump sum allowance is used) and 75% taxed as income alongside state and DB pensions. ${S.smooth ? 'Each year the plan first draws enough pension to use your tax-free personal allowance.' : ''}</p>
+  <div class="wrap"><table class="tbl"><thead><tr><th>Age</th><th>Need</th><th>State pension</th><th>DB</th><th>Pension drawn</th><th>ISA</th><th>LISA</th><th>GIA</th><th>Cash</th><th>Tax paid</th><th>Shortfall</th></tr></thead><tbody>${rr.map(r => `<tr><td>${r.a}</td><td>${money(r.need, r.I)}</td><td>${money(r.sp, r.I)}</td><td>${money(r.db, r.I)}</td><td>${money(r.fromPen, r.I)}</td><td>${money(r.fromIsa, r.I)}</td><td>${money(r.fromLisa, r.I)}</td><td>${money(r.fromGia, r.I)}</td><td>${money(r.fromCash, r.I)}</td><td>${money(r.tax, r.I)}</td><td style="color:var(--${r.short ? 'bad' : 'muted'})">${r.short ? money(r.short, r.I) : '–'}</td></tr>`).join('')}</tbody></table></div>
+  <div class="cards">${stat('Lifetime tax in retirement', money(sum(rr, r => real(r.tax, r.I)), 1), S.display === 'real' ? "today's money" : '')}${stat('Average tax rate on income', pct(sum(rr, 'tax') / Math.max(1, sum(rr, r => r.fromPen + r.sp + r.db)) * 100), 'on pension, state & DB income')}</div></div>`;
+  barChart($('#chDraw'), { cats: rr.map(r => String(r.a)), h: 280, stacks: [{ name: 'State pension', color: 'var(--good)', vals: rr.map(r => real(r.sp, r.I)) }, { name: 'DB', color: 'var(--teal)', vals: rr.map(r => real(r.db, r.I)) }, { name: 'Pension', color: 'var(--blue)', vals: rr.map(r => real(r.fromPen, r.I)) }, { name: 'ISA', color: 'var(--acc)', vals: rr.map(r => real(r.fromIsa, r.I)) }, { name: 'LISA', color: 'var(--pink)', vals: rr.map(r => real(r.fromLisa, r.I)) }, { name: 'GIA', color: 'var(--violet)', vals: rr.map(r => real(r.fromGia, r.I)) }, { name: 'Cash', color: 'var(--warn)', vals: rr.map(r => real(r.fromCash, r.I)) }, { name: 'Shortfall', color: 'var(--bad)', vals: rr.map(r => real(r.short, r.I)) }], tipTitle: i => 'Age ' + rr[i].a });
+};
+APPX.render.mc = () => {
+  const res = mcCached(), t = Math.round(N(S.target)), me = res.find(x => x.ra === t) || res[0];
+  const n = me.tot[0].length, q = (arr, pq) => { const s = [...arr].sort((a, b) => a - b); return s[Math.floor(pq * (s.length - 1))]; };
+  const p10 = [], p50 = [], p90 = []; for (let y = 0; y < n; y++) { const col = me.tot.map(r => r[y]); p10.push(q(col, .1)); p50.push(q(col, .5)); p90.push(q(col, .9)); }
+  const safe = res.find(x => x.p >= .85);
+  $('#mcOut').innerHTML = `<div class="panel"><div class="reco"><div class="eyebrow">${me.tot.length} market paths</div><div class="big">${pct(me.p * 100, 0)} chance it lasts if you stop at ${t}</div><p>${safe ? `For an 85% or better chance, stop at <b>${safe.ra}</b>.` : 'No age in this range reaches an 85% chance.'} Most planners aim for 80–90% and adjust spending if markets disappoint.</p></div>
+  <h3>Chance the money lasts, by retirement age</h3><div class="chart" id="chAge"></div>
+  <h3>Range of outcomes stopping at ${t} ${S.display === 'real' ? "(today's money)" : ''}</h3><div class="chart" id="chFan"></div><p class="hint">Shaded band: 10th to 90th percentile of total wealth. Line: median.</p></div>`;
+  barChart($('#chAge'), { cats: res.map(x => String(x.ra)), h: 220, yFmt: v => (v * 100).toFixed(0) + '%', tipFmt: v => (v * 100).toFixed(0) + '%', stacks: [{ name: 'Success rate', color: 'var(--good)', vals: res.map(x => x.p) }], tipTitle: i => 'Stop at ' + res[i].ra });
+  const xs = D.plan.rows.map(r => String(r.a));
+  lineChart($('#chFan'), { xs, series: [{ name: 'Median', color: 'var(--acc)', ys: p50, band: [p10, p90] }, { name: '10th percentile', color: 'var(--bad)', ys: p10, dash: '4 4' }, { name: '90th percentile', color: 'var(--good)', ys: p90, dash: '4 4' }], tipTitle: i => 'Age ' + xs[i] });
+};
+APPX.render.levers = () => {
+  const base = D.fi, t = Math.round(N(S.target));
+  const L = [['Save £100 more a month (ISA)', { extraISA: 100 }], ['Save £250 more a month', { extraISA: 250 }], ['Save £500 more a month', { extraISA: 500 }], ['Spend 10% less in retirement', { spend: N(S.spend) * .9 }], ['Spend 20% less in retirement', { spend: N(S.spend) * .8 }], ['Returns 1% lower', { ret: N(S.ret) - 1 }], ['Returns 1% higher', { ret: N(S.ret) + 1 }], ['Inflation 1% higher', { infl: N(S.infl) + 1 }], ['Fees 0.5% higher', { fee: N(S.fee) + .5 }], ['No state pension', { spPct: 0 }], ['Pension access at 58', { access: 58 }]].map(([l, o]) => { const f = fiAge({ ...S, ...o }); return [l, f]; });
+  let need = null; if (!sim(S, t).ok) { let lo = 0, hi = 20000; if (sim({ ...S, extraISA: hi }, t).ok) { for (let k = 0; k < 30; k++) { const m = (lo + hi) / 2; if (sim({ ...S, extraISA: m }, t).ok) hi = m; else lo = m; } need = hi; } }
+  let spendMax = null; { let lo = 0, hi = N(S.spend) * 3; for (let k = 0; k < 30; k++) { const m = (lo + hi) / 2; if (sim({ ...S, spend: m }, t).ok) lo = m; else hi = m; } spendMax = lo; }
+  $('#levOut').innerHTML = `<div class="panel"><div class="cards">${stat('Extra saving to stop at ' + t, sim(S, t).ok ? 'None needed' : need != null ? gbp(need) + '/mo' : 'Over £20k/mo', 'into an ISA, from today', sim(S, t).ok ? 'good' : 'warn')}${stat('Max spending if you stop at ' + t, gbp(spendMax) + '/yr', "today's money, lasting to " + N(S.lifeExp), spendMax >= N(S.spend) ? 'good' : 'bad')}${stat('Your FI age now', base ?? '80+', '')}</div>
+  <div class="wrap short"><table class="tbl"><thead><tr><th>Change</th><th>FI age</th><th>Difference</th></tr></thead><tbody>${L.map(([l, f]) => `<tr><td class="l">${l}</td><td>${f ?? '80+'}</td><td style="color:var(--${f == null || base == null ? 'muted' : f < base ? 'good' : f > base ? 'bad' : 'muted'})">${f == null || base == null ? '–' : f === base ? 'no change' : (f < base ? (base - f) + ' yrs sooner' : (f - base) + ' yrs later')}</td></tr>`).join('')}</tbody></table></div>
+  <h3>Saving vs FI age</h3><div class="chart" id="chLev"></div><p class="hint">Extra monthly saving into an ISA from today, holding everything else as entered.</p></div>`;
+  const xs = [0, 100, 200, 300, 500, 750, 1000, 1500, 2000], ys = xs.map(x => fiAge({ ...S, extraISA: x }));
+  lineChart($('#chLev'), { xs: xs.map(x => '+£' + x), h: 220, yFmt: v => Math.round(v), tipFmt: v => 'age ' + v, series: [{ name: 'FI age', color: 'var(--acc)', ys: ys.map(v => v ?? 80) }], yMin: Math.min(...ys.filter(fin)) - 2 });
+};
+APPX.render.guide = () => {};
+boot(APPX);
+
+</script>
+</body>
+</html>

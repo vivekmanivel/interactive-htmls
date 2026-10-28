@@ -1,0 +1,601 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>UK Take-Home Pay &amp; Contracting Calculator</title>
+<meta name="description" content="UK take-home pay with every pension type, student loans, child benefit charge and the £100k trap, plus contracting via limited company, umbrella or sole trader against a permanent job, with day-rate equivalents.">
+<style>
+:root{
+  --bg:#0a1120;--bg2:#0d1628;--panel:#111b30;--panel2:#16233d;--ink:#f3eee4;--muted:#93a0b7;--line:#22314d;
+  --acc:#ff6a2b;--acc2:#ffa063;--blue:#5aa2ff;--good:#3fd18b;--bad:#ff6161;--warn:#ffb648;--violet:#b48cff;--teal:#2ec4c4;--pink:#ff7ab6;
+  --serif:Georgia,serif;--sans:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;--mono:ui-monospace,Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.5 var(--sans)}
+a{color:var(--acc2)}
+h1,h2,h3{font-family:var(--serif);font-weight:600;letter-spacing:-.01em}
+h2{font-size:22px;margin:0 0 4px}
+h3{font-size:16px;margin:22px 0 8px}
+.mono{font-family:var(--mono)}
+small,.hint{color:var(--muted);font-size:12.5px}
+.hint{margin:6px 0 10px}
+.app{display:grid;grid-template-columns:268px minmax(0,1fr);min-height:100vh}
+nav.side{position:sticky;top:0;height:100vh;overflow:auto;background:linear-gradient(180deg,var(--bg2),var(--bg));border-right:1px solid var(--line);padding:20px 16px}
+.brand{display:flex;gap:10px;align-items:center;margin-bottom:18px}
+.logo{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,var(--acc),#ff3d6e);display:grid;place-items:center;font-family:var(--serif);font-weight:700;font-size:19px;color:#fff;flex:none}
+.brand b{font-family:var(--serif);font-size:17px;display:block;line-height:1.15}
+.brand span{font:10.5px var(--mono);color:var(--muted);letter-spacing:.06em}
+ol.pipe{list-style:none;margin:0;padding:0;position:relative}
+ol.pipe::before{content:"";position:absolute;left:15px;top:14px;bottom:14px;width:2px;background:linear-gradient(180deg,var(--acc),var(--violet),var(--blue));opacity:.55;border-radius:2px}
+ol.pipe li{position:relative;margin:2px 0}
+ol.pipe button{all:unset;cursor:pointer;display:grid;grid-template-columns:32px 1fr;gap:10px;align-items:center;width:100%;padding:7px 6px;border-radius:10px;box-sizing:border-box}
+ol.pipe button:hover{background:rgba(255,255,255,.04)}
+ol.pipe .n{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;background:var(--panel);border:1px solid var(--line);font:600 12px var(--mono);color:var(--muted);position:relative;z-index:1}
+ol.pipe .t{font-weight:600;font-size:13.5px;line-height:1.2}
+ol.pipe .d{display:block;font-size:11.5px;color:var(--muted);font-weight:400}
+ol.pipe button.active .n{background:var(--acc);border-color:var(--acc);color:#fff;box-shadow:0 0 0 4px rgba(255,106,43,.18)}
+ol.pipe button.active .t{color:var(--acc2)}
+.tools{margin-top:18px;border-top:1px solid var(--line);padding-top:14px;display:flex;flex-wrap:wrap;gap:6px}
+.family{margin-top:14px;font-size:12px;color:var(--muted)}
+.family a{display:block;margin:3px 0;text-decoration:none}
+main{min-width:0;padding:0 26px 60px}
+.kpis{position:sticky;top:0;z-index:20;background:rgba(10,17,32,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);margin:0 -26px 18px;padding:10px 26px;display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px}
+.kpis:empty{display:none}
+.kpis.nok{padding:0;border:0;margin-bottom:18px}
+.kpi .l{font:11px var(--mono);color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.kpi .v{font:600 17px var(--mono);white-space:nowrap}
+.kpi .s{font-size:11.5px;color:var(--muted)}
+.tab{display:none;padding-top:4px}.tab.active{display:block;animation:fade .25s ease}
+@keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+.tabhead{margin:6px 0 14px}
+.eyebrow{font:11.5px var(--mono);color:var(--acc2);letter-spacing:.12em;text-transform:uppercase}
+.grid2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.3fr);gap:16px;align-items:start}
+.grid2.even{grid-template-columns:1fr 1fr}
+.grid2.wideL{grid-template-columns:minmax(0,1.5fr) minmax(0,1fr)}
+@media (max-width:1150px){.grid2,.grid2.even,.grid2.wideL{grid-template-columns:1fr}}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px 18px;min-width:0}
+.panel+.panel{margin-top:16px}
+fieldset{border:1px solid var(--line);border-radius:12px;padding:10px 12px 12px;margin:0 0 12px;min-width:0}
+legend{font:600 11.5px var(--mono);color:var(--acc2);text-transform:uppercase;letter-spacing:.08em;padding:0 6px}
+.fg{display:grid;grid-template-columns:repeat(auto-fill,minmax(165px,1fr));gap:10px}
+label{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--muted);font-weight:500}
+label>small{font-size:11px;line-height:1.3}
+input,select,textarea{font:13px var(--mono);color:var(--ink);background:var(--bg2);border:1px solid var(--line);border-radius:8px;padding:7px 9px;width:100%;min-width:0}
+select{font-family:var(--sans)}
+input:focus,select:focus,textarea:focus{outline:2px solid var(--acc);outline-offset:-1px}
+input[type=range]{padding:0;accent-color:var(--acc)}
+label.chk{flex-direction:row;align-items:center;gap:8px;color:var(--ink);font-size:13px}
+label.chk input{width:auto;accent-color:var(--acc)}
+.btn{font:600 12.5px var(--sans);border:1px solid var(--line);background:var(--panel2);color:var(--ink);padding:7px 12px;border-radius:8px;cursor:pointer;text-decoration:none;display:inline-block}
+.btn:hover{border-color:var(--acc)}
+.btn.pri{background:var(--acc);border-color:var(--acc);color:#fff}
+.btn.sm{padding:4px 9px;font-size:12px}
+.btn.on{background:rgba(255,106,43,.18);border-color:var(--acc);color:var(--acc2)}
+.btn.del{color:var(--bad);padding:3px 8px}
+.filebtn{position:relative;overflow:hidden}.filebtn input{position:absolute;inset:0;opacity:0;cursor:pointer}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;margin:10px 0}
+.stat{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:10px 12px;min-width:0}
+.stat .l{font-size:11.5px;color:var(--muted);font-weight:600}
+.stat .v{font:600 19px var(--mono);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.stat .s{font-size:11.5px;color:var(--muted)}
+.stat.good .v{color:var(--good)}.stat.bad .v{color:var(--bad)}.stat.warn .v{color:var(--warn)}.stat.acc .v{color:var(--acc2)}
+.stat.hero{background:linear-gradient(135deg,rgba(255,106,43,.16),rgba(90,162,255,.08));border-color:rgba(255,106,43,.45)}
+.note,.warnbox,.badbox,.okbox{padding:8px 12px;border-radius:8px;margin:8px 0;font-size:13px}
+.note{border-left:3px solid var(--blue);background:rgba(90,162,255,.08)}
+.warnbox{border-left:3px solid var(--warn);background:rgba(255,182,72,.08)}
+.badbox{border-left:3px solid var(--bad);background:rgba(255,97,97,.08)}
+.okbox{border-left:3px solid var(--good);background:rgba(63,209,139,.08)}
+.reco{border:1px solid rgba(255,106,43,.5);background:linear-gradient(135deg,rgba(255,106,43,.14),rgba(180,140,255,.06));border-radius:14px;padding:14px 16px;margin:10px 0}
+.reco .big{font:600 26px var(--mono);color:var(--acc2);line-height:1.2}
+.reco p{margin:6px 0}
+table{border-collapse:collapse;width:100%}
+.tbl th,.tbl td{padding:6px 8px;border-bottom:1px solid var(--line);font-size:12.5px;text-align:right;white-space:nowrap}
+.tbl th{color:var(--muted);font-weight:600;position:sticky;top:0;background:var(--panel);z-index:1}
+.tbl td:first-child,.tbl th:first-child,.tbl td.l,.tbl th.l{text-align:left}
+.tbl td{font-family:var(--mono)}
+.tbl td.l,.tbl td.t{font-family:var(--sans)}
+.tbl td.t{white-space:normal;text-align:left;min-width:180px}
+.tbl tr.tot td{font-weight:700;border-top:2px solid var(--line)}
+.tbl tr.hl td{background:rgba(255,106,43,.1)}
+.tbl tr.yr{cursor:pointer}.tbl tr.yr:hover td{background:rgba(255,255,255,.03)}
+.tbl tr.mo td{color:var(--muted);background:var(--bg2)}
+.tbl input,.tbl select{padding:4px 6px;font-size:12px}
+.wrap{overflow:auto;max-height:70vh;border:1px solid var(--line);border-radius:10px}
+.wrap.short{max-height:none}
+.chart svg{width:100%;height:auto;display:block}
+.chart text{fill:var(--muted);font:11px var(--mono)}
+.chart .gl{stroke:var(--line)}
+.chart .hit{fill:transparent;cursor:crosshair}
+.tip{position:fixed;pointer-events:none;background:#030712;border:1px solid var(--line);color:var(--ink);padding:7px 10px;border-radius:8px;font:12px var(--mono);z-index:999;display:none;white-space:pre;box-shadow:0 8px 24px rgba(0,0,0,.4);max-width:420px}
+.toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:var(--acc);color:#fff;padding:9px 16px;border-radius:10px;z-index:999;font-weight:600}
+.toast.hidden{display:none}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.between{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.hbar{display:grid;grid-template-columns:200px 1fr 96px;gap:8px;align-items:center;font-size:12.5px;margin:3px 0}
+.hbar .t{height:10px;background:var(--bg2);border-radius:6px;overflow:hidden}
+.hbar .t i{display:block;height:100%}
+.hbar .v{text-align:right;font-family:var(--mono)}
+.pill{display:inline-block;padding:1px 8px;border-radius:99px;background:var(--panel2);border:1px solid var(--line);font:11px var(--mono);color:var(--muted);white-space:nowrap}
+.pill.g{color:var(--good);border-color:rgba(63,209,139,.4)}.pill.b{color:var(--bad);border-color:rgba(255,97,97,.4)}.pill.w{color:var(--warn);border-color:rgba(255,182,72,.4)}.pill.a{color:var(--acc2);border-color:rgba(255,106,43,.5)}.pill.v{color:var(--violet);border-color:rgba(180,140,255,.45)}.pill.bl{color:var(--blue);border-color:rgba(90,162,255,.45)}
+details.more{border:1px dashed var(--line);border-radius:10px;padding:6px 12px;margin:10px 0}
+details.more summary{cursor:pointer;font-weight:600;color:var(--muted)}
+.hero{position:relative;overflow:hidden;border-radius:18px;padding:34px 30px;border:1px solid var(--line);background:radial-gradient(900px 300px at 0% 0%,rgba(255,106,43,.22),transparent 60%),radial-gradient(700px 300px at 100% 100%,rgba(90,162,255,.18),transparent 60%),var(--panel)}
+.hero h1{font-size:clamp(28px,4.2vw,46px);line-height:1.05;margin:8px 0 12px;max-width:860px}
+.hero h1 em{font-style:italic;color:var(--acc2)}
+.hero p{color:#cdd5e3;max-width:780px;font-size:15px}
+.steps{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px;margin-top:16px}
+.step{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px;cursor:pointer;transition:border-color .15s,transform .15s}
+.step:hover{border-color:var(--acc);transform:translateY(-2px)}
+.step .n{font:600 12px var(--mono);color:var(--acc2)}
+.step b{display:block;font-family:var(--serif);font-size:17px;margin:4px 0}
+.step p{margin:0;color:var(--muted);font-size:13px}
+.cols3{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px}
+.cols3 ul{padding-left:18px;margin:6px 0}.cols3 li{margin:3px 0;font-size:13px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font:12px var(--sans);border:1px solid var(--line);background:var(--panel2);color:var(--muted);border-radius:99px;padding:3px 10px;cursor:pointer}
+.chip.on{background:var(--acc);border-color:var(--acc);color:#fff}
+@media (max-width:900px){
+  .app{grid-template-columns:1fr}
+  nav.side{position:static;height:auto;padding:12px}
+  ol.pipe{display:flex;overflow-x:auto;gap:4px}
+  ol.pipe::before{display:none}
+  ol.pipe button{grid-template-columns:28px auto;white-space:nowrap}
+  ol.pipe .d,.family{display:none}
+  main{padding:0 14px 50px}
+  .kpis{margin:0 -14px 14px;padding:8px 14px;position:static}
+  .hbar{grid-template-columns:120px 1fr 80px}
+}
+@media print{nav.side,.kpis,.tools,.btn{display:none!important}.app{display:block}.tab{display:block!important;page-break-after:always}}
+
+
+</style>
+<meta name="author" content="Usualy Labs">
+<meta name="color-scheme" content="light dark">
+<script>/* Usualy Labs theme switcher: auto | light | dark, remembered in this browser only */
+(function(){var K='usualy.theme',d=document.documentElement,m=window.matchMedia?matchMedia('(prefers-color-scheme: dark)'):null;
+function p(){try{return localStorage.getItem(K)||'auto'}catch(e){return 'auto'}}
+function a(){var v=p();d.setAttribute('data-theme',v==='auto'?(m&&m.matches?'dark':'light'):v);var s=document.getElementById('themeSel');if(s)s.value=v}
+a();if(m&&m.addEventListener)m.addEventListener('change',a);
+window.setTheme=function(v){try{localStorage.setItem(K,v)}catch(e){}a()};
+document.addEventListener('change',function(e){if(e.target&&e.target.id==='themeSel')setTheme(e.target.value)});
+document.addEventListener('DOMContentLoaded',a);})();
+</script>
+<style>
+.ul-theme{display:flex;gap:8px;align-items:center;margin-top:10px;font-size:12.5px;color:var(--muted)}
+.ul-theme select{background:var(--panel);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:4px 8px;font:inherit}
+:root[data-theme=light]{--bg:#f7f5f0;--bg2:#efece4;--panel:#ffffff;--panel2:#f3f1ec;--ink:#1b2333;--muted:#5d6678;--line:#dcd7cc;--acc:#d9531a;--acc2:#b8460f;--blue:#2f6fd6;--good:#1d8f5a;--bad:#cc3333;--warn:#a86d12;--violet:#7650d0}
+[data-theme=light] .kpis{background:rgba(247,245,240,.94)}
+[data-theme=light] ol.pipe button:hover{background:rgba(0,0,0,.04)}
+.ul-about{margin:28px 0 8px;padding:18px 20px;border:1px solid var(--line);border-radius:14px;background:var(--panel);font-size:13px;line-height:1.6}
+.ul-about h2{font-size:18px}.ul-about h3{font-size:14px;margin:14px 0 4px}.ul-about ul{margin:4px 0;padding-left:20px}
+@media print{.ul-theme{display:none}}
+[data-theme=light] .family a{color:var(--acc2)}
+</style>
+</head>
+<body>
+<div class="app"><nav class="side" id="side"></nav><main><header class="kpis" id="kpis"></header><div id="tabs"></div>
+<footer class="ul-about" id="about">
+  <h2>About, data sources &amp; disclaimer</h2>
+  <p><b>UK Take-Home Pay &amp; Contracting Calculator</b> &middot; published by <b>Usualy Labs</b> &middot; version 1.0.0 &middot; figures last checked October 2026.</p>
+  <h3>Not advice</h3>
+  <p>For general information and personal research only. It is <b>not</b> financial, investment, tax, legal or debt advice, and Usualy Labs is not authorised or regulated by the Financial Conduct Authority. It does not recommend any product or provider. Results are illustrations based on your inputs and on assumptions that may be wrong; investment returns are not guaranteed and can fall as well as rise; tax rules change and depend on your circumstances. Check with the official sources and a qualified, regulated adviser before acting.</p>
+  <p>Provided &ldquo;as is&rdquo; without warranty of any kind. To the fullest extent permitted by law, Usualy Labs and contributors accept no responsibility or liability for any loss or decision arising from its use. Nothing here limits any liability that cannot be limited by law.</p>
+  <h3>Your privacy</h3>
+  <p>Usualy Labs collects nothing. This page makes no network requests: no accounts, analytics, cookies, trackers or web fonts. Inputs are saved only in <b>your browser&rsquo;s local storage</b> on this device. &ldquo;Copy share link&rdquo; puts your inputs into the link itself; it is only shared if you send it, so treat it like a private document. Export and Import use a file on your own device.</p>
+  <h3>Data sources and credits</h3>
+  <p>All credit for the underlying information belongs to these publishers; inclusion does not imply their endorsement.</p>
+  <ul>
+    <li><b>HM Revenue &amp; Customs / GOV.UK</b> &ndash; 2026/27 Income Tax bands and allowances, National Insurance, dividend and savings rates (OGL v3.0).</li>
+    <li><b>Scottish Government / Revenue Scotland</b> &ndash; Scottish income tax bands for 2026/27 (OGL v3.0).</li>
+    <li><b>Student Loans Company / GOV.UK</b> &ndash; student and postgraduate loan repayment thresholds (OGL v3.0).</li>
+    <li><b>HMRC / GOV.UK</b> &ndash; Child Benefit and the High Income Child Benefit Charge, Marriage Allowance, pension relief methods, Corporation Tax, Employment Allowance and the off-payroll working (IR35) rules (OGL v3.0).</li>
+    <li>Day rates, expenses, umbrella margins and permanent-role comparisons are <b>illustrative assumptions</b>.</li>
+  </ul>
+  <p>IR35 status depends on the facts of each engagement. HMRC&rsquo;s free <b>Check Employment Status for Tax (CEST)</b> tool and a qualified accountant can help.</p>
+  <p>Contains public sector information licensed under the Open Government Licence v3.0 where marked. No third-party code libraries are used.</p>
+  <p>Spotted a mistake or out-of-date figure? Please report it through the project&rsquo;s GitHub Issues page.</p>
+</footer>
+</main></div>
+<div class="tip" id="tip"></div><div class="toast hidden" id="toast"></div>
+<script>
+'use strict';
+/* ===== Usualy Labs · shared kit (TEMPV01) ===== */
+const $ = (s, e = document) => e.querySelector(s), $$ = (s, e = document) => [...e.querySelectorAll(s)];
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const fin = n => typeof n === 'number' && isFinite(n);
+const N = v => { const x = parseFloat(v); return isFinite(x) ? x : 0; };
+const gbp = n => fin(n) ? (n < 0 ? '−£' : '£') + Math.abs(Math.round(n)).toLocaleString('en-GB') : '–';
+const gbp2 = n => fin(n) ? (n < 0 ? '−£' : '£') + Math.abs(n).toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '–';
+const pct = (n, d = 1) => fin(n) ? n.toFixed(d) + '%' : '–';
+const num0 = n => fin(n) ? Math.round(n).toLocaleString('en-GB') : '–';
+const kfmt = v => { const a = Math.abs(v), s = v < 0 ? '−' : ''; return a >= 1e6 ? s + '£' + (a / 1e6).toFixed(2) + 'm' : a >= 1e3 ? s + '£' + Math.round(a / 1e3) + 'k' : s + '£' + Math.round(a); };
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+const sum = (arr, f) => arr.reduce((a, x) => a + (+(f ? (typeof f === 'function' ? f(x) : x[f]) : x) || 0), 0);
+const yrsMo = m => { m = Math.round(m); return m < 12 ? `${m} mo` : `${Math.floor(m / 12)} yr${m % 12 ? ' ' + (m % 12) + ' mo' : ''}`; };
+const todayYM = () => new Date().toISOString().slice(0, 7);
+const monthsAdd = (ym, k) => { const [y, m] = ym.split('-').map(Number); return new Date(Date.UTC(y, m - 1 + k, 1)).toISOString().slice(0, 7); };
+const ymLabel = ym => { const [y, m] = ym.split('-').map(Number); return new Date(Date.UTC(y, m - 1, 1)).toLocaleDateString('en-GB', { month: 'short', year: 'numeric', timeZone: 'UTC' }); };
+const debounce = (fn, ms) => { let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), ms); }; };
+function toast(m) { const t = $('#toast'); t.textContent = m; t.classList.remove('hidden'); clearTimeout(toast.t); toast.t = setTimeout(() => t.classList.add('hidden'), 2600); }
+function showTip(e, txt) { const t = $('#tip'); t.textContent = txt; t.style.display = 'block'; t.style.left = Math.min(e.clientX + 14, innerWidth - 300) + 'px'; t.style.top = (e.clientY + 14) + 'px'; }
+function hideTip() { $('#tip').style.display = 'none'; }
+function download(name, text, type) { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([text], { type })); a.download = name; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 2000); }
+
+/* ---------- finance primitives ---------- */
+function pmt(P, r, n) { if (n <= 0) return P; if (Math.abs(r) < 1e-12) return P / n; return P * r / (1 - Math.pow(1 + r, -n)); }
+function nper(P, r, A) { if (P <= 0) return 0; if (Math.abs(r) < 1e-12) return P / A; if (A <= P * r) return Infinity; return -Math.log(1 - P * r / A) / Math.log(1 + r); }
+function pvA(r, n, A) { if (A <= 0) return 0; if (Math.abs(r) < 1e-12) return A * n; return A * (1 - Math.pow(1 + r, -n)) / r; }
+function rng(seed) { return () => { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+function gauss(rand) { let u = 0, v = 0; while (u === 0) u = rand(); while (v === 0) v = rand(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v); }
+const mRate = annualPct => Math.pow(1 + annualPct / 100, 1 / 12) - 1;
+
+/* ---------- UK tax engine (2026/27 defaults; every figure overridable) ---------- */
+const UK = {
+  year: '2026/27', pa: 12570, taper: 100000, basic: 37700, addl: 125140,
+  pt: 12570, uel: 50270, ee: .08, ee2: .02, er: .15, st: 5000, ea: 10500, c4: .06, c4b: .02,
+  divAllow: 500, div: [.1075, .3575, .3935], psa: [1000, 500, 0],
+  sl: { p1: 26065, p2: 28470, p4: 32745, p5: 25000, pg: 21000 },
+  scot: [[2827, .19], [14921, .20], [31092, .21], [62430, .42], [125140, .45], [Infinity, .48]],
+  cb: [27.05, 17.90], hicbc: [60000, 80000], sp: 241.30, lumpCap: 268275, ma: 1260,
+  ct: { small: .19, main: .25, lo: 50000, hi: 250000 }
+};
+/* ns: earnings/pension/rental income; div: dividends; ras: gross relief-at-source pension contributions (extend bands) */
+function ukTax({ ns = 0, div = 0, ras = 0, scot = false, paOverride = null } = {}) {
+  ns = Math.max(0, ns); div = Math.max(0, div);
+  const ani = ns + div - ras;
+  const pa = paOverride != null ? paOverride : Math.max(0, UK.pa - Math.max(0, (ani - UK.taper) / 2));
+  const paNS = Math.min(pa, ns), paD = Math.min(pa - paNS, div), tNS = ns - paNS, tD = div - paD;
+  const ext = Math.max(0, ras), B1 = UK.basic + ext, B2 = UK.addl + ext, bands = [];
+  let taxNS = 0;
+  if (scot) {
+    let prev = 0;
+    UK.scot.forEach(([lim, r], i) => { const L = lim === Infinity ? Infinity : lim + ext, amt = Math.max(0, Math.min(tNS, L) - prev); if (amt > 0) { bands.push({ label: ['Starter', 'Basic', 'Intermediate', 'Higher', 'Advanced', 'Top'][i] + ` ${Math.round(r * 100)}%`, amt, r, tax: amt * r }); taxNS += amt * r; } prev = L; });
+  } else {
+    const b = [[B1, .20, 'Basic 20%'], [B2, .40, 'Higher 40%'], [Infinity, .45, 'Additional 45%']]; let prev = 0;
+    b.forEach(([L, r, l]) => { const amt = Math.max(0, Math.min(tNS, L) - prev); if (amt > 0) { bands.push({ label: l, amt, r, tax: amt * r }); taxNS += amt * r; } prev = L; });
+  }
+  // dividends sit on top of non-savings income, using UK bands
+  let taxDiv = 0, pos = tNS, allow = Math.min(UK.divAllow, tD), left = tD;
+  const db = [[B1, UK.div[0], 'Dividend basic'], [B2, UK.div[1], 'Dividend higher'], [Infinity, UK.div[2], 'Dividend additional']];
+  for (const [L, r, l] of db) {
+    if (left <= 0) break; const room = Math.max(0, L - pos); if (room <= 0) continue;
+    let amt = Math.min(left, room), free = Math.min(allow, amt); allow -= free; const taxed = amt - free;
+    if (free > 0) bands.push({ label: 'Dividend allowance 0%', amt: free, r: 0, tax: 0 });
+    if (taxed > 0) { bands.push({ label: l + ` ${(r * 100).toFixed(2)}%`, amt: taxed, r, tax: taxed * r }); taxDiv += taxed * r; }
+    pos += amt; left -= amt;
+  }
+  return { ani, pa, taxNS, taxDiv, total: taxNS + taxDiv, bands };
+}
+const niEE = pay => UK.ee * Math.max(0, Math.min(pay, UK.uel) - UK.pt) + UK.ee2 * Math.max(0, pay - UK.uel);
+const niER = (pay, ea = 0) => Math.max(0, UK.er * Math.max(0, pay - UK.st) - ea);
+const niC4 = p => UK.c4 * Math.max(0, Math.min(p, UK.uel) - UK.pt) + UK.c4b * Math.max(0, p - UK.uel);
+const slRepay = (plan, inc) => { if (!plan || plan === 'none') return 0; const t = UK.sl[plan]; return t == null ? 0 : (plan === 'pg' ? .06 : .09) * Math.max(0, inc - t); };
+function corpTax(profit) { const c = UK.ct; if (profit <= 0) return 0; if (profit <= c.lo) return profit * c.small; if (profit >= c.hi) return profit * c.main; return profit * c.main - (c.hi - profit) * 3 / 200; }
+function hicbc(ani, kids) { if (!kids) return { cb: 0, charge: 0 }; const cb = (UK.cb[0] + UK.cb[1] * (kids - 1)) * 52; const [lo, hi] = UK.hicbc; const p = clamp((ani - lo) / (hi - lo), 0, 1); return { cb, charge: Math.floor(cb * p) }; }
+function sdlt(price, buyer = 'ftb', nonRes = false) {
+  if (buyer === 'none') return { tax: 0, parts: [] };
+  const std = [[125000, 0], [250000, .02], [925000, .05], [1500000, .10], [Infinity, .12]];
+  let bands = std;
+  if (buyer === 'ftb' && price <= 500000) bands = [[300000, 0], [500000, .05]];
+  else if (buyer === 'add' && price >= 40000) bands = std.map(([t, r]) => [t, r + .05]);
+  if (nonRes) bands = bands.map(([t, r]) => [t, r + .02]);
+  let prev = 0, tax = 0; const parts = [];
+  for (const [t, r] of bands) { if (price <= prev) break; const sl = Math.min(price, t) - prev; parts.push({ from: prev, to: Math.min(price, t), rate: r, tax: sl * r }); tax += sl * r; prev = t; }
+  return { tax: Math.floor(tax), parts };
+}
+
+/* ---------- state ---------- */
+let S = {}, APP = null, CUR = null, LISTS = {};
+function deepMerge(base, add) { for (const k in add) { if (add[k] && typeof add[k] === 'object' && !Array.isArray(add[k]) && base[k] && typeof base[k] === 'object' && !Array.isArray(base[k])) deepMerge(base[k], add[k]); else if (add[k] !== undefined) base[k] = add[k]; } return base; }
+const getP = (o, p) => p.split('.').reduce((a, k) => a == null ? a : a[k], o);
+const setP = (o, p, v) => { const ks = p.split('.'); let a = o; ks.slice(0, -1).forEach(k => a = a[k] = a[k] || {}); a[ks[ks.length - 1]] = v; };
+function loadState() {
+  S = APP.def();
+  try { const h = location.hash; if (h.startsWith('#s=')) { S = deepMerge(APP.def(), JSON.parse(decodeURIComponent(escape(atob(h.slice(3)))))); history.replaceState(null, '', location.pathname); setTimeout(() => toast('Loaded from link'), 300); return; } } catch (e) { console.warn(e); }
+  try { const s = localStorage.getItem(APP.key); if (s) S = deepMerge(APP.def(), JSON.parse(s)); } catch (e) {}
+}
+const saveState = debounce(() => { try { localStorage.setItem(APP.key, JSON.stringify(S)); } catch (e) {} }, 300);
+
+/* ---------- form helpers ---------- */
+function fld(k, label, o = {}) {
+  const t = o.type || 'num', v = getP(S, k), sh = o.show ? ` data-show="${o.show}"` : '', h = o.hint ? `<small>${o.hint}</small>` : '';
+  if (t === 'chk') return `<label class="chk"${sh}><input type="checkbox" data-k="${k}" ${v ? 'checked' : ''}> <span>${label}</span></label>`;
+  if (t === 'sel') return `<label${sh}><span>${label}</span><select data-k="${k}">${o.opts.map(([val, l]) => `<option value="${esc(val)}" ${String(v) === String(val) ? 'selected' : ''}>${esc(l)}</option>`).join('')}</select>${h}</label>`;
+  if (t === 'range') return `<label${sh}><span>${label}: <b class="mono" data-rv="${k}">${esc(v)}${o.unit || ''}</b></span><input type="range" data-k="${k}" min="${o.min}" max="${o.max}" step="${o.step || 1}" value="${esc(v)}" data-unit="${o.unit || ''}">${h}</label>`;
+  const it = t === 'num' ? 'type="number" inputmode="decimal" step="any"' : t === 'month' ? 'type="month"' : t === 'date' ? 'type="date"' : 'type="text"';
+  return `<label${sh}><span>${label}</span><input ${it} data-k="${k}" value="${esc(v ?? '')}"${o.min != null ? ` min="${o.min}"` : ''}${o.ph ? ` placeholder="${esc(o.ph)}"` : ''}>${h}</label>`;
+}
+const fs = (title, inner, show) => `<fieldset${show ? ` data-show="${show}"` : ''}><legend>${title}</legend><div class="fg">${inner}</div></fieldset>`;
+const stat = (l, v, s = '', c = '') => `<div class="stat ${c}"><div class="l">${l}</div><div class="v" title="${esc(String(v).replace(/<[^>]+>/g, ''))}">${v}</div><div class="s">${s}</div></div>`;
+const head = (i, title, sub) => `<div class="tabhead"><div class="eyebrow">Step ${String(i).padStart(2, '0')}</div><h2>${title}</h2><div class="hint" style="margin:0">${sub}</div></div>`;
+function applyShow() {
+  $$('[data-show]').forEach(el => {
+    const ok = el.dataset.show.split('&').every(cond => { const m = cond.match(/^([\w.]+)(!?=|>|<)(.*)$/); if (!m) return true; const raw = getP(S, m[1]), v = String(raw), vals = m[3].split('|'); if (m[2] === '>') return N(raw) > N(m[3]); if (m[2] === '<') return N(raw) < N(m[3]); return m[2] === '=' ? vals.includes(v) : !vals.includes(v); });
+    el.style.display = ok ? '' : 'none';
+  });
+}
+function syncInputs() { $$('[data-k]').forEach(el => { if (el === document.activeElement) return; const v = getP(S, el.dataset.k); if (el.type === 'checkbox') el.checked = !!v; else if (String(el.value) !== String(v ?? '')) el.value = v ?? ''; }); $$('[data-rv]').forEach(b => { const inp = $(`input[type=range][data-k="${b.dataset.rv}"]`); b.textContent = getP(S, b.dataset.rv) + (inp ? inp.dataset.unit : ''); }); }
+function listHTML(name) {
+  const L = LISTS[name], arr = getP(S, name) || [];
+  return `<div class="wrap short"><table class="tbl"><thead><tr>${L.cols.map(c => `<th class="l">${c[1]}</th>`).join('')}<th></th></tr></thead><tbody>${arr.map((r, i) => `<tr>${L.cols.map(([f, , t, opts]) => `<td class="l">${t === 'sel' ? `<select data-l="${name}" data-i="${i}" data-f="${f}">${opts.map(([v, l]) => `<option value="${esc(v)}" ${String(r[f]) === String(v) ? 'selected' : ''}>${esc(l)}</option>`).join('')}</select>` : t === 'chk' ? `<input type="checkbox" data-l="${name}" data-i="${i}" data-f="${f}" ${r[f] ? 'checked' : ''}>` : `<input ${t === 'num' ? 'type="number" step="any"' : t === 'month' ? 'type="month"' : 'type="text"'} data-l="${name}" data-i="${i}" data-f="${f}" value="${esc(r[f] ?? '')}"${t === 'text' ? ' style="min-width:130px"' : ''}>`}</td>`).join('')}<td>${L.min && arr.length <= L.min ? '' : `<button class="btn del" data-del="${name}:${i}" title="Remove">✕</button>`}</td></tr>`).join('') || `<tr><td class="l hint" colspan="${L.cols.length + 1}">Nothing added yet.</td></tr>`}</tbody></table></div>
+  ${!L.max || arr.length < L.max ? `<button class="btn sm" data-add="${name}" style="margin-top:6px">+ Add</button>` : ''}`;
+}
+function renderLists(name) { $$(`[data-list${name ? `="${name}"` : ''}]`).forEach(el => el.innerHTML = listHTML(el.dataset.list)); }
+
+/* ---------- charts ---------- */
+function lineChart(el, o) {
+  if (!el) return;
+  const W = 780, H = o.h || 260, pl = 66, pr = 18, pt = 30, pb = 30, xs = o.xs, n = xs.length;
+  const vals = o.series.flatMap(s => s.ys).filter(fin);
+  if (!vals.length) { el.innerHTML = ''; return; }
+  let mn = Math.min(o.yMin ?? 0, ...vals), mx = Math.max(o.yMax ?? -Infinity, ...vals); if (mx - mn < 1e-9) mx = mn + 1;
+  const pad = (mx - mn) * .06; mx += pad; if (mn < 0) mn -= pad;
+  const X = i => pl + (W - pl - pr) * (n > 1 ? i / (n - 1) : .5), Y = v => pt + (H - pt - pb) * (1 - (v - mn) / (mx - mn));
+  const yf = o.yFmt || kfmt; let g = '';
+  (o.bands || []).forEach(b => { g += `<rect x="${X(b.from)}" y="${pt}" width="${Math.max(0, X(b.to) - X(b.from))}" height="${H - pt - pb}" fill="${b.color}" opacity="${b.op || .08}"/>`; if (b.label) g += `<text x="${X(b.from) + 4}" y="${H - pb - 6}" style="fill:${b.tc || 'var(--muted)'}">${esc(b.label)}</text>`; });
+  for (let k = 0; k <= 4; k++) { const v = mn + (mx - mn) * k / 4; g += `<line class="gl" x1="${pl}" x2="${W - pr}" y1="${Y(v)}" y2="${Y(v)}"/><text x="${pl - 8}" y="${Y(v) + 4}" text-anchor="end">${yf(v)}</text>`; }
+  if (mn < 0) g += `<line x1="${pl}" x2="${W - pr}" y1="${Y(0)}" y2="${Y(0)}" stroke="var(--muted)"/>`;
+  const st = Math.max(1, Math.ceil(n / 8)); for (let i = 0; i < n; i += st) g += `<text x="${X(i)}" y="${H - 9}" text-anchor="middle">${esc(xs[i])}</text>`;
+  (o.markers || []).forEach(m => { if (m.i == null || m.i < 0 || m.i >= n) return; g += `<line x1="${X(m.i)}" x2="${X(m.i)}" y1="${pt}" y2="${H - pb}" stroke="${m.color || 'var(--warn)'}" stroke-dasharray="4 4"/><text x="${X(m.i) + 5}" y="${pt + 12 + (m.dy || 0)}" style="fill:${m.color || 'var(--warn)'}">${esc(m.label)}</text>`; });
+  (o.hlines || []).forEach(m => { g += `<line x1="${pl}" x2="${W - pr}" y1="${Y(m.y)}" y2="${Y(m.y)}" stroke="${m.color || 'var(--warn)'}" stroke-dasharray="4 4"/><text x="${W - pr - 4}" y="${Y(m.y) - 5}" text-anchor="end" style="fill:${m.color || 'var(--warn)'}">${esc(m.label)}</text>`; });
+  o.series.forEach(s => {
+    if (s.band) { const lo = s.band[0], hi = s.band[1]; let d = ''; hi.forEach((v, i) => d += (i ? 'L' : 'M') + X(i).toFixed(1) + ',' + Y(v).toFixed(1)); for (let i = lo.length - 1; i >= 0; i--) d += 'L' + X(i).toFixed(1) + ',' + Y(lo[i]).toFixed(1); g += `<path d="${d}Z" fill="${s.color}" opacity=".14"/>`; }
+    let d = '', pen = false; s.ys.forEach((v, i) => { if (!fin(v)) { pen = false; return; } d += (pen ? 'L' : 'M') + X(i).toFixed(1) + ',' + Y(v).toFixed(1); pen = true; });
+    if (s.area && d) { const f = s.ys.findIndex(fin), l = s.ys.length - 1 - [...s.ys].reverse().findIndex(fin); g += `<path d="${d}L${X(l)},${Y(Math.max(mn, 0))}L${X(f)},${Y(Math.max(mn, 0))}Z" fill="${s.color}" opacity=".12"/>`; }
+    g += `<path d="${d}" fill="none" stroke="${s.color}" stroke-width="${s.w || 2.4}" ${s.dash ? `stroke-dasharray="${s.dash}"` : ''} stroke-linejoin="round" stroke-linecap="round"/>`;
+  });
+  let lx = pl; g += `<g transform="translate(0,${pt - 16})">` + o.series.filter(s => !s.noLegend).map(s => { const t = `<rect x="${lx}" y="0" width="14" height="4" rx="2" fill="${s.color}"/><text x="${lx + 19}" y="6">${esc(s.name)}</text>`; lx += 30 + s.name.length * 6.6; return t; }).join('') + '</g>';
+  el.innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(o.label || 'chart')}">${g}<line class="cur" x1="0" x2="0" y1="${pt}" y2="${H - pb}" stroke="var(--ink)" stroke-opacity=".35" style="opacity:0"/><rect class="hit" x="${pl}" y="${pt}" width="${W - pl - pr}" height="${H - pt - pb}"/></svg>`;
+  const svg = el.querySelector('svg'), hit = svg.querySelector('.hit'), cur = svg.querySelector('.cur');
+  hit.addEventListener('mousemove', e => { const r = hit.getBoundingClientRect(), i = clamp(Math.round((e.clientX - r.left) / r.width * (n - 1)), 0, n - 1); cur.setAttribute('x1', X(i)); cur.setAttribute('x2', X(i)); cur.style.opacity = 1; showTip(e, (o.tipTitle ? o.tipTitle(i) : xs[i]) + '\n' + o.series.filter(s => !s.noTip).map(s => `${s.name}: ${fin(s.ys[i]) ? (s.fmt || o.tipFmt || gbp)(s.ys[i]) : '–'}`).join('\n')); });
+  hit.addEventListener('mouseleave', () => { hideTip(); cur.style.opacity = 0; });
+}
+function barChart(el, o) {
+  if (!el) return;
+  const W = 780, H = o.h || 250, pl = 66, pr = 18, pt = 30, pb = o.pb || 30, n = o.cats.length;
+  const pos = o.cats.map((_, i) => o.stacks.reduce((a, s) => a + Math.max(0, s.vals[i] || 0), 0)), neg = o.cats.map((_, i) => o.stacks.reduce((a, s) => a + Math.min(0, s.vals[i] || 0), 0));
+  const mx = Math.max(...pos, 1) * 1.06, mn = Math.min(...neg, 0) * 1.06;
+  const bw = (W - pl - pr) / Math.max(1, n), Y = v => pt + (H - pt - pb) * (1 - (v - mn) / (mx - mn)), yf = o.yFmt || kfmt;
+  let g = '';
+  for (let k = 0; k <= 4; k++) { const v = mn + (mx - mn) * k / 4; g += `<line class="gl" x1="${pl}" x2="${W - pr}" y1="${Y(v)}" y2="${Y(v)}"/><text x="${pl - 8}" y="${Y(v) + 4}" text-anchor="end">${yf(v)}</text>`; }
+  if (mn < 0) g += `<line x1="${pl}" x2="${W - pr}" y1="${Y(0)}" y2="${Y(0)}" stroke="var(--muted)"/>`;
+  o.cats.forEach((c, i) => {
+    let up = 0, dn = 0; const x0 = pl + i * bw + bw * .14, w = bw * .72;
+    g += `<g class="bg" data-i="${i}">` + o.stacks.map(s => { const v = s.vals[i] || 0; if (!v) return ''; let y1, y2; if (v > 0) { y1 = Y(up + v); y2 = Y(up); up += v; } else { y1 = Y(dn); y2 = Y(dn + v); dn += v; } return `<rect x="${x0}" y="${y1}" width="${w}" height="${Math.max(0, y2 - y1)}" rx="2" fill="${s.color}"/>`; }).join('') + `<rect x="${pl + i * bw}" y="${pt}" width="${bw}" height="${H - pt - pb}" fill="transparent"/></g>`;
+    if (n <= 14 || i % Math.ceil(n / 12) === 0) g += `<text x="${x0 + w / 2}" y="${H - pb + 18}" text-anchor="middle">${esc(c)}</text>`;
+  });
+  let lx = pl; g += `<g transform="translate(0,${pt - 18})">` + o.stacks.map(s => { const t = `<rect x="${lx}" y="0" width="10" height="10" rx="2" fill="${s.color}"/><text x="${lx + 14}" y="9">${esc(s.name)}</text>`; lx += 26 + s.name.length * 6.6; return t; }).join('') + '</g>';
+  el.innerHTML = `<svg viewBox="0 0 ${W} ${H}">${g}</svg>`;
+  $$('.bg', el).forEach(b => { b.addEventListener('mousemove', e => { const i = +b.dataset.i; showTip(e, (o.tipTitle ? o.tipTitle(i) : o.cats[i]) + '\n' + o.stacks.map(s => `${s.name}: ${(o.tipFmt || gbp)(s.vals[i] || 0)}`).join('\n')); }); b.addEventListener('mouseleave', hideTip); });
+}
+const hbars = (items, color = 'var(--acc)', fmt = gbp) => { const mx = Math.max(...items.map(x => Math.abs(x[1])), 1e-9); return items.map(([l, v, c]) => `<div class="hbar"><span>${esc(l)}</span><div class="t"><i style="width:${Math.abs(v) / mx * 100}%;background:${c || color}"></i></div><span class="v">${fmt(v)}</span></div>`).join(''); };
+
+/* ---------- shell ---------- */
+const FAMILY = [['..', 'All tools', '../../'], ['uk-mortgage-planner', 'Mortgage planner'], ['rent-vs-buy-calculator', 'Rent vs buy'], ['uk-take-home-pay-calculator', 'Take-home & contracting'], ['fi-planner-uk', 'Financial independence'], ['debt-payoff-planner', 'Debt payoff'], ['payment-methods-explorer', 'Payment methods explorer']];
+function go(t) { CUR = t; $$('#pipe button').forEach(b => b.classList.toggle('active', b.dataset.t === t)); $$('.tab').forEach(s => s.classList.toggle('active', s.id === 't-' + t)); try { localStorage.setItem(APP.key + '.tab', t); } catch (e) {} render(); scrollTo({ top: 0 }); }
+function render() { APP.reset && APP.reset(); try { const k = APP.kpis ? APP.kpis() : null; const el = $('#kpis'); el.innerHTML = k ? k.map(([l, v, s]) => `<div class="kpi"><div class="l">${l}</div><div class="v">${v}</div><div class="s">${s || ''}</div></div>`).join('') : ''; (APP.render[CUR] || (() => {}))(); } catch (e) { console.error(e); } }
+const renderSoon = debounce(render, 160);
+function changed(now = true) { saveState(); applyShow(); syncInputs(); now ? render() : renderSoon(); }
+function readEl(el) { return el.type === 'checkbox' ? el.checked : (el.type === 'number' || el.type === 'range') ? (el.value === '' ? '' : parseFloat(el.value)) : el.value; }
+function buildShell() {
+  const here = 'uk-take-home-pay-calculator';
+  $('#side').innerHTML = `<div class="brand"><div class="logo">${APP.logo || '£'}</div><div><b>${APP.title}</b><span>${APP.sub}</span></div></div><ol class="pipe" id="pipe">${APP.tabs.map(([k, t, d], i) => `<li><button data-t="${k}"><span class="n">${String(i).padStart(2, '0')}</span><span class="t">${t}<span class="d">${d}</span></span></button></li>`).join('')}</ol>
+  <div class="tools"><button class="btn sm" data-tool="share" title="Copy a link that holds all your inputs">Copy share link</button><button class="btn sm" data-tool="export">Export</button><label class="btn sm filebtn">Import<input type="file" id="tImport" accept=".json"></label><button class="btn sm" data-tool="print">Print</button><button class="btn sm del" data-tool="reset">Reset</button></div>
+  <p class="hint" style="margin-top:12px">Inputs save in this browser only. Nothing is sent anywhere.</p>
+  <label class="ul-theme">Theme <select id="themeSel" aria-label="Colour theme"><option value="auto">Auto</option><option value="light">Light</option><option value="dark">Dark</option></select></label>
+  <div class="family"><div class="eyebrow" style="margin-bottom:4px">More from Usualy Labs</div>${FAMILY.filter(([f]) => f !== here).map(([f, l, h]) => `<a href="${h || '../' + f + '/'}">${l} →</a>`).join('')}</div>`;
+  $('#tabs').innerHTML = APP.build();
+  renderLists();
+}
+function wire() {
+  document.addEventListener('input', e => {
+    const el = e.target;
+    if (el.dataset.k) { setP(S, el.dataset.k, readEl(el)); saveState(); applyShow(); const b = $(`[data-rv="${el.dataset.k}"]`); if (b) b.textContent = el.value + (el.dataset.unit || ''); $$(`[data-k="${el.dataset.k}"]`).forEach(o => { if (o !== el && o.type !== 'checkbox') o.value = el.value; }); renderSoon(); }
+    else if (el.dataset.l) { getP(S, el.dataset.l)[+el.dataset.i][el.dataset.f] = readEl(el); saveState(); renderSoon(); }
+  });
+  document.addEventListener('change', e => { const el = e.target; if (el.dataset.k) { setP(S, el.dataset.k, readEl(el)); changed(); } else if (el.dataset.l) { getP(S, el.dataset.l)[+el.dataset.i][el.dataset.f] = readEl(el); changed(); } });
+  document.addEventListener('click', e => {
+    const t = e.target.closest('[data-go],[data-t],[data-add],[data-del],[data-set],[data-tool]'); if (!t) return;
+    if (t.dataset.set && t.dataset.go) { const o = JSON.parse(t.dataset.set); for (const k in o) setP(S, k, o[k]); saveState(); applyShow(); syncInputs(); go(t.dataset.go); }
+    else if (t.dataset.go) go(t.dataset.go);
+    else if (t.dataset.t) go(t.dataset.t);
+    else if (t.dataset.add) { getP(S, t.dataset.add).push(LISTS[t.dataset.add].add()); renderLists(t.dataset.add); changed(); }
+    else if (t.dataset.del) { const [n, i] = t.dataset.del.split(':'); getP(S, n).splice(+i, 1); renderLists(n); changed(); }
+    else if (t.dataset.set) { const o = JSON.parse(t.dataset.set); for (const k in o) setP(S, k, o[k]); if (t.dataset.relist) renderLists(t.dataset.relist); changed(); }
+    else if (t.dataset.tool === 'share') { const url = location.href.split('#')[0] + '#s=' + btoa(unescape(encodeURIComponent(JSON.stringify(S)))); (navigator.clipboard ? navigator.clipboard.writeText(url) : Promise.reject()).then(() => toast('Share link copied'), () => prompt('Copy this link', url)); }
+    else if (t.dataset.tool === 'export') download(APP.file + '-' + new Date().toISOString().slice(0, 10) + '.json', JSON.stringify(S, null, 1), 'application/json');
+    else if (t.dataset.tool === 'print') print();
+    else if (t.dataset.tool === 'reset') { if (!confirm('Reset every input to the defaults?')) return; S = APP.def(); rebuild(); toast('Reset'); }
+  });
+  document.addEventListener('change', async e => { if (e.target.id !== 'tImport') return; const f = e.target.files[0]; if (!f) return; try { S = deepMerge(APP.def(), JSON.parse(await f.text())); rebuild(); toast('Imported'); } catch (err) { toast('Import failed: ' + err.message); } e.target.value = ''; });
+}
+function rebuild() { $('#tabs').innerHTML = APP.build(); renderLists(); APP.afterBuild && APP.afterBuild(); saveState(); applyShow(); go(CUR); }
+function boot(app) {
+  APP = app; LISTS = app.lists || {}; loadState(); buildShell(); wire(); APP.afterBuild && APP.afterBuild(); applyShow();
+  let t0 = app.tabs[0][0]; try { t0 = localStorage.getItem(APP.key + '.tab') || t0; } catch (e) {}
+  go(app.render[t0] ? t0 : app.tabs[0][0]);
+}
+
+</script>
+<script>
+// title: UK Take-Home Pay & Contracting Calculator
+// desc: UK take-home pay with every pension type, student loans, child benefit charge and the £100k trap, plus contracting via limited company, umbrella or sole trader against a permanent job, with day-rate equivalents.
+const TAXKEYS = [['pa', 'Personal allowance £'], ['taper', 'Allowance taper starts £'], ['basic', 'Basic rate band £'], ['addl', 'Additional rate threshold £'], ['pt', 'NI primary threshold £'], ['uel', 'NI upper earnings limit £'], ['ee', 'Employee NI main rate'], ['ee2', 'Employee NI upper rate'], ['er', 'Employer NI rate'], ['st', 'Employer NI threshold £'], ['ea', 'Employment allowance £'], ['c4', 'Class 4 NI main rate'], ['c4b', 'Class 4 NI upper rate'], ['divAllow', 'Dividend allowance £'], ['div.0', 'Dividend basic rate'], ['div.1', 'Dividend higher rate'], ['div.2', 'Dividend additional rate'], ['sl.p1', 'Student loan Plan 1 threshold £'], ['sl.p2', 'Plan 2 threshold £'], ['sl.p4', 'Plan 4 threshold £'], ['sl.p5', 'Plan 5 threshold £'], ['sl.pg', 'Postgraduate threshold £'], ['cb.0', 'Child benefit, eldest £/wk'], ['cb.1', 'Child benefit, others £/wk'], ['hicbc.0', 'Child benefit charge starts £'], ['hicbc.1', 'Child benefit fully withdrawn £'], ['ct.small', 'Corporation tax small rate'], ['ct.main', 'Corporation tax main rate'], ['ct.lo', 'Small profits limit £'], ['ct.hi', 'Main rate limit £'], ['ma', 'Marriage allowance transfer £']];
+const UK0 = JSON.parse(JSON.stringify(UK));
+const DEF = () => ({
+  region: 'ruk', salary: 50000, bonus: 0, bik: 0, pensType: 'sac', pensPct: 5, erPct: 5, erPass: 0, sl1: 'none', sl2: 'none', kids: 0, claimCB: true, ma: 'none', period: 'm',
+  sacPct: 5,
+  dayRate: 500, days: 220, expAcc: 1500, expIns: 600, expOther: 1200, dirSal: 12570, dirSalMode: '12570', coPens: 0, extract: 100, eaOn: false, umbMargin: 25, umbWeeks: 46, umbPens: 5, umbHol: false,
+  perm: { salary: 60000, bonus: 0, erPct: 6, benefits: 1500, holidays: 33 },
+  gMax: 200000,
+  tax: {}
+});
+function applyTax() { const base = JSON.parse(JSON.stringify(UK0)); for (const [k] of TAXKEYS) { const v = getP(S.tax || {}, k); if (v !== undefined && v !== '' && fin(+v)) setP(base, k, +v); } Object.assign(UK, base); }
+/* ---------- PAYE engine ---------- */
+function paye(o) {
+  const gross = N(o.salary) + N(o.bonus), P = o.pensType === 'none' ? 0 : o.pensAmt != null ? o.pensAmt : gross * N(o.pensPct) / 100;
+  let niPay = gross, taxPay = gross, ras = 0, cash = 0;
+  if (o.pensType === 'sac') { niPay -= P; taxPay -= P; }
+  else if (o.pensType === 'net') { taxPay -= P; cash = P; }
+  else if (o.pensType === 'ras') { ras = P; cash = P * .8; }
+  const scot = o.region === 'scot', ns = Math.max(0, taxPay) + N(o.bik);
+  let paOv = null; if (o.ma === 'give') paOv = Math.max(0, UK.pa - UK.ma);
+  const t = ukTax({ ns, ras, scot, paOverride: paOv });
+  let tax = t.total;
+  if (o.ma === 'receive' && ns <= UK.pa + UK.basic) tax = Math.max(0, tax - UK.ma * .2);
+  const ni = niEE(niPay), sl = slRepay(o.sl1, niPay) + slRepay(o.sl2, niPay);
+  const cb = hicbc(t.ani, o.claimCB ? N(o.kids) : 0);
+  const erNI = niER(niPay), erP = gross * N(o.erPct) / 100, pass = o.pensType === 'sac' ? (niER(gross) - erNI) * N(o.erPass) / 100 : 0;
+  const take = gross - (o.pensType === 'sac' ? P : 0) - cash - tax - ni - sl;
+  const relief = o.pensType === 'ras' ? P * .2 : 0;
+  return { gross, P, niPay, taxPay, ns, t, tax, ni, sl, cb, erNI, erP, pass, take, household: take + cb.cb - cb.charge, pensionIn: P + erP + pass, cost: gross + erNI + erP, relief };
+}
+const me = (x = {}) => paye({ ...S, ...x });
+function marginal(o = {}) { const a = me(o), b = me({ ...o, salary: N(o.salary ?? S.salary) + 100, pensAmt: a.P }); return { take: 100 - (b.household - a.household), }; }
+/* ---------- contracting ---------- */
+function ltd(o = {}) {
+  const p = { ...S, ...o }, rev = N(p.dayRate) * N(p.days), exp = N(p.expAcc) + N(p.expIns) + N(p.expOther);
+  const sal = p.dirSalMode === '12570' ? UK.pa : p.dirSalMode === '5000' ? UK.st : N(p.dirSal);
+  const erNI = niER(sal, p.eaOn ? UK.ea : 0), coP = N(p.coPens);
+  const profit = rev - exp - sal - erNI - coP, ct = corpTax(profit), dist = Math.max(0, profit - ct), div = dist * clamp(N(p.extract), 0, 100) / 100;
+  const t = ukTax({ ns: sal, div }), eeNI = niEE(sal), sl = slRepay(p.sl1, sal + div) + slRepay(p.sl2, sal + div);
+  const take = sal + div - t.total - eeNI - sl;
+  return { route: 'Limited company (outside IR35)', rev, exp, sal, erNI, coP, profit, ct, div, retained: dist - div, tax: t.total, eeNI, sl, take, pension: coP, levy: 0, margin: 0, bands: t.bands };
+}
+function umbrella(o = {}) {
+  const p = { ...S, ...o }, A = N(p.dayRate) * N(p.days), margin = N(p.umbMargin) * N(p.umbWeeks);
+  const qe = g => Math.max(0, Math.min(g, UK.uel) - 6240);
+  const cost = g => g + niER(g) + .005 * Math.max(0, g) + margin + .03 * qe(g);
+  let lo = 0, hi = A; for (let i = 0; i < 60; i++) { const m = (lo + hi) / 2; if (cost(m) > A) hi = m; else lo = m; }
+  const G = lo, r = paye({ salary: G, bonus: 0, bik: 0, pensType: 'sac', pensPct: N(p.umbPens), erPct: 0, region: p.region, sl1: p.sl1, sl2: p.sl2, kids: 0, claimCB: false, ma: 'none' });
+  const erNI = niER(G), levy = .005 * G, erPens = .03 * qe(G);
+  return { route: 'Umbrella (inside IR35)', rev: A, exp: 0, gross: G, erNI, levy, margin, take: r.take, tax: r.tax, eeNI: r.ni, sl: r.sl, pension: r.P + erPens, ct: 0, retained: 0, coP: 0 };
+}
+function soleTrader(o = {}) {
+  const p = { ...S, ...o }, rev = N(p.dayRate) * N(p.days), exp = N(p.expAcc) + N(p.expIns) + N(p.expOther), profit = Math.max(0, rev - exp);
+  const t = ukTax({ ns: profit, scot: p.region === 'scot' }), c4 = niC4(profit), sl = slRepay(p.sl1, profit) + slRepay(p.sl2, profit);
+  return { route: 'Sole trader', rev, exp, profit, tax: t.total, eeNI: c4, sl, take: profit - t.total - c4 - sl, pension: 0, ct: 0, erNI: 0, levy: 0, margin: 0, retained: 0 };
+}
+function permJob(o = {}) {
+  const p = { ...S.perm, ...o }, r = paye({ salary: p.salary, bonus: p.bonus, bik: 0, pensType: 'sac', pensPct: S.pensPct, erPct: p.erPct, erPass: 0, region: S.region, sl1: S.sl1, sl2: S.sl2, kids: 0, claimCB: false, ma: 'none' });
+  return { route: 'Permanent job', rev: N(p.salary) + N(p.bonus), take: r.take, tax: r.tax, eeNI: r.ni, sl: r.sl, pension: r.pensionIn, benefits: N(p.benefits), erNI: r.erNI, ct: 0, levy: 0, margin: 0, retained: 0, exp: 0 };
+}
+const value = r => r.take + r.pension + (r.retained || 0) * .7 + (r.benefits || 0);
+let A = null;
+const per = v => S.period === 'm' ? v / 12 : S.period === 'w' ? v / 52 : v;
+const perL = () => ({ y: 'year', m: 'month', w: 'week' })[S.period];
+
+const APPX = {
+  key: 'take-home-pay.v1', file: 'take-home-pay', title: 'Take-Home & Contracting', sub: 'UK · ' + UK.year + ' · v1.0', logo: '%',
+  def: DEF, lists: {},
+  reset() { applyTax(); A = me(); },
+  kpis() { const m = marginal(); return [['Take-home', gbp(A.take / 12) + '/mo', gbp(A.take) + ' a year'], ['Effective deduction rate', pct((A.tax + A.ni + A.sl) / Math.max(1, A.gross) * 100), 'tax, NI, student loan'], ['Marginal rate', pct(m.take, 0), 'on the next £100 earned'], ['Into your pension', gbp(A.pensionIn), 'you + employer a year'], ['Cost to employer', gbp(A.cost), 'salary + NI + pension']]; },
+  tabs: [['home', 'Start here', 'What this covers'], ['paye', 'Employed take-home', 'Salary, pension, loans, family'], ['pension', 'Pension optimiser', 'Salary sacrifice sweet spots'], ['traps', 'Tax traps', 'Marginal rates across incomes'], ['contract', 'Contracting', 'Ltd, umbrella, sole trader'], ['compare', 'Contract vs perm', 'Side by side + day-rate solver'], ['assume', 'Assumptions', 'Every tax figure, editable']],
+  build() {
+    const slo = [['none', 'None'], ['p1', 'Plan 1'], ['p2', 'Plan 2'], ['p4', 'Plan 4 (Scotland)'], ['p5', 'Plan 5'], ['pg', 'Postgraduate']];
+    return `
+<section class="tab" id="t-home"><div class="hero"><div class="eyebrow">UK income tax · NI · pensions · contracting · ${UK.year}</div><h1>See where every pound of your pay goes, <em>and how to keep more of it.</em></h1>
+<p>Take-home pay for employees with every pension type, student loans, the child benefit charge and the £100k personal allowance trap. Then the contractor's question: limited company, umbrella or sole trader, and what day rate actually beats your permanent salary.</p>
+<div class="row" style="margin-top:14px"><button class="btn pri" data-go="paye">Work out my take-home →</button><button class="btn" data-go="pension">Find my pension sweet spot</button><button class="btn" data-go="compare">Contract vs perm</button></div></div>
+<div class="steps">${[['paye', 'Employed take-home', 'Income tax (rest of UK or Scotland), NI, salary sacrifice, net pay or relief-at-source pensions, two student loans, taxable benefits, marriage allowance and child benefit.'], ['pension', 'Pension optimiser', 'Slide your sacrifice and see what each extra pound into your pension really costs you, including the 60% and child benefit traps.'], ['traps', 'Tax traps', 'Your true marginal rate at every income from £0 to £200k, with the cliffs marked.'], ['contract', 'Contracting', 'Outside IR35 through a limited company, inside IR35 through an umbrella, or as a sole trader: every tax and cost itemised.'], ['compare', 'Contract vs perm', 'All routes against a permanent package, plus the day rate you would need to match it.'], ['assume', 'Assumptions', 'Thresholds and rates are editable, so the calculator stays right when budgets change.']].map(([k, t, d], i) => `<div class="step" data-go="${k}"><div class="n">${String(i + 1).padStart(2, '0')}</div><b>${t}</b><p>${d}</p></div>`).join('')}</div>
+<div class="note" style="margin-top:16px">Figures use ${UK.year} rates as published, with the frozen income tax thresholds. Scottish bands and some thresholds change each year: check the Assumptions tab against GOV.UK. This is an estimate, not tax advice.</div></section>
+
+<section class="tab" id="t-paye">${head(1, 'Employed take-home', 'Your pay, your pension and everything deducted on the way.')}
+<div class="grid2"><div>
+${fs('Pay', fld('salary', 'Salary £/yr') + fld('bonus', 'Bonus £/yr') + fld('bik', 'Taxable benefits £/yr', { hint: 'P11D value, e.g. company car' }) + fld('region', 'Tax region', { type: 'sel', opts: [['ruk', 'England, Wales, NI'], ['scot', 'Scotland']] }) + fld('period', 'Show amounts per', { type: 'sel', opts: [['y', 'Year'], ['m', 'Month'], ['w', 'Week']] }))}
+${fs('Pension', fld('pensType', 'How you contribute', { type: 'sel', opts: [['sac', 'Salary sacrifice'], ['net', 'Net pay arrangement'], ['ras', 'Relief at source'], ['none', 'No pension']] }) + fld('pensPct', 'Your contribution % of pay', { show: 'pensType!=none' }) + fld('erPct', 'Employer contribution %') + fld('erPass', 'Employer NI saving passed on %', { show: 'pensType=sac', hint: 'Some employers add their NI saving' }))}
+${fs('Student loans', fld('sl1', 'Plan', { type: 'sel', opts: slo }) + fld('sl2', 'Second plan', { type: 'sel', opts: slo, hint: 'e.g. Plan 2 + Postgraduate' }))}
+${fs('Family', fld('kids', 'Children claimed for') + fld('claimCB', 'Claim child benefit', { type: 'chk' }) + fld('ma', 'Marriage allowance', { type: 'sel', opts: [['none', 'Not used'], ['receive', 'Partner transfers to me'], ['give', 'I transfer to partner']] }))}
+</div><div id="payeOut"></div></div></section>
+
+<section class="tab" id="t-pension">${head(2, 'Pension optimiser', 'Salary sacrifice turns taxed pay into untaxed pension. Some bands make it extraordinarily cheap.')}
+<div class="grid2"><div>${fs('Try a sacrifice', fld('sacPct', 'Sacrifice % of pay', { type: 'range', min: 0, max: 60, step: 1, unit: '%' }))}
+<div class="note">Uses your pay, region, loans and family settings from Employed take-home, with salary sacrifice as the method. Employer contributions are added on top.</div><div id="penSide"></div></div><div id="penOut"></div></div></section>
+
+<section class="tab" id="t-traps">${head(3, 'Tax traps', 'The rate you lose on each extra £100 of salary, across every income, with your loans, family and pension settings.')}
+<div class="panel">${fs('Range', fld('gMax', 'Show salaries up to £'))}<div class="chart" id="chM"></div><div class="chart" id="chT"></div><div id="trapOut"></div></div></section>
+
+<section class="tab" id="t-contract">${head(4, 'Contracting', 'The same contract run three ways: your own limited company outside IR35, an umbrella company inside IR35, or as a sole trader.')}
+<div class="grid2"><div>
+${fs('The contract', fld('dayRate', 'Day rate £') + fld('days', 'Days billed a year', { hint: '≈220–230 after holidays and gaps' }) + fld('expAcc', 'Accountant £/yr') + fld('expIns', 'Insurances £/yr') + fld('expOther', 'Other business costs £/yr'))}
+${fs('Limited company', fld('dirSalMode', 'Director salary', { type: 'sel', opts: [['12570', 'Up to personal allowance'], ['5000', 'Up to employer NI threshold'], ['custom', 'Custom']] }) + fld('dirSal', 'Custom salary £', { show: 'dirSalMode=custom' }) + fld('coPens', 'Company pension contribution £/yr') + fld('extract', '% of profit taken as dividends', { hint: 'The rest stays in the company' }) + fld('eaOn', 'Claim employment allowance', { type: 'chk', hint: 'Not available to sole-director companies' }))}
+${fs('Umbrella', fld('umbMargin', 'Umbrella margin £/week') + fld('umbWeeks', 'Weeks paid a year') + fld('umbPens', 'Your pension % (sacrifice)'))}
+</div><div id="conOut"></div></div></section>
+
+<section class="tab" id="t-compare">${head(5, 'Contract vs perm', 'Every route side by side against a permanent package, and the day rate you would need to match it.')}
+<div class="grid2"><div>${fs('Permanent package', fld('perm.salary', 'Salary £') + fld('perm.bonus', 'Bonus £') + fld('perm.erPct', 'Employer pension %') + fld('perm.benefits', 'Other benefits £/yr', { hint: 'Health, life cover, etc.' }) + fld('perm.holidays', 'Paid holidays incl. bank holidays'))}
+<div class="note">Contract figures use the Contracting tab. Your own pension % from Employed take-home applies to the perm job. "Total value" counts take-home, pension and benefits, plus 70% of profit kept in your company (it's taxed again when you take it out).</div></div><div id="cmpOut"></div></div></section>
+
+<section class="tab" id="t-assume">${head(6, 'Assumptions', `Every figure the calculator uses. Defaults are ${UK.year}; change any of them and every tab updates.`)}
+<div class="panel"><div class="fg">${TAXKEYS.map(([k, l]) => `<label><span>${l}</span><input type="number" step="any" data-k="tax.${k}" placeholder="${getP(UK0, k)}"></label>`).join('')}</div>
+<p class="hint">Blank fields use the default shown in grey. Rates are decimals (0.08 = 8%). Scottish bands use ${UK.year} defaults built into the calculator.</p><button class="btn sm" data-set='{"tax":{}}'>Restore all defaults</button></div></section>`;
+  },
+  render: {}
+};
+APPX.render.home = () => {};
+APPX.render.paye = () => {
+  const r = A, m = marginal(), cbNote = N(S.kids) && S.claimCB ? r.cb : null;
+  const rows = [['Gross pay', r.gross, ''], r.P && S.pensType !== 'none' ? [S.pensType === 'sac' ? 'Salary sacrifice to pension' : S.pensType === 'net' ? 'Pension (net pay)' : 'Pension (relief at source, 80% paid by you)', -(S.pensType === 'ras' ? r.P * .8 : r.P), ''] : null, ['Income tax', -r.tax, ''], ['National Insurance', -r.ni, ''], r.sl ? ['Student loan', -r.sl, ''] : null, ['Take-home pay', r.take, 'tot']].filter(Boolean);
+  $('#payeOut').innerHTML = `<div class="panel"><div class="cards">${stat('Take-home per ' + perL(), gbp(per(r.take)), gbp(r.take) + ' a year', 'hero')}${stat('Marginal rate', pct(m.take, 0), 'lost from the next £100', m.take >= 60 ? 'bad' : m.take >= 45 ? 'warn' : '')}${stat('Pension going in', gbp(per(r.pensionIn)), `you ${gbp(per(r.P))} + employer ${gbp(per(r.erP + r.pass))}${r.relief ? ' (incl. 20% relief)' : ''}`, 'good')}${stat('Personal allowance', gbp(r.t.pa), r.t.pa < UK.pa ? 'reduced by the £100k taper' : 'full', r.t.pa < UK.pa ? 'warn' : '')}${stat('Adjusted net income', gbp(r.t.ani), 'drives the traps')}${stat('Employer cost', gbp(per(r.cost)), 'salary + employer NI + pension')}</div>
+  <div class="wrap short"><table class="tbl"><thead><tr><th></th><th>Year</th><th>Month</th><th>Week</th></tr></thead><tbody>${rows.map(([l, v, c]) => `<tr class="${c}"><td>${l}</td><td>${gbp(v)}</td><td>${gbp(v / 12)}</td><td>${gbp(v / 52)}</td></tr>`).join('')}
+  ${cbNote ? `<tr><td>Child benefit received</td><td>${gbp(cbNote.cb)}</td><td>${gbp(cbNote.cb / 12)}</td><td>${gbp(cbNote.cb / 52)}</td></tr><tr><td>High income child benefit charge</td><td>${gbp(-cbNote.charge)}</td><td>${gbp(-cbNote.charge / 12)}</td><td>${gbp(-cbNote.charge / 52)}</td></tr><tr class="tot"><td>Household income</td><td>${gbp(r.household)}</td><td>${gbp(r.household / 12)}</td><td>${gbp(r.household / 52)}</td></tr>` : ''}</tbody></table></div>
+  <h3>Income tax by band</h3>${r.t.bands.length ? hbars(r.t.bands.map(b => [`${b.label} on ${gbp(b.amt)}`, b.tax, 'var(--acc)'])) : '<p class="hint">No income tax.</p>'}
+  ${S.ma === 'receive' && r.ns > UK.pa + UK.basic ? '<div class="warnbox">Marriage allowance can only be received by a basic-rate taxpayer, so it isn\'t applied here.</div>' : ''}
+  ${r.t.ani > UK.taper ? `<div class="warnbox">Your adjusted net income is ${gbp(r.t.ani)}. Between £100,000 and £125,140 you lose £1 of personal allowance for every £2 over, an effective 60% tax rate (more with student loans). Pension sacrifice is the usual fix: see the Pension optimiser.</div>` : ''}
+  ${N(S.kids) && r.t.ani > UK.hicbc[0] ? `<div class="warnbox">Above ${gbp(UK.hicbc[0])}, 1% of child benefit is clawed back for every £200 of adjusted net income, and all of it by ${gbp(UK.hicbc[1])}. Keep claiming even if it's fully clawed back: it protects National Insurance credits.</div>` : ''}
+  <div class="chart" id="chP"></div></div>`;
+  barChart($('#chP'), { cats: ['Where your pay goes'], h: 120, stacks: [{ name: 'Take-home', color: 'var(--good)', vals: [r.take] }, { name: 'Pension (yours)', color: 'var(--blue)', vals: [S.pensType === 'none' ? 0 : r.P] }, { name: 'Income tax', color: 'var(--bad)', vals: [r.tax] }, { name: 'NI', color: 'var(--warn)', vals: [r.ni] }, { name: 'Student loan', color: 'var(--violet)', vals: [r.sl] }] });
+};
+APPX.render.pension = () => {
+  const base = me({ pensType: 'sac', pensPct: 0 }), cur = me({ pensType: 'sac', pensPct: N(S.sacPct) });
+  const lost = base.household - cur.household, added = cur.P + cur.pass, cpp = added ? lost / added : 0;
+  const gross = A.gross;
+  const targets = [];
+  const findPct = ani => { if (base.t.ani <= ani) return null; let lo = 0, hi = 100; for (let i = 0; i < 40; i++) { const m = (lo + hi) / 2; if (me({ pensType: 'sac', pensPct: m }).t.ani > ani) lo = m; else hi = m; } return hi; };
+  [[UK.addl, 'Below the 45% band'], [UK.taper, 'Restore the full personal allowance (£100k)'], [UK.hicbc[1], 'Keep some child benefit'], [UK.hicbc[0], 'Keep all child benefit'], [UK.pa + UK.basic, 'Drop to basic rate']].forEach(([lim, l]) => { const p = findPct(lim); if (p != null && p < 70) { const x = me({ pensType: 'sac', pensPct: p }), lost2 = base.household - x.household, add2 = x.P + x.pass; targets.push({ l, p, P: x.P, lost: lost2, cpp: add2 ? lost2 / add2 : 0 }); } });
+  const pts = []; for (let p = 0; p <= 60; p += 1) { const x = me({ pensType: 'sac', pensPct: p }), prev = me({ pensType: 'sac', pensPct: Math.max(0, p - 1) }); pts.push({ p, take: x.household, pen: x.P + x.erP + x.pass, step: p ? (prev.household - x.household) / Math.max(1, (x.P - prev.P)) : null }); }
+  $('#penSide').innerHTML = targets.length ? `<div class="panel" style="margin-top:12px"><h3 style="margin-top:0">Sacrifice targets</h3><div class="wrap short"><table class="tbl"><thead><tr><th>Goal</th><th>Sacrifice</th><th>Costs you</th><th>Per £1 in pension</th></tr></thead><tbody>${targets.map(t => `<tr><td class="t">${t.l}</td><td>${pct(t.p)} · ${gbp(t.P)}</td><td>${gbp(t.lost)}</td><td>${gbp2(t.cpp)}</td></tr>`).join('')}</tbody></table></div></div>` : '';
+  $('#penOut').innerHTML = `<div class="panel"><div class="reco"><div class="eyebrow">Sacrificing ${N(S.sacPct)}% · ${gbp(cur.P)} a year</div><div class="big">Each £1 in your pension costs ${gbp2(cpp)}</div><p>Your take-home (including any child benefit) falls by ${gbp(lost)}, while ${gbp(added)} goes into your pension${cur.pass ? ' (including your employer\'s NI saving)' : ''}. Your employer adds ${gbp(cur.erP)} on top.</p></div>
+  <div class="cards">${stat('Take-home', gbp(cur.take / 12) + '/mo', `was ${gbp(base.take / 12)}`)}${stat('Pension a year', gbp(cur.P + cur.erP + cur.pass), 'you + employer')}${stat('Adjusted net income', gbp(cur.t.ani), '')}${stat('Child benefit kept', gbp(cur.cb.cb - cur.cb.charge), N(S.kids) ? '' : 'no children entered')}</div>
+  <h3>Cost of the next £1 into your pension</h3><div class="chart" id="chC"></div>
+  <p class="hint">Where the line dips, sacrificing is especially cheap: you are pulling income out of the 60% personal-allowance trap or the child benefit taper. Pension income is taxed later, but 25% can usually be taken tax-free. The annual allowance is £60,000 (tapered for very high incomes).</p></div>`;
+  lineChart($('#chC'), { xs: pts.map(x => x.p + '%'), h: 230, yFmt: v => '£' + v.toFixed(2), tipFmt: v => '£' + v.toFixed(2), tipTitle: i => `Sacrifice ${pts[i].p}% (${gbp(gross * pts[i].p / 100)})`, series: [{ name: 'Take-home lost per £1 sacrificed', color: 'var(--acc)', ys: pts.map(x => x.step) }], yMin: 0, yMax: 1, markers: [{ i: N(S.sacPct), label: 'you', color: 'var(--ink)' }] });
+};
+APPX.render.traps = () => {
+  const mx = Math.max(20000, N(S.gMax)), st = mx / 200, xs = [], mr = [], th = [];
+  for (let g = 0; g <= mx; g += st) { const a = me({ salary: g, bonus: 0 }), b = me({ salary: g + 100, bonus: 0, pensAmt: a.P }); xs.push(kfmt(g)); mr.push(100 - (b.household - a.household)); th.push(a.household); }
+  lineChart($('#chM'), { xs, label: 'Marginal rate', yFmt: v => v.toFixed(0) + '%', tipFmt: v => v.toFixed(1) + '%', series: [{ name: 'Lost from the next £100', color: 'var(--bad)', ys: mr }], yMin: 0, markers: [{ i: Math.round(N(S.salary) / st), label: 'your salary', color: 'var(--ink)' }], tipTitle: i => 'Salary ' + gbp(i * st) });
+  lineChart($('#chT'), { xs, label: 'Take-home', series: [{ name: 'Take-home incl. child benefit', color: 'var(--good)', ys: th, area: true }], tipTitle: i => 'Salary ' + gbp(i * st) });
+  $('#trapOut').innerHTML = `<div class="cols3"><div><h3>The 60% trap</h3><p>Between £100,000 and £125,140 of adjusted net income, the personal allowance is withdrawn at £1 for every £2. With 40% tax and 2% NI, you keep about 38p of each pound (less with a student loan).</p></div><div><h3>Child benefit</h3><p>Above £60,000, the High Income Child Benefit Charge claws back 1% of child benefit per £200. With three children, that can push the marginal rate well above 60% in that band.</p></div><div><h3>Student loans</h3><p>9% over the threshold (6% for postgraduate loans) on top of tax and NI. A higher-rate payer with Plan 2 and a postgraduate loan loses 57p of each extra pound before any taper.</p></div></div>`;
+};
+APPX.render.contract = () => {
+  const L = ltd(), U = umbrella(), T = soleTrader(), rs = [L, U, T];
+  const vatNote = L.rev > 90000 ? `<div class="warnbox">Turnover of ${gbp(L.rev)} is above the £90,000 VAT registration threshold. VAT is charged on top of your day rate and passed to HMRC, so it doesn't change these figures (the flat rate scheme can add a small gain).</div>` : '';
+  $('#conOut').innerHTML = `<div class="panel"><div class="cards">${rs.map((r, i) => stat(r.route, gbp(r.take), `${gbp(r.take / 12)}/mo · ${gbp(r.take / Math.max(1, N(S.days)))}/day worked`, i === rs.indexOf(rs.reduce((a, b) => value(b) > value(a) ? b : a)) ? 'hero' : '')).join('')}</div>${vatNote}
+  <div class="wrap short"><table class="tbl"><thead><tr><th></th>${rs.map(r => `<th>${r.route.split(' (')[0]}</th>`).join('')}</tr></thead><tbody>
+  ${[['Contract income', r => r.rev], ['Business expenses', r => -(r.exp || 0)], ['Umbrella margin', r => -(r.margin || 0)], ['Employer NI', r => -(r.erNI || 0)], ['Apprenticeship levy', r => -(r.levy || 0)], ['Company pension', r => -(r.coP || 0)], ['Corporation tax', r => -(r.ct || 0)], ['Salary', r => r.sal ?? r.gross ?? r.profit], ['Dividends', r => r.div || 0], ['Income tax', r => -r.tax], ['Employee NI / Class 4', r => -r.eeNI], ['Student loan', r => -r.sl], ['Take-home', r => r.take], ['Pension contributions', r => r.pension], ['Kept in company', r => r.retained || 0]].map(([l, f], i) => `<tr class="${l === 'Take-home' ? 'tot' : ''}"><td>${l}</td>${rs.map(r => `<td>${gbp(f(r))}</td>`).join('')}</tr>`).join('')}</tbody></table></div>
+  <div class="chart" id="chCon"></div>
+  <div class="note"><b>IR35</b> decides the route, not you. If the client is a medium or large business, it decides whether the contract is inside or outside IR35. Inside means PAYE through an umbrella or deemed employment; outside lets you work through your own company. Small clients leave the decision with you, and the risk.</div>
+  <p class="hint">Limited company assumes a single director with no other employees, salary paid first, then dividends from post-tax profit. Umbrella pays you as an employee after deducting employer NI, the apprenticeship levy, auto-enrolment employer pension and its margin from the assignment rate. Holiday pay is part of the umbrella rate, not on top.</p></div>`;
+  barChart($('#chCon'), { cats: rs.map(r => r.route.split(' (')[0]), stacks: [{ name: 'Take-home', color: 'var(--good)', vals: rs.map(r => r.take) }, { name: 'Pension', color: 'var(--blue)', vals: rs.map(r => r.pension) }, { name: 'Kept in company', color: 'var(--teal)', vals: rs.map(r => r.retained || 0) }, { name: 'Tax & NI', color: 'var(--bad)', vals: rs.map(r => r.tax + r.eeNI + (r.erNI || 0) + (r.ct || 0) + (r.levy || 0) + r.sl) }, { name: 'Costs', color: 'var(--warn)', vals: rs.map(r => (r.exp || 0) + (r.margin || 0)) }] });
+};
+APPX.render.compare = () => {
+  const P = permJob(), L = ltd(), U = umbrella(), T = soleTrader(), rs = [P, L, U, T];
+  const target = value(P);
+  const solveRate = f => { let lo = 50, hi = 5000; for (let i = 0; i < 50; i++) { const m = (lo + hi) / 2; if (value(f({ dayRate: m })) < target) lo = m; else hi = m; } return hi; };
+  const rL = solveRate(ltd), rU = solveRate(umbrella), rT = solveRate(soleTrader);
+  const permDays = 260 - N(S.perm.holidays);
+  $('#cmpOut').innerHTML = `<div class="panel"><div class="reco"><div class="eyebrow">To match the permanent package (${gbp(target)} total value)</div><div class="big">${gbp(rL)}/day outside IR35</div><p>Inside IR35 via an umbrella you'd need about <b>${gbp(rU)}/day</b>; as a sole trader, <b>${gbp(rT)}/day</b>. All at ${N(S.days)} billed days a year. The perm job pays you for ${N(S.perm.holidays)} days off and covers sick pay, notice and redundancy; a contractor doesn't get those.</p></div>
+  <div class="wrap short"><table class="tbl"><thead><tr><th>Route</th><th>Take-home</th><th>Pension</th><th>Kept in co.</th><th>Benefits</th><th>Total value</th><th>Per day worked</th></tr></thead><tbody>${rs.map(r => `<tr class="${r === P ? 'hl' : ''}"><td class="l">${r.route}</td><td>${gbp(r.take)}</td><td>${gbp(r.pension)}</td><td>${gbp(r.retained || 0)}</td><td>${gbp(r.benefits || 0)}</td><td><b>${gbp(value(r))}</b></td><td>${gbp(value(r) / (r === P ? permDays : Math.max(1, N(S.days))))}</td></tr>`).join('')}</tbody></table></div>
+  <h3>Value by day rate</h3><div class="chart" id="chDR"></div>
+  <p class="hint">Rule of thumb: an outside-IR35 day rate around salary ÷ 200 to ÷ 250 roughly matches a permanent job, but gaps between contracts move this a lot. Try fewer billed days to see the effect.</p></div>`;
+  const rates = []; for (let d = 200; d <= 1200; d += 25) rates.push(d);
+  lineChart($('#chDR'), { xs: rates.map(r => '£' + r), series: [{ name: 'Ltd', color: 'var(--good)', ys: rates.map(d => value(ltd({ dayRate: d }))) }, { name: 'Umbrella', color: 'var(--acc)', ys: rates.map(d => value(umbrella({ dayRate: d }))) }, { name: 'Sole trader', color: 'var(--violet)', ys: rates.map(d => value(soleTrader({ dayRate: d }))) }], hlines: [{ y: target, label: 'perm package', color: 'var(--blue)' }], tipTitle: i => `£${rates[i]}/day` });
+};
+APPX.render.assume = () => {};
+boot(APPX);
+
+</script>
+</body>
+</html>
