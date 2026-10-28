@@ -2,7 +2,7 @@
 {
   "slug": "debt-payoff-planner",
   "title": "Debt Payoff Planner",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "status": "approved",
   "summary": "Plan paying off several debts: avalanche, snowball or custom order, month-by-month schedule, debt-free date and interest saved, lump sums, balance-transfer and consolidation-loan checks. Any currency, UK examples. Fully offline.",
   "category": "Personal finance",
@@ -15,7 +15,7 @@
 {
   "slug": "fi-planner-uk",
   "title": "Financial Independence Planner (UK)",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "status": "approved",
   "summary": "When could you stop working? Projects cash, GIA, ISA, LISA and pensions to a target age, then models drawdown order, UK tax, State Pension and a Monte Carlo success rate. Fully offline.",
   "category": "Personal finance",
@@ -28,7 +28,7 @@
 {
   "slug": "payment-methods-explorer",
   "title": "Payment Methods Explorer",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "status": "approved",
   "summary": "Explore how people pay in 33 markets: card, wallet, real-time, direct debit, BNPL, cash and voucher methods, their roles, refunds, disputes and recurring support; plan a payment mix, model approval and retry outcomes, and look up decline and return codes.",
   "category": "Payments & business",
@@ -67,7 +67,7 @@
 {
   "slug": "rent-vs-buy-calculator",
   "title": "Rent vs Buy Calculator (UK)",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "status": "approved",
   "summary": "Compare renting and investing the difference against buying over your horizon: stamp duty, mortgage, running and selling costs, house-price growth, investment returns, sensitivity ranges and a Monte Carlo view. Fully offline.",
   "category": "Property & finance",
@@ -119,7 +119,7 @@
 {
   "slug": "uk-take-home-pay-calculator",
   "title": "UK Take-Home Pay & Contracting Calculator",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "status": "approved",
   "summary": "2026/27 take-home pay for employees (rUK or Scotland) with pension options, student loans, Child Benefit charge and benefits in kind, plus contractor comparisons: limited company, umbrella and permanent role. Fully offline.",
   "category": "Personal finance",

@@ -1,7 +1,7 @@
 {
   "slug": "payment-methods-explorer",
   "title": "Payment Methods Explorer",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "status": "approved",
   "summary": "Explore how people pay in 33 markets: card, wallet, real-time, direct debit, BNPL, cash and voucher methods, their roles, refunds, disputes and recurring support; plan a payment mix, model approval and retry outcomes, and look up decline and return codes.",
   "category": "Payments & business",

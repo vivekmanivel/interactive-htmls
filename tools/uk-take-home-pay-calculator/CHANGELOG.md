@@ -1,6 +1,10 @@
 # Changelog – UK Take-Home Pay & Contracting Calculator
 Format: [Keep a Changelog](https://keepachangelog.com/), versions: [SemVer](https://semver.org/).
 
+## [1.0.1] – 2026-10-28
+### Changed
+- "More from Usualy Labs" menu now links to the Cash Flow Simulator.
+
 ## [1.0.0] – 2026-10-28
 ### Added
 - First public release.

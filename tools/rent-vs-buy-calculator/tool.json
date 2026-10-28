@@ -1,7 +1,7 @@
 {
   "slug": "rent-vs-buy-calculator",
   "title": "Rent vs Buy Calculator (UK)",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "status": "approved",
   "summary": "Compare renting and investing the difference against buying over your horizon: stamp duty, mortgage, running and selling costs, house-price growth, investment returns, sensitivity ranges and a Monte Carlo view. Fully offline.",
   "category": "Property & finance",

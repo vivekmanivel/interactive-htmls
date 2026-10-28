@@ -1,7 +1,7 @@
 {
   "slug": "debt-payoff-planner",
   "title": "Debt Payoff Planner",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "status": "approved",
   "summary": "Plan paying off several debts: avalanche, snowball or custom order, month-by-month schedule, debt-free date and interest saved, lump sums, balance-transfer and consolidation-loan checks. Any currency, UK examples. Fully offline.",
   "category": "Personal finance",
