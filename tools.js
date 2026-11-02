@@ -26,6 +26,19 @@ window.TOOLS = [
 }
 ,
 {
+  "slug": "grammar-school-finder",
+  "title": "UK Grammar School Finder",
+  "version": "1.0.0",
+  "status": "approved",
+  "summary": "Every state grammar school in England and Northern Ireland on a map: postcode search with drive-time reach, catchment and priority-area checks for all 163 English grammars, GCSE and A-level results, admissions demand, leavers' destinations, Ofsted, rankings weighted your way, test areas and dates, and a printable report.",
+  "category": "Education",
+  "data_sources": ["DfE (GIAS, KS4, 16-19, destinations, applications and offers)", "Ofsted", "DE NI and Education Authority NI", "SEAG", "Council and school admission arrangements (163 English schools)", "postcodes.io", "Esri and OpenStreetMap tiles"],
+  "external_requests": true,
+  "data_last_checked": "2026-11",
+  "licence": "MIT (code); data under each publisher's licence"
+}
+,
+{
   "slug": "payment-methods-explorer",
   "title": "Payment Methods Explorer",
   "version": "1.0.1",

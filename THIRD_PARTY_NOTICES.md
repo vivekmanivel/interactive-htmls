@@ -16,3 +16,11 @@ Licence headers are kept inside each inlined library.
 
 ## Music tools
 Piano tools use standard music theory (not owned by anyone). The "chord trees" practice idea is credited to piano teacher Jason Zachariah; no text, images or audio from his lessons are reproduced, and there is no affiliation or endorsement.
+
+## Fonts (embedded in some tools)
+| Font | Licence | Used in |
+|---|---|---|
+| Figtree | SIL Open Font License 1.1, (c) The Figtree Project Authors, see LICENSES/OFL-Figtree.txt | grammar-school-finder |
+| JetBrains Mono | SIL Open Font License 1.1, (c) The JetBrains Mono Project Authors, see LICENSES/OFL-JetBrainsMono.txt | grammar-school-finder |
+
+Leaflet 1.9.4 (BSD 2-Clause) is also embedded in grammar-school-finder.
