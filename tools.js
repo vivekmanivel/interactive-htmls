@@ -91,6 +91,19 @@ window.TOOLS = [
 }
 ,
 {
+  "slug": "saye-sale-planner",
+  "title": "SAYE Sale Planner",
+  "version": "1.0.0",
+  "status": "approved",
+  "summary": "Work out the UK Capital Gains Tax on selling Sharesave shares and how many to move to a spouse so both annual exemptions are used. Compares four ways to sell, with a line-by-line breakdown and an ISA check. Fully offline.",
+  "category": "Personal finance",
+  "data_sources": ["GOV.UK Capital Gains Tax rates and allowances", "HMRC share matching rules", "GOV.UK Income Tax, ISA and Self Assessment guidance"],
+  "external_requests": false,
+  "data_last_checked": "2026-11",
+  "licence": "MIT (code); fonts under SIL OFL 1.1"
+}
+,
+{
   "slug": "south-london-first-time-buyer-guide",
   "title": "South London First-Time Buyer Guide & Mortgage Planner",
   "version": "1.0.1",

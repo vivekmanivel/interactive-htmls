@@ -24,3 +24,5 @@ Piano tools use standard music theory (not owned by anyone). The "chord trees" p
 | JetBrains Mono | SIL Open Font License 1.1, (c) The JetBrains Mono Project Authors, see LICENSES/OFL-JetBrainsMono.txt | grammar-school-finder |
 
 Leaflet 1.9.4 (BSD 2-Clause) is also embedded in grammar-school-finder.
+
+Newsreader, Schibsted Grotesk and IBM Plex Mono (SIL Open Font License 1.1, see LICENSES/) are embedded in saye-sale-planner.
