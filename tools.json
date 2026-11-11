@@ -117,6 +117,19 @@
 }
 ,
 {
+  "slug": "statement-reconciliation",
+  "title": "Statement Reconciliation",
+  "version": "1.0.0",
+  "status": "approved",
+  "summary": "Match a supplier, customer or bank statement against your own ledger, side by side. Reads PDF, Excel or CSV statements, refreshes your records from a shared folder, and exports the result to Excel. Fully offline.",
+  "category": "Payments & business",
+  "data_sources": ["Your own statements and ledgers", "SheetJS (Excel/CSV)", "PDF.js (PDF)"],
+  "external_requests": false,
+  "data_last_checked": "2026-11",
+  "licence": "MIT (code); SheetJS and PDF.js Apache-2.0; fonts SIL OFL 1.1"
+}
+,
+{
   "slug": "uk-cash-flow-simulator",
   "title": "UK Small Business Cash Flow Simulator",
   "version": "1.0.0",

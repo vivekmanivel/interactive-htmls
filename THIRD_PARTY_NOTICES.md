@@ -26,3 +26,5 @@ Piano tools use standard music theory (not owned by anyone). The "chord trees" p
 Leaflet 1.9.4 (BSD 2-Clause) is also embedded in grammar-school-finder.
 
 Newsreader, Schibsted Grotesk and IBM Plex Mono (SIL Open Font License 1.1, see LICENSES/) are embedded in saye-sale-planner.
+
+SheetJS Community Edition 0.18.5 and PDF.js 3.11.174 (Apache License 2.0, see LICENSES/Apache-2.0.txt), with Figtree and JetBrains Mono (SIL OFL 1.1), are embedded in statement-reconciliation.

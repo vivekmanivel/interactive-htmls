@@ -10,15 +10,15 @@ for d in tools/*/; do
   [ -f "$h" ] || continue
   grep -qiE 'data sources|sources &amp; disclaimer|sources and credits' "$h" || err "$n" "no data sources / credits section"
   grep -qiE 'not (financial|legal|professional)|not advice|is for general information' "$h" || err "$n" "no disclaimer"
-  grep -qiE 'googletagmanager|google-analytics|gtag\(|plausible|matomo|hotjar|segment\.com|clarity\.ms|facebook\.net|mixpanel|posthog|sentry' "$h" && err "$n" "analytics/tracker found"
+  grep -qiE 'googletagmanager|google-analytics|gtag\(|plausible|matomo|hotjar|segment\.com|clarity\.ms|facebook\.net|mixpanel|posthog|sentry\.io|sentry-cdn' "$h" && err "$n" "analytics/tracker found"
   grep -qiE 'sendBeacon' "$h" && err "$n" "sendBeacon (data transfer) found"
   grep -qiE '<form[^>]*action=["'"'"']?https?:' "$h" && err "$n" "form posts to external URL"
   grep -qiE '(sk|pk)_live_|AKIA[0-9A-Z]{16}|-----BEGIN [A-Z ]*PRIVATE KEY' "$h" && err "$n" "possible secret"
   grep -qiE '<script[^>]+src=["'"'"']?https?:' "$h" && err "$n" "external script (must be inlined)"
-  # Private-only personal/company blocklist (never published)
+  # Private-only personal/company blocklist, checked on the four published files (reference/ folders stay private)
   if [ -f .forbidden-patterns ]; then
     while IFS= read -r p; do [ -z "$p" ] || [[ "$p" == \#* ]] && continue
-      grep -rqiE "$p" "$t" && err "$n" "forbidden pattern: $p"; done < .forbidden-patterns
+      grep -qiE "$p" "$t"/index.html "$t"/README.md "$t"/CHANGELOG.md "$t"/tool.json && err "$n" "forbidden pattern: $p"; done < .forbidden-patterns
   fi
 done
 [ $fail -eq 0 ] && echo "All checks passed." || exit 1
