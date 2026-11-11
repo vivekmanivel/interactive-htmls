@@ -1,6 +1,10 @@
 # Changelog – UK Small Business Cash Flow Simulator
 Format: [Keep a Changelog](https://keepachangelog.com/), versions: [SemVer](https://semver.org/).
 
+## [1.0.1] – 2026-11-11
+### Changed
+- "More from Usualy Labs" menu now links to the SAYE Sale Planner and Statement Reconciliation.
+
 ## [1.0.0] – 2026-10-28
 ### Added
 - First public release.

@@ -1,6 +1,10 @@
 # Changelog – UK Grammar School Finder
 Format: [Keep a Changelog](https://keepachangelog.com/), versions: [SemVer](https://semver.org/).
 
+## [1.0.1] – 2026-11-11
+### Changed
+- "More from Usualy Labs" menu now links to the SAYE Sale Planner and Statement Reconciliation.
+
 ## [1.0.0] – 2026-11-02
 ### Added
 - First public release: 163 English and 66 Northern Ireland grammar schools; catchment register checked 29 October 2026 (97 mapped, 15 described in words, 51 with no catchment).

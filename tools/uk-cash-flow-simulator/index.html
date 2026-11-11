@@ -204,7 +204,7 @@ document.addEventListener('DOMContentLoaded',a);})();
 <div class="app"><nav class="side" id="side"></nav><main><header class="kpis" id="kpis"></header><div id="tabs"></div>
 <footer class="ul-about" id="about">
   <h2>About, data sources &amp; disclaimer</h2>
-  <p><b>UK Small Business Cash Flow Simulator</b> &middot; published by <b>Usualy Labs</b> &middot; version 1.0.0 &middot; rules last checked October 2026.</p>
+  <p><b>UK Small Business Cash Flow Simulator</b> &middot; published by <b>Usualy Labs</b> &middot; version 1.0.1 &middot; rules last checked October 2026.</p>
   <h3>Not advice</h3>
   <p>For general information and planning only. It is <b>not</b> financial, accounting, tax, legal or banking advice. Results are simulations based on your inputs and on assumptions about payment timing, failure and retry rates that may not match your bank, payment provider or customers. Actual settlement times, cut-offs, fees and HMRC deadlines depend on your providers and circumstances. Check with your bank, payment provider, accountant or HMRC before relying on it.</p>
   <p>Provided &ldquo;as is&rdquo; without warranty of any kind. To the fullest extent permitted by law, Usualy Labs and contributors accept no responsibility or liability for any loss or decision arising from its use. Nothing here limits any liability that cannot be limited by law.</p>
@@ -397,7 +397,7 @@ function barChart(el, o) {
 const hbars = (items, color = 'var(--acc)', fmt = gbp) => { const mx = Math.max(...items.map(x => Math.abs(x[1])), 1e-9); return items.map(([l, v, c]) => `<div class="hbar"><span>${esc(l)}</span><div class="t"><i style="width:${Math.abs(v) / mx * 100}%;background:${c || color}"></i></div><span class="v">${fmt(v)}</span></div>`).join(''); };
 
 /* ---------- shell ---------- */
-const FAMILY = [['..', 'All tools', '../../'], ['uk-mortgage-planner', 'Mortgage planner'], ['rent-vs-buy-calculator', 'Rent vs buy'], ['uk-take-home-pay-calculator', 'Take-home & contracting'], ['fi-planner-uk', 'Financial independence'], ['debt-payoff-planner', 'Debt payoff'], ['payment-methods-explorer', 'Payment methods explorer'], ['uk-cash-flow-simulator', 'Cash flow simulator']];
+const FAMILY = [['..', 'All tools', '../../'], ['uk-mortgage-planner', 'Mortgage planner'], ['rent-vs-buy-calculator', 'Rent vs buy'], ['uk-take-home-pay-calculator', 'Take-home & contracting'], ['fi-planner-uk', 'Financial independence'], ['debt-payoff-planner', 'Debt payoff'], ['payment-methods-explorer', 'Payment methods explorer'], ['uk-cash-flow-simulator', 'Cash flow simulator'], ['grammar-school-finder', 'Grammar school finder'], ['saye-sale-planner', 'SAYE sale planner'], ['statement-reconciliation', 'Statement reconciliation']];
 function go(t) { CUR = t; $$('#pipe button').forEach(b => b.classList.toggle('active', b.dataset.t === t)); $$('.tab').forEach(s => s.classList.toggle('active', s.id === 't-' + t)); try { localStorage.setItem(APP.key + '.tab', t); } catch (e) {} render(); scrollTo({ top: 0 }); }
 function render() { APP.reset && APP.reset(); try { const k = APP.kpis ? APP.kpis() : null; const el = $('#kpis'); el.innerHTML = k ? k.map(([l, v, s]) => `<div class="kpi"><div class="l">${l}</div><div class="v">${v}</div><div class="s">${s || ''}</div></div>`).join('') : ''; (APP.render[CUR] || (() => {}))(); } catch (e) { console.error(e); } }
 const renderSoon = debounce(render, 160);
