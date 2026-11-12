@@ -1,6 +1,10 @@
 # Changelog – Payment Methods Explorer
 Format: [Keep a Changelog](https://keepachangelog.com/), versions: [SemVer](https://semver.org/).
 
+## [1.0.3] – 2026-11-12
+### Changed
+- "More from Usualy Labs" menu now links to Blockchain, Hands On.
+
 ## [1.0.2] – 2026-11-11
 ### Changed
 - "More from Usualy Labs" menu now links to the SAYE Sale Planner and Statement Reconciliation.

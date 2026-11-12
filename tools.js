@@ -1,8 +1,21 @@
 window.TOOLS = [
 {
+  "slug": "blockchain-hands-on",
+  "title": "Blockchain, Hands On",
+  "version": "1.0.0",
+  "status": "approved",
+  "summary": "Follow one payment through a working blockchain on a single zoomable page. Sign it with real keys, mine the block on your own computer, try to tamper with the chain, watch the network reject it, and test a 51% attack. Fully offline.",
+  "category": "Learning",
+  "data_sources": ["Bitcoin white paper (Nakamoto, 2008)", "NIST FIPS 180-4 and 186-5", "W3C Web Cryptography API", "FCA crypto risk guide"],
+  "external_requests": false,
+  "data_last_checked": "2026-11",
+  "licence": "MIT (code); fonts SIL OFL 1.1"
+}
+,
+{
   "slug": "debt-payoff-planner",
   "title": "Debt Payoff Planner",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "status": "approved",
   "summary": "Plan paying off several debts: avalanche, snowball or custom order, month-by-month schedule, debt-free date and interest saved, lump sums, balance-transfer and consolidation-loan checks. Any currency, UK examples. Fully offline.",
   "category": "Personal finance",
@@ -15,7 +28,7 @@ window.TOOLS = [
 {
   "slug": "fi-planner-uk",
   "title": "Financial Independence Planner (UK)",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "status": "approved",
   "summary": "When could you stop working? Projects cash, GIA, ISA, LISA and pensions to a target age, then models drawdown order, UK tax, State Pension and a Monte Carlo success rate. Fully offline.",
   "category": "Personal finance",
@@ -28,7 +41,7 @@ window.TOOLS = [
 {
   "slug": "grammar-school-finder",
   "title": "UK Grammar School Finder",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "status": "approved",
   "summary": "Every state grammar school in England and Northern Ireland on a map: postcode search with drive-time reach, catchment and priority-area checks for all 163 English grammars, GCSE and A-level results, admissions demand, leavers' destinations, Ofsted, rankings weighted your way, test areas and dates, and a printable report.",
   "category": "Education",
@@ -41,7 +54,7 @@ window.TOOLS = [
 {
   "slug": "payment-methods-explorer",
   "title": "Payment Methods Explorer",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "status": "approved",
   "summary": "Explore how people pay in 33 markets: card, wallet, real-time, direct debit, BNPL, cash and voucher methods, their roles, refunds, disputes and recurring support; plan a payment mix, model approval and retry outcomes, and look up decline and return codes.",
   "category": "Payments & business",
@@ -80,7 +93,7 @@ window.TOOLS = [
 {
   "slug": "rent-vs-buy-calculator",
   "title": "Rent vs Buy Calculator (UK)",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "status": "approved",
   "summary": "Compare renting and investing the difference against buying over your horizon: stamp duty, mortgage, running and selling costs, house-price growth, investment returns, sensitivity ranges and a Monte Carlo view. Fully offline.",
   "category": "Property & finance",
@@ -119,7 +132,7 @@ window.TOOLS = [
 {
   "slug": "statement-reconciliation",
   "title": "Statement Reconciliation",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "status": "approved",
   "summary": "Match a supplier, customer or bank statement against your own ledger, side by side. Reads PDF, Excel or CSV statements, refreshes your records from a shared folder, and exports the result to Excel. Fully offline.",
   "category": "Payments & business",
@@ -132,7 +145,7 @@ window.TOOLS = [
 {
   "slug": "uk-cash-flow-simulator",
   "title": "UK Small Business Cash Flow Simulator",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "status": "approved",
   "summary": "Day-by-day cash flow for a UK small business on the real banking calendar: Bacs Direct Debit and card settlement timing, bank holidays, failed payments and retries, invoices, payroll, HMRC PAYE, VAT and Corporation Tax dates, overdraft and buffer alerts, with a Monte Carlo view. Fully offline.",
   "category": "Payments & business",
@@ -158,7 +171,7 @@ window.TOOLS = [
 {
   "slug": "uk-take-home-pay-calculator",
   "title": "UK Take-Home Pay & Contracting Calculator",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "status": "approved",
   "summary": "2026/27 take-home pay for employees (rUK or Scotland) with pension options, student loans, Child Benefit charge and benefits in kind, plus contractor comparisons: limited company, umbrella and permanent role. Fully offline.",
   "category": "Personal finance",

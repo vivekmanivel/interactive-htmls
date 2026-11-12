@@ -1,0 +1,12 @@
+{
+  "slug": "blockchain-hands-on",
+  "title": "Blockchain, Hands On",
+  "version": "1.0.0",
+  "status": "approved",
+  "summary": "Follow one payment through a working blockchain on a single zoomable page. Sign it with real keys, mine the block on your own computer, try to tamper with the chain, watch the network reject it, and test a 51% attack. Fully offline.",
+  "category": "Learning",
+  "data_sources": ["Bitcoin white paper (Nakamoto, 2008)", "NIST FIPS 180-4 and 186-5", "W3C Web Cryptography API", "FCA crypto risk guide"],
+  "external_requests": false,
+  "data_last_checked": "2026-11",
+  "licence": "MIT (code); fonts SIL OFL 1.1"
+}

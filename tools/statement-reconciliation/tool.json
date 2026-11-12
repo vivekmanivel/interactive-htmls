@@ -1,7 +1,7 @@
 {
   "slug": "statement-reconciliation",
   "title": "Statement Reconciliation",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "status": "approved",
   "summary": "Match a supplier, customer or bank statement against your own ledger, side by side. Reads PDF, Excel or CSV statements, refreshes your records from a shared folder, and exports the result to Excel. Fully offline.",
   "category": "Payments & business",
