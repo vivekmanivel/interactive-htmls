@@ -1,0 +1,12 @@
+{
+  "slug": "scenario-budget-forecast",
+  "title": "Scenario Budget & Forecast",
+  "version": "1.0.0",
+  "status": "approved",
+  "summary": "Build a budget or rolling forecast from your own master data and monthly actuals: paste from Excel, load files or refresh from a folder, map fields, project a baseline, layer scenarios by any field, see the P&L, and export upload files that keep your master data IDs (Excel or CSV). Fully offline.",
+  "category": "Payments & business",
+  "data_sources": ["Your own master data, actuals and budget", "SheetJS (Excel/CSV)"],
+  "external_requests": false,
+  "data_last_checked": "2026-11",
+  "licence": "MIT (code); SheetJS Apache-2.0; fonts SIL OFL 1.1"
+}

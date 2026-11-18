@@ -1,6 +1,10 @@
 # Changelog – Statement Reconciliation
 Format: [Keep a Changelog](https://keepachangelog.com/), versions: [SemVer](https://semver.org/).
 
+## [1.0.2] – 2026-11-18
+### Changed
+- "More from Usualy Labs" menu now links to Scenario Budget & Forecast.
+
 ## [1.0.1] – 2026-11-12
 ### Changed
 - "More from Usualy Labs" menu now links to Blockchain, Hands On.

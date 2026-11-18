@@ -1,6 +1,10 @@
 # Changelog – UK Grammar School Finder
 Format: [Keep a Changelog](https://keepachangelog.com/), versions: [SemVer](https://semver.org/).
 
+## [1.1.1] – 2026-11-18
+### Changed
+- "More from Usualy Labs" menu now links to Scenario Budget & Forecast.
+
 ## [1.1.0] – 2026-11-18
 ### Added
 - Map & search: choose up to 6 schools from a "Choose schools" checkbox list that follows your filters (with search), or with "Show catchment" from any dot or profile, and see every catchment on the map at once, each in its own colour, with last-offered distance rings.
