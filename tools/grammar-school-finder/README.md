@@ -5,7 +5,7 @@ A free, single-file guide to every state grammar school in England and Northern 
 ## What it does
 | Tab | Purpose |
 |---|---|
-| Map & search | Type a postcode or drop a pin; schools within your chosen drive time or distance, reach and coverage layers, catchment of a selected school |
+| Map & search | Type a postcode or drop a pin; schools within your chosen drive time or distance, reach and coverage layers. Choose up to 6 schools to see all their catchments at once, where they overlap, and every source link for each school, and export the postcodes in each area |
 | Schools & compare | Search, filter and sort all grammar schools; compare side by side |
 | School profile | GCSE and A-level results, admissions demand and last offers, leavers' destinations, Ofsted, catchment rules with source links |
 | Rankings your way | Weight the measures that matter to you |

@@ -41,7 +41,7 @@ window.TOOLS = [
 {
   "slug": "grammar-school-finder",
   "title": "UK Grammar School Finder",
-  "version": "1.0.2",
+  "version": "1.1.0",
   "status": "approved",
   "summary": "Every state grammar school in England and Northern Ireland on a map: postcode search with drive-time reach, catchment and priority-area checks for all 163 English grammars, GCSE and A-level results, admissions demand, leavers' destinations, Ofsted, rankings weighted your way, test areas and dates, and a printable report.",
   "category": "Education",

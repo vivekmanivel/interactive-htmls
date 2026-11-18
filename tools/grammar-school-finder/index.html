@@ -233,6 +233,11 @@ details.more summary{cursor:pointer;font-weight:600;color:var(--muted)}
 
 
 #map{height:620px;border-radius:10px;border:1px solid var(--line);background:var(--bg);z-index:1}
+#mapWrap:fullscreen,#mapWrap.fs{background:var(--bg);padding:12px 16px;display:flex;flex-direction:column;gap:4px;overflow:auto}
+#mapWrap.fs{position:fixed;inset:0;z-index:3000}
+#mapWrap:fullscreen #map,#mapWrap.fs #map{flex:1 1 auto;height:auto;min-height:55vh}
+#mapWrap:fullscreen #mapLegend,#mapWrap.fs #mapLegend{flex:none;max-height:28vh;overflow:auto}
+.leaflet-bar a.fsbtn{font:700 16px/30px var(--f-body);color:var(--ink)}
 .leaflet-container{font:13px var(--f-body)}
 .leaflet-popup-content-wrapper,.leaflet-popup-tip{background:var(--surface);color:var(--ink);box-shadow:0 8px 24px rgba(11,22,64,.18)}
 .leaflet-popup-content{margin:12px 14px}
@@ -252,6 +257,32 @@ details.more summary{cursor:pointer;font-weight:600;color:var(--muted)}
 .res .sub{grid-column:2/4;font-size:12px;color:var(--muted);display:flex;flex-wrap:wrap;gap:4px 8px;align-items:center}
 .res .rt{font:600 12.5px var(--f-mono);text-align:right;white-space:nowrap}
 .gdot{width:10px;height:10px;border-radius:50%;display:inline-block}
+.msel-pick{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:flex-end;margin:0 0 10px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--bg)}
+.mdd{position:relative;flex:1 1 300px;min-width:0}
+.mlbl{display:block;font-size:12.5px;color:var(--muted);font-weight:600;margin-bottom:5px}
+.mdd-btn{width:100%;text-align:left;display:flex;justify-content:space-between;align-items:center;gap:8px;font:500 14px var(--f-body);color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:8px 10px;cursor:pointer}
+.mdd-btn:hover,.mdd-btn[aria-expanded="true"]{border-color:var(--accent)}
+.mdd-pop{position:absolute;z-index:1200;left:0;top:calc(100% + 4px);width:max(100%,360px);max-width:calc(100vw - 32px);background:var(--surface);border:1px solid var(--line);border-radius:10px;box-shadow:0 12px 32px rgba(11,22,64,.18);padding:8px}
+.mdd-pop input[type=search]{margin-bottom:6px;font-family:var(--f-body)}
+.mdd-list{max-height:340px;overflow:auto}
+.msel-pick .mopt{display:flex;flex-direction:row;align-items:center;gap:8px;padding:6px 8px;border-radius:6px;color:var(--ink);font-weight:500;font-size:13.5px;cursor:pointer;margin:0}
+.mopt:hover{background:var(--bg)}.mopt.on{background:var(--accent-soft)}.mopt.dis{opacity:.5;cursor:not-allowed}
+.mopt input{width:auto;flex:none;accent-color:var(--accent);margin:0}
+.mopt .hint{font-size:12px}
+.mdd-foot{display:flex;justify-content:space-between;align-items:center;gap:8px;border-top:1px solid var(--line);margin-top:6px;padding-top:8px}
+.msel-pick .chips{flex:2 1 320px;align-items:center}
+.msel-pick .chip{color:var(--on-strong);cursor:default}
+.chip .x{background:none;border:0;color:inherit;cursor:pointer;font:800 14px var(--f-body);padding:0 0 0 6px;line-height:1}
+.mcard{border:1px solid var(--line);border-left:4px solid var(--line);border-radius:8px;padding:8px 10px;margin:6px 0;background:var(--surface)}
+.mcard summary{cursor:pointer;display:flex;gap:8px;align-items:center;font-size:13.5px}
+.mcard summary .del{margin-left:auto}
+.mcard .sub{font-size:12px;color:var(--muted);margin:6px 0 4px;display:flex;flex-wrap:wrap;gap:4px 8px;align-items:center}
+.mct{font-size:12.5px;margin:6px 0;line-height:1.5}
+.srcs{margin:2px 0 8px;padding-left:18px;font-size:12.5px}.srcs li{margin:2px 0}
+.shared{border:1px solid var(--line);border-radius:8px;padding:8px 10px;margin:0 0 8px;background:var(--surface)}
+.srow{display:grid;grid-template-columns:16px 1fr auto;gap:8px;align-items:center;font-size:12.5px;padding:3px 0}
+.srow>i{width:16px;height:16px;border-radius:4px;display:inline-block;opacity:.85}
+.srow .gdot{width:8px;height:8px;vertical-align:1px}
 .star{all:unset;cursor:pointer;font-size:17px;line-height:1;color:var(--muted)}
 .star.on{color:var(--cash)}
 .ptabs{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0 14px}
@@ -582,6 +613,7 @@ const DEF = () => ({
   f: { country: 'all', region: 'all', child: 'any', gtype: 'any', sixth: false, test: 'all', minA8: '', q: '' },
   reach: { mode: 'drive', mins: 30, miles: 10, speed: 24, circ: 1.35 },
   layers: { reach: true, heat: false, tests: false, overlap: false, hist: false, catch: false },
+  msel: [],
   star: [], cmp: [], sel: '136290', ptab: 'results', sort: 'name', rcmp: [],
   w: { a8: 3, em5: 0, ebacc: 0, triple: 0, al: 3, va: 0, aab: 0, top3: 2, he: 0, ofsted: 1, demand: 0, dist: 0 },
   rk: { country: 'E', region: 'all', child: 'any', limit: 50 },
@@ -590,7 +622,7 @@ const DEF = () => ({
 
 let MAP = null, LYR = {}, gridCache = null;
 const APPX = {
-  key: 'grammar-schools.v1', file: 'grammar-schools', title: 'Grammar School Finder', sub: 'England · Northern Ireland · v1.0', logo: 'G',
+  key: 'grammar-schools.v1', file: 'grammar-schools', title: 'Grammar School Finder', sub: 'England · Northern Ireland · v1.1', logo: 'G',
   def: DEF, lists: {},
   kpis() {
     const f = filtered(), r = S.pin ? f.filter(inReach) : [];
@@ -620,8 +652,9 @@ const APPX = {
 <button class="btn" id="geoBtn">My location</button><button class="btn ${S.dropMode ? 'on' : ''}" id="dropBtn">Drop a pin</button>${S.pin ? '<button class="btn" id="clrPin">Clear pin</button>' : ''}
 ${fld('basemap', 'Map style', { type: 'sel', opts: [['auto', 'Auto (follows theme)'], ...Object.entries(BASEMAPS).map(([k, b]) => [k, b.name])] })}${fld('reach.mode', 'Reach by', { type: 'sel', opts: [['drive', 'Drive time (estimate)'], ['miles', 'Straight-line miles']] })}${fld('reach.mins', 'Max drive (min)', { type: 'range', min: 5, max: 90, step: 5, unit: ' min', show: 'reach.mode=drive' })}${fld('reach.miles', 'Max distance (miles)', { type: 'range', min: 1, max: 40, step: 1, unit: ' mi', show: 'reach.mode=miles' })}</div>
 <div class="mapbar">${filt()}${fld('f.test', 'Entrance test', { type: 'sel', opts: testOpts })}${fld('f.sixth', 'Has a sixth form', { type: 'chk' })}</div>
-<div class="row" style="margin-bottom:8px"><span class="hint" style="margin:0">Layers:</span>${[['reach', 'Reach circle'], ['heat', 'Coverage heat-map'], ['tests', 'Test chances'], ['overlap', 'Overlap of compared schools'], ['catch', 'Catchment of selected school'], ['hist', 'Last-offered distance rings']].map(([k, l]) => `<button class="chip ${S.layers[k] ? 'on' : ''}" data-layer="${k}">${l}</button>`).join('')}</div>
-<div class="grid2 wideL"><div><div id="map"></div><div id="mapLegend"></div></div><div id="results"></div></div></div>
+<div class="row" style="margin-bottom:8px"><span class="hint" style="margin:0">Layers:</span>${[['reach', 'Reach circle'], ['heat', 'Coverage heat-map'], ['tests', 'Test chances'], ['overlap', 'Overlap of compared schools'], ['catch', 'Catchments of chosen schools'], ['hist', 'Last-offered distance rings']].map(([k, l]) => `<button class="chip ${S.layers[k] ? 'on' : ''}" data-layer="${k}">${l}</button>`).join('')}</div>
+<div id="mselBox"></div>
+<div class="grid2 wideL"><div id="mapWrap"><div id="map"></div><div id="mapLegend"></div></div><div id="results"></div></div></div>
 <details class="more"><summary>Journey-time assumptions</summary><div class="fg" style="margin-top:8px">${fld('reach.speed', 'Average door-to-door speed (mph)', { hint: '≈18 urban, 24 mixed, 32 rural' })}${fld('reach.circ', 'Road detour factor', { hint: 'Road distance ÷ straight line; 1.3–1.4 is typical' })}</div></details></section>
 
 <section class="tab" id="t-list">${head(2, 'Schools & compare', 'Search the full list, sort it, and tick schools to compare side by side.')}
@@ -643,10 +676,10 @@ ${fld('basemap', 'Map style', { type: 'sel', opts: [['auto', 'Auto (follows them
 <section class="tab" id="t-report">${head(7, 'My report', 'A print-ready summary of your search. Use your browser\'s print to save it as a PDF.')}<div class="row noprint" style="margin-bottom:10px"><button class="btn pri" id="printBtn">Print or save as PDF</button></div><div id="repOut"></div></section>
 
 <section class="tab" id="t-guide">${head(8, 'Data & methods', 'Where every number comes from, how it\'s used, and what this tool can\'t tell you.')}<div id="guideOut"></div></section>
-<section class="tab" id="t-refs">${head(9, 'References & credits', 'Every source this tool relies on, who to credit, and the small print.')}<div class="panel"><h3 style="margin-top:0">About</h3><p><b>Grammar School Finder</b> &middot; published by <b>Usualy Labs</b> &middot; version 1.0.2 &middot; catchment register last fully checked 29 October 2026, data as stated in &ldquo;Data &amp; methods&rdquo;.</p>
+<section class="tab" id="t-refs">${head(9, 'References & credits', 'Every source this tool relies on, who to credit, and the small print.')}<div class="panel"><h3 style="margin-top:0">About</h3><p><b>Grammar School Finder</b> &middot; published by <b>Usualy Labs</b> &middot; version 1.1.0 &middot; catchment register last fully checked 29 October 2026, data as stated in &ldquo;Data &amp; methods&rdquo;.</p>
 <h3>Not advice</h3><p>This tool is for general information and personal research only. It is <b>not</b> educational, legal or admissions advice and is not an official source. Admission arrangements, catchment areas, test dates and results change every year and can differ from what is shown here. Whether a child is offered a place depends on each admission authority's determined arrangements, the selection test and the number of applicants. Always check the school's and the council's own published arrangements (linked below) before making any decision or application.</p>
 <p>Provided &ldquo;as is&rdquo; without warranty of any kind. To the fullest extent permitted by law, Usualy Labs and contributors accept no responsibility or liability for any loss or decision arising from its use. Nothing here limits any liability that cannot be limited by law.</p>
-<h3>Your privacy</h3><p>Usualy Labs collects nothing: no accounts, analytics, cookies or trackers. Your inputs, shortlist and settings are saved only in <b>your browser's local storage</b> on this device. When you search a postcode, drop a pin or show a catchment layer, your browser asks <b>postcodes.io</b> directly for postcode details, and map tiles are loaded directly from <b>Esri</b> or <b>OpenStreetMap</b>. Those services see the request (including your IP address and the postcode or map area) under their own privacy policies. Nothing is sent to Usualy Labs. &ldquo;Copy share link&rdquo; puts your inputs, including any postcode, into the link itself, so only share it with people you trust.</p></div>
+<h3>Your privacy</h3><p>Usualy Labs collects nothing: no accounts, analytics, cookies or trackers. Your inputs, shortlist and settings are saved only in <b>your browser's local storage</b> on this device. When you search a postcode, drop a pin, show a catchment layer or export postcodes, your browser asks <b>postcodes.io</b> directly for postcode details (for an export, a grid of points across the map view), and map tiles are loaded directly from <b>Esri</b> or <b>OpenStreetMap</b>. Those services see the request (including your IP address and the postcode or map area) under their own privacy policies. Nothing is sent to Usualy Labs. &ldquo;Copy share link&rdquo; puts your inputs, including any postcode, into the link itself, so only share it with people you trust.</p></div>
 <div class="panel"><h3 style="margin-top:0">Data sources and credits</h3><p>All credit for the underlying data belongs to its publishers. Inclusion does not imply their endorsement, and this tool is not affiliated with any school, council or exam board.</p><ul>
 <li><b>Department for Education</b> &ndash; Get Information about Schools; key stage 4 and 16 to 19 performance; destination measures; progression to higher education; school applications and offers (explore-education-statistics.service.gov.uk). Open Government Licence v3.0.</li>
 <li><b>Ofsted</b> &ndash; management information on state-funded school inspections. Open Government Licence v3.0.</li>
@@ -692,9 +725,12 @@ function initMap() {
   if (MAP && MAP.getContainer() === el) { MAP.invalidateSize(); return; }
   tileKey = null; MAP = L.map(el, { zoomControl: true, preferCanvas: true }); MAP.createPane('labels'); MAP.getPane('labels').style.zIndex = 450; MAP.getPane('labels').style.pointerEvents = 'none'; MAP.setView(S.pin ? [S.pin.lat, S.pin.lng] : [53.2, -2.6], S.pin ? 11 : 6);
   LYR = { tiles: null, schools: L.layerGroup().addTo(MAP), pin: L.layerGroup().addTo(MAP), reach: L.layerGroup().addTo(MAP), grid: L.layerGroup().addTo(MAP), hist: L.layerGroup().addTo(MAP), catch: L.layerGroup().addTo(MAP) };
+  const FsCtl = L.Control.extend({ options: { position: 'topleft' }, onAdd() { const d = L.DomUtil.create('div', 'leaflet-bar'), a = L.DomUtil.create('a', 'fsbtn', d); a.href = '#'; a.id = 'fsBtn'; a.setAttribute('role', 'button'); L.DomEvent.disableClickPropagation(d); L.DomEvent.on(a, 'click', e => { L.DomEvent.preventDefault(e); toggleFs(); }); return d; } });
+  new FsCtl().addTo(MAP); updFsBtn();
   MAP.on('click', e => { if (S.dropMode) { setPin(e.latlng.lat, e.latlng.lng, 'Dropped pin'); S.dropMode = false; changed(); } });
   MAP.on('moveend', () => { if (S.layers.heat || S.layers.tests || S.layers.overlap) drawGrid(); if (S.layers.catch) { drawCatch(); legend(); } });
   drawTiles(); drawMap();
+  if (!S.pin && (S.msel || []).length && S.layers.catch) fitMsel();
 }
 const ESRI = 'https://server.arcgisonline.com/ArcGIS/rest/services/', ESRI_ATT = 'Tiles &copy; <a href="https://www.esri.com/">Esri</a> · Sources: Esri, HERE, Garmin, USGS, OpenStreetMap contributors and the GIS user community';
 const BASEMAPS = {
@@ -719,15 +755,29 @@ function drawTiles() {
   LYR.tiles.bringToBack();
 }
 function setPin(lat, lng, label) { S.pin = { lat: +lat, lng: +lng, label }; }
-function popupHTML(s) { const d = pinD(s), o = ofsted(s); return `<b>${esc(s.n)}</b><br><span style="color:var(--muted)">${GNAME[s.g]} · ${esc(s.la)} · ${s.c === 'N' ? 'Northern Ireland' : esc(s.rg)}</span><br>${s.c === 'E' ? `Attainment 8: <b>${fmt(a8(s))}</b> · A-level: <b>${alg(s) || '–'}</b><br>Ofsted: ${esc(o.label)}<br>` : `Pupils: ${num0(s.pup)} · FSM ${fmtP(s.fsm)}<br>`}${d != null ? `${d.toFixed(1)} mi · ~${Math.round(driveMin(d))} min (est.)<br>` : ''}${s.c === 'E' && catchPill(s) ? catchPill(s) + '<br>' : ''}<a href="#" data-open="${s.id}">Open profile →</a>`; }
+function popupHTML(s) { const d = pinD(s), o = ofsted(s); return `<b>${esc(s.n)}</b><br><span style="color:var(--muted)">${GNAME[s.g]} · ${esc(s.la)} · ${s.c === 'N' ? 'Northern Ireland' : esc(s.rg)}</span><br>${s.c === 'E' ? `Attainment 8: <b>${fmt(a8(s))}</b> · A-level: <b>${alg(s) || '–'}</b><br>Ofsted: ${esc(o.label)}<br>` : `Pupils: ${num0(s.pup)} · FSM ${fmtP(s.fsm)}<br>`}${d != null ? `${d.toFixed(1)} mi · ~${Math.round(driveMin(d))} min (est.)<br>` : ''}${s.c === 'E' && catchPill(s) ? catchPill(s) + '<br>' : ''}<a href="#" data-open="${s.id}">Open profile →</a>${s.c === 'E' ? ` · <a href="#" data-msel="${s.id}">${(S.msel || []).includes(s.id) ? 'Catchment shown' : 'Show catchment'}</a>` : ''}`; }
+/* full-screen map (Fullscreen API, falling back to filling the window) */
+const fsOn = () => { const w = $('#mapWrap'); return !!w && (document.fullscreenElement === w || w.classList.contains('fs')); };
+function updFsBtn() { const a = $('#fsBtn'); if (!a) return; const on = fsOn(); a.textContent = on ? '⤡' : '⤢'; a.title = on ? 'Exit full screen (Esc)' : 'Full screen map'; a.setAttribute('aria-label', a.title); }
+function afterFs() { setTimeout(() => { if (MAP) { MAP.invalidateSize(); drawCatch(); drawGrid(); legend(); } updFsBtn(); }, 150); }
+function toggleFs() {
+  const w = $('#mapWrap'); if (!w) return;
+  if (document.fullscreenElement) { document.exitFullscreen(); return; }
+  if (w.classList.contains('fs')) { w.classList.remove('fs'); document.body.style.overflow = ''; afterFs(); return; }
+  const fallback = () => { w.classList.add('fs'); document.body.style.overflow = 'hidden'; afterFs(); };
+  if (w.requestFullscreen) w.requestFullscreen().catch(fallback); else fallback();
+}
+document.addEventListener('fullscreenchange', afterFs);
+document.addEventListener('keydown', e => { if (e.key === 'Escape') { const w = $('#mapWrap'); if (w && w.classList.contains('fs')) { w.classList.remove('fs'); document.body.style.overflow = ''; afterFs(); } } });
 function drawMap() {
   if (!MAP) return; drawTiles();
   LYR.schools.clearLayers(); LYR.pin.clearLayers(); LYR.reach.clearLayers(); LYR.hist.clearLayers();
   const cols = { B: tok('accent'), G: tok('pink'), M: tok('cov') }, surf = tok('surface');
   filtered().forEach(s => {
-    const starred = S.star.includes(s.id), r = inReach(s);
-    L.circleMarker([s.lat, s.lng], { radius: starred ? 9 : 7, color: starred ? tok('cash') : surf, weight: starred ? 3 : 2, fillColor: cols[s.g], fillOpacity: S.pin && !r ? .45 : .95 }).bindPopup(() => popupHTML(s)).bindTooltip(esc(s.n), { direction: 'top', offset: [0, -6] }).addTo(LYR.schools);
+    const starred = S.star.includes(s.id), r = inReach(s), mc = mselColOf(s.id);
+    L.circleMarker([s.lat, s.lng], { radius: mc ? 10 : starred ? 9 : 7, color: starred ? tok('cash') : surf, weight: mc || starred ? 3 : 2, fillColor: mc ? tok(mc) : cols[s.g], fillOpacity: mc ? 1 : S.pin && !r ? .45 : .95 }).bindPopup(() => popupHTML(s)).bindTooltip(esc(s.n), { direction: 'top', offset: [0, -6] }).addTo(LYR.schools);
   });
+  if (S.layers.catch) (S.msel || []).filter(id => BY[id] && !filtered().includes(BY[id])).forEach(id => { const s = BY[id]; L.circleMarker([s.lat, s.lng], { radius: 10, color: surf, weight: 3, fillColor: tok(mselColOf(id)), fillOpacity: 1 }).bindPopup(() => popupHTML(s)).bindTooltip(esc(s.n), { direction: 'top', offset: [0, -6] }).addTo(LYR.schools); });
   if (S.pin) {
     const m = L.marker([S.pin.lat, S.pin.lng], { draggable: true, title: 'Your pin (drag to move)', icon: L.divIcon({ className: 'pinIcon', html: '<span></span>', iconSize: [26, 26], iconAnchor: [13, 26] }) }).addTo(LYR.pin);
     m.on('dragend', e => { const p = e.target.getLatLng(); setPin(p.lat, p.lng, 'Dropped pin'); changed(); });
@@ -791,8 +841,10 @@ APPX.render.map = () => {
     if (out.length) h += `<details ${S.moreOut ? 'open' : ''}><summary class="res-g" style="cursor:pointer">Next nearest beyond reach · ${out.length}</summary>${out.map(card).join('')}</details>`;
     h += `<h3>Scan nearby</h3><p class="hint">Would moving a little help? Points 1 and 2 miles away in eight directions, by how many schools they reach.</p><div id="scan"></div>`;
   }
-  $('#results').innerHTML = h;
-  wireCards($('#results'));
+  $('#results').innerHTML = mselCards() + h;
+  $('#mselBox').innerHTML = mselHTML();
+  if (mselFitPending && MAP) { mselFitPending = false; requestAnimationFrame(() => { MAP.invalidateSize(); fitMsel(); }); }
+  wireCards($('#results')); wireMsel(); renderMselSummary();
   if (S.pin) {
     const base = f.filter(inReach).length, pts = [];
     for (const dist of [1, 2]) for (let k = 0; k < 8; k++) { const br = k * Math.PI / 4, lat = S.pin.lat + dist / 69 * Math.cos(br), lng = S.pin.lng + dist / (69 * Math.cos(S.pin.lat * Math.PI / 180)) * Math.sin(br); const c = f.filter(s => hav(lat, lng, s.lat, s.lng) <= reachMiles()).length; pts.push({ dist, dir: ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'][k], lat, lng, c }); }
@@ -805,6 +857,7 @@ function wireCards(root) {
   $$('[data-star]', root).forEach(b => b.onclick = e => { e.stopPropagation(); const id = b.dataset.star; S.star = S.star.includes(id) ? S.star.filter(x => x !== id) : [...S.star, id]; changed(); });
   $$('[data-open]', root).forEach(b => b.onclick = e => { if (e.target.closest('[data-star],input,button:not([data-open])')) return; e.preventDefault(); S.sel = b.dataset.open; S.ptab = 'results'; saveState(); go('school'); });
 }
+document.addEventListener('click', e => { const m = e.target.closest && e.target.closest('.leaflet-popup [data-msel]'); if (m) { e.preventDefault(); if (MAP) MAP.closePopup(); addMsel(m.dataset.msel); } });
 document.addEventListener('click', e => { const a = e.target.closest('.leaflet-popup [data-open]'); if (a) { e.preventDefault(); S.sel = a.dataset.open; S.ptab = 'results'; saveState(); go('school'); } });
 function rebuildKeep() { MAP = null; rebuild(); }
 
@@ -829,7 +882,7 @@ function renderCompare() {
     ['Ofsted', s => s.c === 'E' ? `${esc(ofsted(s).label)} <span class="hint">${esc(ofsted(s).sub)}</span>` : 'ETI (NI)'],
     ['Places offered', s => s.c === 'E' ? num0((adm(s) || [])[0]) : num0(s.appr) + ' approved'], ['Applications per place', s => demand(s) ? demand(s).toFixed(1) : '–'], ['First preferences per place', s => demand1(s) ? demand1(s).toFixed(2) : '–'],
     ['Entrance test', s => esc(TESTS[s.test][0])], ...(S.pin ? [['From your pin', s => `${pinD(s).toFixed(1)} mi · ~${Math.round(driveMin(pinD(s)))} min`]] : [])];
-  $('#cmpOut').innerHTML = `<div class="between"><h3 style="margin-top:0">Comparing ${cs.length}</h3><button class="btn sm" id="cmpClr">Clear</button></div><div class="wrap short"><table class="tbl"><thead><tr><th></th>${cs.map(s => `<th class="l cmpcell">${esc(s.n)}</th>`).join('')}</tr></thead><tbody>${rows.map(([l, f]) => `<tr><td class="l"><b>${l}</b></td>${cs.map(s => `<td class="l">${f(s)}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
+  $('#cmpOut').innerHTML = `<div class="between"><h3 style="margin-top:0">Comparing ${cs.length}</h3><div class="row"><button class="btn sm pri" data-cmpmap="${cs.map(s => s.id).join(',')}" title="Open Map &amp; search with these schools' catchments">Show on map</button><button class="btn sm" id="cmpClr">Clear</button></div></div><div class="wrap short"><table class="tbl"><thead><tr><th></th>${cs.map(s => `<th class="l cmpcell">${esc(s.n)}</th>`).join('')}</tr></thead><tbody>${rows.map(([l, f]) => `<tr><td class="l"><b>${l}</b></td>${cs.map(s => `<td class="l">${f(s)}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
   $('#cmpClr').onclick = () => { S.cmp = []; changed(); };
 }
 
@@ -931,56 +984,239 @@ function catchHTML(s) {
   if (src) h += `<p class="hint">Source: <a href="${esc(src)}" target="_blank" rel="noopener">${r && r.yr ? 'admission arrangements ' + esc(r.yr) : 'admission arrangements'}</a>, checked ${esc(CATCH.checked)}. Distances in policies are usually measured by the council's mapping system; this tool uses straight lines and your nearest postcode, so treat borderline results with care.</p>`;
   return h;
 }
-/* map layer: catchment of the selected school */
-function drawCatch() {
-  if (!MAP || !LYR.catch) return; LYR.catch.clearLayers(); catchMsg = '';
-  if (!S.layers.catch) return;
-  const s = BY[S.sel], r = s && CATCH.r[s.id];
-  if (!s || s.c !== 'E') { catchMsg = 'Choose an English grammar school (open its profile) to see its catchment.'; return; }
-  const L0 = CATCH.last[s.id] || {}, ly = Object.keys(L0).filter(y => L0[y][0] != null).sort().pop();
-  if (ly) L.circle([s.lat, s.lng], { radius: L0[ly][0] * 1609.34, color: tok('cash'), weight: 2, dashArray: '4 6', fill: false, interactive: false }).bindTooltip(`Last offered ${ly}: ${L0[ly][0]} mi`).addTo(LYR.catch);
-  if (!r) { catchMsg = CATCH.none[s.id] ? `${s.n} has no catchment area${ly ? '; the dashed ring is the last distance offered' : ''}.` : `${s.n}: catchment rules not confirmed yet.`; return; }
-  if (r.tx) { catchMsg = `${s.n}: priority isn't based on a home area that can be drawn. See the profile.`; return; }
-  let listy = false;
-  r.t.slice().reverse().forEach((t, ri) => {
-    const i = r.t.length - 1 - ri, col = tok(CT_COL[i % 4]);
-    t.c.forEach(c => {
-      if (c[0] === 'r') L.circle([s.lat, s.lng], { radius: c[1] * 1609.34, color: col, weight: 2, fillColor: col, fillOpacity: .07, interactive: false }).addTo(LYR.catch);
-      else if (c[0] === 'poly' && CATCH.poly[c[1]]) L.geoJSON(CATCH.poly[c[1]], { style: { color: col, weight: 2, fillColor: col, fillOpacity: .12 }, interactive: false }).addTo(LYR.catch);
-      else if (LISTY(c)) listy = true;
-    });
-  });
-  catchMsg = `Catchment of ${s.n}: ` + r.t.map((t, i) => `<span style="white-space:nowrap"><i style="background:${tok(CT_COL[i % 4])}"></i>${esc(t.l)}</span>`).join(' ');
-  if (listy) sampleCatch(s, r);
+/* map layer: catchments of the chosen schools (or the last opened profile), with overlap */
+const MCOL = ['accent', 'fee', 'cash', 'pos', 'pink', 'cov'], MSEL_MAX = 6;
+let catchMsg = '', catchStats = null, catchGen = 0;
+const mselCol = i => MCOL[i % MCOL.length];
+const mselColOf = id => S.layers.catch && (S.msel || []).includes(id) ? mselCol(S.msel.indexOf(id)) : null;
+const shortName = n => n.replace(/^(The|St)\s+/, m => m).replace(/\s+(Grammar School|High School|School|College|Academy)(\s+for\s+(Boys|Girls))?.*$/i, '').trim() || n;
+/* a separate, clearly different colour for each shared combination; hues spread by the golden angle, tuned per theme */
+function comboCol(rank) { const dark = document.documentElement.getAttribute('data-theme') === 'dark' || (!document.documentElement.getAttribute('data-theme') && matchMedia('(prefers-color-scheme: dark)').matches); const hue = (28 + rank * 137.508) % 360; return `hsl(${hue.toFixed(0)}, ${dark ? 70 : 78}%, ${dark ? 62 : 46}%)`; }
+function mselIds() { const ids = (S.msel || []).filter(id => BY[id]); return ids.length ? ids : (S.sel && BY[S.sel] ? [S.sel] : []); }
+function addMsel(id) {
+  if (!BY[id]) return;
+  if ((S.msel || []).includes(id)) { S.layers.catch = true; changed(); if (!mselOpen) fitMsel(); return; }
+  if ((S.msel || []).length >= MSEL_MAX) { toast('Up to ' + MSEL_MAX + ' schools at a time. Remove one first.'); return; }
+  S.msel = [...(S.msel || []), id]; S.layers.catch = true; changed(); if (S.msel.length === 1 || !mselOpen) fitMsel();
 }
-let catchMsg = '';
-async function sampleCatch(s, r) {
-  if (MAP.getZoom() < 9) { catchMsg += '<br>Zoom in closer to shade postcode, parish and ward areas.'; legend(); return; }
-  const b = MAP.getBounds(), nx = 26, ny = 20, dx = (b.getEast() - b.getWest()) / nx, dy = (b.getNorth() - b.getSouth()) / ny;
-  const key = s.id + '|' + b.toBBoxString();
-  const pts = []; for (let i = 0; i < nx; i++) for (let j = 0; j < ny; j++) pts.push([b.getSouth() + (j + .5) * dy, b.getWest() + (i + .5) * dx, i, j]);
-  if (!GRIDC[key]) {
-    catchMsg += '<br>Shading postcode-based areas…'; legend();
-    const out = [];
-    for (let k = 0; k < pts.length; k += 100) {
-      try {
-        const res = await (await fetch('https://api.postcodes.io/postcodes', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ geolocations: pts.slice(k, k + 100).map(p => ({ latitude: p[0], longitude: p[1], radius: 1000, limit: 1 })) }) })).json();
-        (res.result || []).forEach((x, n) => out[k + n] = x.result && x.result[0] || null);
-      } catch (e) { }
+function dropMsel(id) { S.msel = (S.msel || []).filter(x => x !== id); changed(); }
+function catchReach(id) { const r = CATCH.r[id], L0 = CATCH.last[id] || {}; let m = 0; if (r && r.t) r.t.forEach(t => t.c.forEach(c => { if (c[0] === 'r') m = Math.max(m, +c[1]); })); Object.values(L0).forEach(v => { if (v && v[0] != null) m = Math.max(m, +v[0]); }); return m || 3; }
+function fitMsel() {
+  if (!MAP || !(S.msel || []).length) return;
+  let b = null;
+  S.msel.forEach(id => { const s = BY[id]; if (!s) return; const mi = catchReach(id), dla = mi / 69, dln = mi / (69 * Math.cos(s.lat * Math.PI / 180)); const bb = L.latLngBounds([s.lat - dla, s.lng - dln], [s.lat + dla, s.lng + dln]); b = b ? b.extend(bb) : bb; const r = CATCH.r[id]; if (r && r.t) r.t.forEach(t => t.c.forEach(c => { if (c[0] === 'poly' && CATCH.poly[c[1]]) b.extend(L.geoJSON(CATCH.poly[c[1]]).getBounds()); })); });
+  if (b) { MAP.invalidateSize(); MAP.fitBounds(b, { padding: [20, 20], maxZoom: 13 }); }
+}
+const catchIn = (s, lat, lng, geo) => catchStatus(s, lat, lng, geo).k === 'in';
+/* 'map' = drawable area, 'none' = no catchment, 'text' = rules in words only, 'nodata' = not confirmed, 'ni' = Northern Ireland */
+function catchKind(s) { if (s.c !== 'E') return 'ni'; const r = CATCH.r[s.id]; if (!r) return CATCH.none[s.id] ? 'none' : 'nodata'; return r.tx ? 'text' : 'map'; }
+const KIND_TAG = { none: 'no catchment', text: 'catchment in words only', nodata: 'catchment not confirmed', ni: 'Northern Ireland criteria' };
+let mselFitPending = false;
+function drawCatch() {
+  if (!MAP || !LYR.catch) return; LYR.catch.clearLayers(); catchMsg = ''; catchStats = null;
+  const gen = ++catchGen;
+  if (!S.layers.catch) return;
+  const ids = mselIds();
+  if (!ids.length) { catchMsg = 'Tick schools in "Choose schools" above the map (or click a dot and pick "Show catchment") to see their catchments.'; return; }
+  const parts = [], drawable = [], listy = [];
+  ids.forEach((id, i) => {
+    const s = BY[id], r = CATCH.r[id], col = tok(mselCol(i));
+    const L0 = CATCH.last[id] || {}, ly = Object.keys(L0).filter(y => L0[y][0] != null).sort().pop();
+    if (ly) L.circle([s.lat, s.lng], { radius: L0[ly][0] * 1609.34, color: col, weight: 1.5, dashArray: '4 6', fill: false, interactive: false }).bindTooltip(`${esc(s.n)}: last offered ${ly}, ${L0[ly][0]} mi`).addTo(LYR.catch);
+    let note = '';
+    if (s.c !== 'E') note = 'Northern Ireland: no mapped catchment';
+    else if (!r) note = CATCH.none[id] ? 'no catchment area' + (ly ? ', dashed ring = last offered' : '') : 'catchment not confirmed yet';
+    else if (r.tx) note = 'priority not based on an area that can be drawn';
+    else {
+      drawable.push(id);
+      r.t.forEach(t => t.c.forEach(c => {
+        if (c[0] === 'r') L.circle([s.lat, s.lng], { radius: c[1] * 1609.34, color: col, weight: 2, fill: false, interactive: false }).addTo(LYR.catch);
+        else if (c[0] === 'poly' && CATCH.poly[c[1]]) L.geoJSON(CATCH.poly[c[1]], { style: { color: col, weight: 2, fill: false }, interactive: false }).addTo(LYR.catch);
+      }));
+      if (r.t.some(t => t.c.some(LISTY))) listy.push(id);
     }
-    GRIDC[key] = out;
-    if (BY[S.sel] !== s || !S.layers.catch) return;
-  }
-  const g = GRIDC[key];
-  pts.forEach((p, n) => {
-    const geo = g[n]; if (!geo) return;
-    for (let i = 0; i < r.t.length; i++) {
-      if (!r.t[i].c.some(LISTY)) continue;
-      if (tierHit(r.t[i], s, p[0], p[1], geo) === true) { L.rectangle([[p[0] - dy / 2, p[1] - dx / 2], [p[0] + dy / 2, p[1] + dx / 2]], { stroke: false, fillColor: tok(CT_COL[i % 4]), fillOpacity: .22, interactive: false }).addTo(LYR.catch); break; }
-    }
+    parts.push(`<span style="white-space:nowrap"><i style="background:${col}"></i>${esc(s.n)}${note ? ' <span class="hint" style="margin:0">(' + note + ')</span>' : ''}</span>`);
   });
-  catchMsg = catchMsg.replace('<br>Shading postcode-based areas…', '') + '<br><span class="hint" style="margin:0">Postcode, parish and ward areas are shaded from a grid of postcode lookups, so edges are approximate. Pan or zoom to redraw.</span>';
-  legend();
+  catchMsg = parts.join(' ');
+  if (drawable.length) catchGrid(ids, drawable, listy, gen);
+}
+async function catchGrid(ids, drawable, listy, gen) {
+  const needGeo = listy.length > 0 && MAP.getZoom() >= 9;
+  if (listy.length && !needGeo) catchMsg += '<br>Zoom in closer to shade postcode, parish and ward areas.';
+  const b = MAP.getBounds(), nx = needGeo ? 26 : 48, ny = needGeo ? 20 : 36, dx = (b.getEast() - b.getWest()) / nx, dy = (b.getNorth() - b.getSouth()) / ny;
+  const pts = []; for (let i = 0; i < nx; i++) for (let j = 0; j < ny; j++) pts.push([b.getSouth() + (j + .5) * dy, b.getWest() + (i + .5) * dx]);
+  const sig = ids.join(',') + '|' + b.toBBoxString();
+  let geo = null;
+  if (needGeo) {
+    const key = 'g|' + nx + 'x' + ny + '|' + b.toBBoxString();
+    if (!GRIDC[key]) {
+      catchMsg += '<br>Shading postcode-based areas…'; legend();
+      const out = [];
+      for (let k = 0; k < pts.length; k += 100) {
+        try { const res = await (await fetch('https://api.postcodes.io/postcodes', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ geolocations: pts.slice(k, k + 100).map(p => ({ latitude: p[0], longitude: p[1], radius: 1000, limit: 1 })) }) })).json(); (res.result || []).forEach((x, q) => out[k + q] = x.result && x.result[0] || null); } catch (e) { }
+      }
+      GRIDC[key] = out;
+      if (gen !== catchGen || !S.layers.catch || !MAP || mselIds().join(',') + '|' + MAP.getBounds().toBBoxString() !== sig) return;
+      catchMsg = catchMsg.replace('<br>Shading postcode-based areas…', '');
+    }
+    geo = GRIDC[key];
+  }
+  if (gen !== catchGen) return;
+  const set = ids.filter(id => drawable.includes(id)), n = set.length, cnt = { any: 0, two: 0, all: 0 }, combo = {};
+  const cells = pts.map((p, k) => { const g = geo ? geo[k] : null; return set.filter(id => catchIn(BY[id], p[0], p[1], g)); });
+  cells.forEach(inn => { if (inn.length) cnt.any++; if (inn.length >= 2) { cnt.two++; const key = inn.join('+'); combo[key] = (combo[key] || 0) + 1; } if (n >= 2 && inn.length === n) cnt.all++; });
+  // rank combinations: pairs first, then larger groups, then by school order, so colours stay stable as you pan
+  const keys = Object.keys(combo).sort((x, y) => x.split('+').length - y.split('+').length || ids.indexOf(x.split('+')[0]) - ids.indexOf(y.split('+')[0]) || ids.indexOf(x.split('+')[1]) - ids.indexOf(y.split('+')[1]));
+  const kcol = Object.fromEntries(keys.map((k, i) => [k, comboCol(i)]));
+  cells.forEach((inn, k) => {
+    if (!inn.length) return;
+    const p = pts[k], fill = inn.length === 1 ? tok(mselCol(ids.indexOf(inn[0]))) : kcol[inn.join('+')], op = inn.length === 1 ? .18 : .55;
+    L.rectangle([[p[0] - dy / 2, p[1] - dx / 2], [p[0] + dy / 2, p[1] + dx / 2]], { stroke: false, fillColor: fill, fillOpacity: op, interactive: false }).addTo(LYR.catch);
+  });
+  catchStats = { n, ...cnt, total: pts.length, approx: !!geo, combos: keys.map(k => ({ ids: k.split('+'), col: kcol[k], c: combo[k] })) };
+  if (keys.length) catchMsg += '<br><b style="font-weight:600">Shared areas:</b> ' + keys.map(k => `<span style="white-space:nowrap"><i style="background:${kcol[k]};border-radius:3px"></i>${k.split('+').map(id => esc(shortName(BY[id].n))).join(' + ')}</span>`).join(' ');
+  catchMsg += `<br><span class="hint" style="margin:0">Each school's area is a light tint of its colour; areas shared by two or more schools have their own colour. ${geo ? 'Postcode, parish and ward areas and the shared areas are' : 'Shading is'} drawn from a grid of points, so edges are approximate. Pan or zoom to redraw.</span>`;
+  legend(); renderMselSummary();
+}
+function srcLinks(s) {
+  const r = CATCH.r[s.id], nn = CATCH.none[s.id], out = [];
+  const a = (u, t) => { if (u) out.push(`<li><a href="${esc(u)}" target="_blank" rel="noopener">${t}</a></li>`); };
+  if (s.c === 'E') {
+    a(r ? r.src : nn, 'Admission arrangements' + (r && r.yr ? ' ' + esc(r.yr) : '') + ' (catchment and oversubscription rules)');
+    a(CATCH.lastsrc[s.id], 'Last distance offered');
+    a('https://get-information-schools.service.gov.uk/Establishments/Establishment/Details/' + encodeURIComponent(s.id), 'DfE Get Information about Schools record');
+    a('https://www.compare-school-performance.service.gov.uk/school/' + encodeURIComponent(s.id), 'DfE school performance (GCSE, A-level, destinations)');
+  } else { a(s.ea, 'Education Authority school page'); a(s.crit, 'Admissions criteria'); }
+  a(s.of && s.of.link, 'Ofsted inspection report');
+  a(webUrl(s.web), 'School website');
+  return out.length ? `<ul class="srcs">${out.join('')}</ul>` : '<p class="hint">No links recorded.</p>';
+}
+let mselOpen = false, mselQ = '', mselScroll = 0;
+function mselHTML() {
+  const ids = (S.msel || []).filter(id => BY[id]), full = ids.length >= MSEL_MAX, f = filtered();
+  const pool = [...ids.map(id => BY[id]), ...f.filter(s => !ids.includes(s.id))];
+  const rows = pool.map(s => { const i = ids.indexOf(s.id), on = i >= 0, dis = !on && full; return `<label class="mopt${on ? ' on' : ''}${dis ? ' dis' : ''}" data-q="${esc((s.n + ' ' + s.la + ' ' + (s.pc || '')).toLowerCase())}"><input type="checkbox" data-mtick="${s.id}"${on ? ' checked' : ''}${dis ? ' disabled' : ''}>${on ? `<span class="gdot" style="background:var(--${mselCol(i)})"></span>` : ''}<span>${esc(s.n)} <span class="hint" style="margin:0">· ${esc(s.la)}${KIND_TAG[catchKind(s)] ? ' · ' + KIND_TAG[catchKind(s)] : ''}${on && !f.includes(s) ? ' · outside your filters' : ''}</span></span></label>`; }).join('');
+  const chips = ids.map((id, i) => `<span class="chip on" style="background:var(--${mselCol(i)});border-color:var(--${mselCol(i)})">${esc(BY[id].n)}<button class="x" data-mdrop="${id}" aria-label="Remove ${esc(BY[id].n)}" title="Remove">×</button></span>`).join('');
+  const fallback = !ids.length && S.layers.catch && S.sel && BY[S.sel] ? `<span class="hint" style="margin:0">Showing ${esc(BY[S.sel].n)}, the last profile you opened.</span>` : '';
+  const pop = mselOpen ? `<div class="mdd-pop" id="mselPop" role="dialog" aria-label="Choose schools"><input type="search" id="mselQ" placeholder="Search ${f.length} school${f.length === 1 ? '' : 's'} matching your filters" value="${esc(mselQ)}" autocomplete="off"><div class="mdd-list" id="mselList">${rows}<p class="hint" id="mselNone" style="padding:6px 8px;margin:0;display:none">No schools match. Change the search or the filters above.</p></div><div class="mdd-foot"><span class="hint" style="margin:0">${full ? `Maximum of ${MSEL_MAX} chosen. Untick one to swap.` : `Tick up to ${MSEL_MAX}. List follows your filters.`}</span><button type="button" class="btn sm pri" id="mselDone">Done</button></div></div>` : '';
+  return `<div class="msel-pick"><div class="mdd"><span class="mlbl">Compare catchments: tick up to ${MSEL_MAX} schools; overlapping areas are shaded</span><button type="button" class="mdd-btn" id="mselTgl" aria-haspopup="true" aria-expanded="${mselOpen}"><span>${ids.length ? `${ids.length} of ${MSEL_MAX} schools chosen` : `Choose schools (${f.length} match your filters)`}</span><span aria-hidden="true">▾</span></button>${pop}</div><div class="chips">${chips}${ids.length ? '<button class="btn sm" id="mselClr">Clear all</button>' : ''}${fallback}</div></div>`;
+}
+function mselFilterRows() {
+  const q = mselQ.trim().toLowerCase(); let shown = 0;
+  $$('#mselList .mopt').forEach(r => { const ok = !q || r.dataset.q.includes(q); r.style.display = ok ? '' : 'none'; if (ok) shown++; });
+  const none = $('#mselNone'); if (none) none.style.display = shown ? 'none' : '';
+}
+function mselRedraw() { const box = $('#mselBox'); if (!box) return; box.innerHTML = mselHTML(); wireMsel(); }
+function wireMsel() {
+  const tgl = $('#mselTgl'); if (!tgl) return;
+  tgl.onclick = () => { mselOpen = !mselOpen; if (mselOpen) mselScroll = 0; mselRedraw(); };
+  $$('[data-mdrop]').forEach(b => b.onclick = e => { e.preventDefault(); e.stopPropagation(); dropMsel(b.dataset.mdrop); });
+  const c = $('#mselClr'); if (c) c.onclick = () => { S.msel = []; changed(); };
+  if (!mselOpen) return;
+  const q = $('#mselQ'), list = $('#mselList');
+  q.oninput = () => { mselQ = q.value; mselFilterRows(); };
+  q.onkeydown = e => { if (e.key === 'Escape') { mselOpen = false; mselRedraw(); tgl.focus(); } };
+  list.scrollTop = mselScroll; list.onscroll = () => { mselScroll = list.scrollTop; };
+  $$('[data-mtick]', list).forEach(cb => cb.onchange = () => { mselScroll = list.scrollTop; const id = cb.dataset.mtick; if (cb.checked) addMsel(id); else dropMsel(id); });
+  $('#mselDone').onclick = () => { mselOpen = false; mselRedraw(); tgl.focus(); };
+  mselFilterRows();
+  const nq = $('#mselQ'); if (nq && document.activeElement !== nq) nq.focus({ preventScroll: true });
+}
+document.addEventListener('click', e => { if (!mselOpen || !e.target.closest) return; if (e.target.closest('.mdd') || !document.contains(e.target)) return; mselOpen = false; mselRedraw(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && mselOpen) { mselOpen = false; mselRedraw(); } });
+document.addEventListener('click', e => {
+  const b = e.target.closest && e.target.closest('[data-cmpmap]'); if (!b) return;
+  const ids = b.dataset.cmpmap.split(',').filter(id => BY[id]);
+  if (!ids.length) return;
+  S.msel = ids.slice(0, MSEL_MAX); S.layers.catch = true; saveState();
+  const drawable = S.msel.filter(id => catchKind(BY[id]) === 'map').length;
+  if (ids.length > MSEL_MAX) toast(`The map shows up to ${MSEL_MAX} catchments, so the first ${MSEL_MAX} were taken.`);
+  else if (!drawable) toast(S.msel.length > 1 ? 'None of these schools has a catchment area that can be drawn. See the cards beside the map.' : 'This school has no catchment area that can be drawn. See its card beside the map.');
+  mselFitPending = true; go('map');
+});
+function mselCards() {
+  const ids = (S.msel || []).filter(id => BY[id]);
+  let h = `<div class="res-g" style="margin-top:0">Chosen schools · ${ids.length} of ${MSEL_MAX}</div>`;
+  if (!ids.length) return h + `<p class="hint">Tick schools in "Choose schools" above the map, click a dot and choose "Show catchment", or use "Show on map" on Schools &amp; compare, to see their catchments side by side and where they overlap.</p>`;
+  const flat = ids.filter(id => catchKind(BY[id]) !== 'map'), names = a => { const b = a.map(id => `<b>${esc(BY[id].n)}</b>`); return b.length > 1 ? b.slice(0, -1).join(', ') + ' and ' + b[b.length - 1] : b[0]; };
+  if (flat.length) {
+    const none = flat.filter(id => catchKind(BY[id]) === 'none'), other = flat.filter(id => catchKind(BY[id]) !== 'none');
+    const all = flat.length === ids.length;
+    h += `<div class="${all ? 'warnbox' : 'note'}">${none.length ? `${names(none)} ${none.length > 1 ? 'have' : 'has'} <b>no catchment area</b>: places go by test score (and in some cases distance), so where you live doesn't decide priority and there is no area to draw. ` : ''}${other.length ? `${names(other)} ${other.length > 1 ? 'have' : 'has'} priority rules that can't be drawn as an area (see ${other.length > 1 ? 'their cards' : 'the card'}). ` : ''}${all ? 'So there is no overlap to show for this selection. Where a last distance offered is published it appears as a dashed ring. Add schools that have catchments to compare overlaps.' : 'Only the other chosen schools are drawn and counted in the overlap.'}</div>`;
+  }
+  h += '<div id="mselOverlap"></div>';
+  ids.forEach((id, i) => {
+    const s = BY[id], r = CATCH.r[id], nn = CATCH.none[id], L0 = CATCH.last[id] || {}, ly = Object.keys(L0).filter(y => L0[y][0] != null).sort().pop(), d = pinD(s);
+    const ct = s.c !== 'E' ? 'Northern Ireland: each school sets its own admissions criteria (see the links below).'
+      : r ? (r.tx ? esc(r.n || 'Priority depends on things like faith or feeder schools, not an area that can be drawn.')
+        : r.t.map((t, k) => `<b>${k + 1}. ${esc(t.l)}</b>${t.pp ? ' (Pupil Premium only)' : ''}: ${esc(t.c.map(compText).join('; or '))}${t.p ? ` · ${esc(String(t.p))} places` : ''}`).join('<br>'))
+      : nn ? esc(CATCH.notes[id] || 'No catchment area: places go by test score and/or distance.') : 'Catchment not confirmed yet: check the admissions policy below.';
+    h += `<details class="mcard" open style="border-left-color:var(--${mselCol(i)})"><summary><span class="gdot" style="background:var(--${mselCol(i)})"></span><b>${esc(s.n)}</b><button class="btn sm del" data-mdrop="${id}" title="Remove from the map">Remove</button></summary>
+<div class="sub"><span>${GNAME[s.g]} · ${esc(s.la)} · ${esc(TESTS[s.test][0])}${d != null ? ` · ${d.toFixed(1)} mi from your pin` : ''}</span>${s.c === 'E' ? catchPill(s) : ''}</div>
+<p class="mct">${ct}${ly ? `<br>Last distance offered (${ly}): <b class="mono">${(+L0[ly][0]).toFixed(2)} mi</b>` : ''}${r && r.st ? ` <span class="pill w">Older policy (${esc(r.yr)})</span>` : ''}${r && r.ap ? ' <span class="pill w">Approximate</span>' : ''}</p>
+<div class="hint" style="margin:4px 0 2px">Sources for this school</div>${srcLinks(s)}
+<button class="btn sm" data-open="${id}">Open full profile</button></details>`;
+  });
+  return h + '<p class="hint">Results and Ofsted figures come from the DfE and Ofsted datasets listed in References &amp; credits.</p><div class="res-g">Schools by distance</div>';
+}
+function renderMselSummary() {
+  const el = $('#mselOverlap'); if (!el) return;
+  const st = catchStats, ids = (S.msel || []).filter(id => BY[id]); let h = '';
+  if (st && st.total && st.n >= 2) {
+    const p = x => { const v = 100 * x / st.total; return (v > 0 && v < 1 ? '<1' : Math.round(v)) + '%'; };
+    h += `<div class="cards" style="margin:4px 0 8px">${stat('In any chosen catchment', p(st.any), 'of the map view')}${stat(st.n === 2 ? 'Inside both' : 'Inside all ' + st.n, p(st.all), 'of the map view', 'hero')}${st.n > 2 ? stat('Inside 2 or more', p(st.two), 'of the map view') : ''}</div>`;
+    if (st.combos && st.combos.length) h += `<div class="shared"><div class="hint" style="margin:0 0 4px">Shared areas on the map</div>${st.combos.map(c => `<div class="srow"><i style="background:${c.col}"></i><span>${c.ids.map(id => `<span class="gdot" style="background:var(--${mselCol(ids.indexOf(id))})"></span> ${esc(BY[id].n)}`).join(' <b>+</b> ')}</span><b class="mono">${p(c.c)}</b></div>`).join('')}</div>`;
+    else h += '<p class="hint">None of the chosen catchments overlap in this map view.</p>';
+  }
+  else if (ids.filter(id => catchKind(BY[id]) === 'map').length === 1 && ids.length >= 2) h += '<p class="hint">Only one of the chosen schools has a catchment that can be drawn, so there is no overlap to measure.</p>';
+  if (S.pin && ids.length) { const ins = ids.filter(id => BY[id].c === 'E' && pinCatch(BY[id]).k === 'in'); h += `<div class="${ins.length ? 'okbox' : 'note'}">Your pin is inside ${ins.length ? `${ins.length} of the ${ids.length} chosen catchments: ${ins.map(id => esc(BY[id].n)).join(', ')}` : 'none of the chosen catchments'}.</div>`; }
+  if (S.layers.catch && ids.some(id => catchKind(BY[id]) === 'map')) h += `<div class="row" style="margin:0 0 8px"><button class="btn sm" id="pcExport"${pcBusy ? ' disabled' : ''}>${pcBusy ? esc(pcBusy) : 'Export postcodes in view (CSV)'}</button><span class="hint" style="margin:0">Every postcode in the current map view that is inside at least one chosen catchment, with which area it falls in.</span></div>`;
+  el.innerHTML = h;
+  const xb = $('#pcExport'); if (xb) xb.onclick = exportPostcodes;
+}
+let pcBusy = '';
+function setPcBusy(t) { pcBusy = t; const b = $('#pcExport'); if (b) { b.textContent = t || 'Export postcodes in view (CSV)'; b.disabled = !!t; } }
+async function exportPostcodes() {
+  if (pcBusy || !MAP) return;
+  const ids = mselIds().filter(id => catchKind(BY[id]) === 'map');
+  if (!ids.length) { toast('None of the chosen schools has a catchment that can be drawn.'); return; }
+  const bb = MAP.getBounds(), S0 = bb.getSouth(), N0 = bb.getNorth(), W0 = bb.getWest(), E0 = bb.getEast(), mid = (S0 + N0) / 2;
+  const kmLat = (N0 - S0) * 111.32, kmLng = (E0 - W0) * 111.32 * Math.cos(mid * Math.PI / 180), step = .35;
+  const nx = Math.ceil(kmLng / step), ny = Math.ceil(kmLat / step);
+  if (nx * ny > 10000) { toast('Zoom in a little first: the map view is too large to list every postcode (about 1,200 km² at most).'); return; }
+  const dLat = (N0 - S0) / ny, dLng = (E0 - W0) / nx;
+  let queue = []; for (let i = 0; i < nx; i++) for (let j = 0; j < ny; j++) queue.push({ lat: S0 + (j + .5) * dLat, lng: W0 + (i + .5) * dLng, r: 260 });
+  const found = new Map(); let done = 0, total = queue.length, failed = 0;
+  setPcBusy('Finding postcodes… 0%');
+  while (queue.length) {
+    const batch = queue.splice(0, 100);
+    let res = null;
+    try { res = await (await fetch('https://api.postcodes.io/postcodes', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ geolocations: batch.map(q => ({ latitude: q.lat, longitude: q.lng, radius: Math.round(q.r), limit: 100 })) }) })).json(); } catch (e) { failed += batch.length; }
+    (res && res.result || []).forEach((x, k) => {
+      const list = x.result || [], q = batch[k];
+      list.forEach(p => found.set(p.postcode, p));
+      // a full page means there may be more nearby: look again more closely
+      if (list.length >= 100 && q.r > 30) { const o = q.r / 2 / 111320, oo = o / Math.cos(q.lat * Math.PI / 180); [[1, 1], [1, -1], [-1, 1], [-1, -1]].forEach(([a, b]) => queue.push({ lat: q.lat + a * o, lng: q.lng + b * oo, r: q.r / 2 })); total += 4; }
+    });
+    done += batch.length; setPcBusy(`Finding postcodes… ${Math.min(99, Math.round(100 * done / total))}%`);
+  }
+  const names = ids.map(id => BY[id].n), rows = [];
+  for (const p of found.values()) {
+    if (p.latitude < S0 || p.latitude > N0 || p.longitude < W0 || p.longitude > E0) continue;
+    const inn = ids.filter(id => catchIn(BY[id], p.latitude, p.longitude, p));
+    if (!inn.length) continue;
+    rows.push([p.postcode, p.outcode + ' ' + String(p.incode || '').charAt(0), p.outcode, inn.map(id => BY[id].n).join(' + '), inn.length, ...ids.map(id => inn.includes(id) ? 'Yes' : 'No'), p.admin_ward || '', p.admin_district || '', p.parish && !/unparished/i.test(p.parish) ? p.parish : '', (+p.latitude).toFixed(5), (+p.longitude).toFixed(5)]);
+  }
+  setPcBusy('');
+  if (!rows.length) { toast(found.size ? 'No postcodes in this view are inside the chosen catchments.' : 'Postcode lookup failed: check your connection'); return; }
+  rows.sort((a, b) => b[4] - a[4] || a[3].localeCompare(b[3]) || a[0].localeCompare(b[0], 'en', { numeric: true }));
+  const q = v => { const s = String(v); return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; };
+  const head = ['Postcode', 'Postcode sector', 'Postcode district', 'Area (chosen catchments it is inside)', 'Number of chosen catchments', ...names.map(x => 'In ' + x), 'Ward', 'Council', 'Parish', 'Latitude', 'Longitude'];
+  const foot = ['', 'Notes: postcodes found in the map view on ' + new Date().toLocaleDateString('en-GB') + '. Each postcode is checked at its centre point against each school\'s published rules, as for your pin; borderline postcodes may differ from the council\'s own measurement. Check with the school or council.', 'Source: postcodes.io. Contains OS data (c) Crown copyright and database right; Royal Mail data (c) Royal Mail copyright and database right; ONS data (c) Crown copyright, Open Government Licence v3.0. Catchment rules from each school\'s admission arrangements (links in the tool). Made with the UK Grammar School Finder by Usualy Labs.'];
+  const csv = '﻿' + [head, ...rows].map(r => r.map(q).join(',')).join('\r\n') + '\r\n' + foot.map(q).join('\r\n') + '\r\n';
+  download('catchment-postcodes-' + new Date().toISOString().slice(0, 10) + '.csv', csv, 'text/csv;charset=utf-8');
+  const by = {}; rows.forEach(r => by[r[4] > 1 ? 'shared' : 'single'] = (by[r[4] > 1 ? 'shared' : 'single'] || 0) + 1);
+  toast(`Exported ${rows.length.toLocaleString('en-GB')} postcodes (${(by.shared || 0).toLocaleString('en-GB')} in shared areas)${failed ? '. Some lookups failed, so the list may be incomplete' : ''}.`);
 }
 
 /* ---------- school profile ---------- */
@@ -1036,7 +1272,7 @@ APPX.render.school = () => {
   $('#schSel').onchange = e => { S.sel = e.target.value; changed(); };
   $('#starBtn').onclick = () => { S.star = S.star.includes(s.id) ? S.star.filter(x => x !== s.id) : [...S.star, s.id]; changed(); };
   $('#cmpBtn').onclick = () => { if (!S.cmp.includes(s.id)) { if (S.cmp.length >= 6) return toast('Compare up to 6 schools'); S.cmp = [...S.cmp, s.id]; } else S.cmp = S.cmp.filter(x => x !== s.id); changed(); };
-  const scb = $('#showCatch'); if (scb) scb.onclick = () => { S.layers.catch = true; saveState(); go('map'); setTimeout(() => { if (MAP) { MAP.setView([s.lat, s.lng], 11); } }, 60); };
+  const scb = $('#showCatch'); if (scb) scb.onclick = () => { S.layers.catch = true; if (!(S.msel || []).includes(S.sel) && (S.msel || []).length < MSEL_MAX) S.msel = [...(S.msel || []), S.sel]; saveState(); go('map'); setTimeout(() => { if (MAP) { MAP.setView([s.lat, s.lng], 11); } }, 60); };
   $('#showMap').onclick = () => { go('map'); setTimeout(() => { if (MAP) { MAP.setView([s.lat, s.lng], 13); } }, 60); };
   $$('[data-ld]').forEach(i => i.onchange = () => { const c = S.custom[s.id] = S.custom[s.id] || {}; c.ld = c.ld || {}; if (i.value === '') delete c.ld[i.dataset.ld]; else c.ld[i.dataset.ld] = +i.value; changed(); });
   const nt = $('#noteTxt'); if (nt) nt.oninput = () => { const c = S.custom[s.id] = S.custom[s.id] || {}; c.note = nt.value; saveState(); };
